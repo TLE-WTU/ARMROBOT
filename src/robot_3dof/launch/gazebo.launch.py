@@ -11,7 +11,6 @@ from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
-    ExecuteProcess,
     RegisterEventHandler,
 )
 from launch.event_handlers import OnProcessExit
@@ -68,13 +67,13 @@ def generate_launch_description():
         }.items(),
     )
 
-    # Spawn robot into Gazebo
+    # Spawn robot into Gazebo from topic
     spawn_robot = Node(
         package="ros_gz_sim",
         executable="create",
         arguments=[
             "-name", "robot_3dof",
-            "-string", robot_description_content,
+            "-topic", "robot_description",
             "-x", "0.0",
             "-y", "0.0",
             "-z", "0.0",
@@ -97,8 +96,6 @@ def generate_launch_description():
     )
 
     # ── Controller spawners ──
-    # These wait until the robot is spawned and controller manager is up
-
     joint_state_broadcaster_spawner = Node(
         package="controller_manager",
         executable="spawner",

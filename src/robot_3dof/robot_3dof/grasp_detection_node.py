@@ -207,15 +207,59 @@ class GraspDetectionNode(Node):
         self, points: np.ndarray
     ) -> List[Tuple[np.ndarray, float]]:
         """
-        Simple heuristic: find point cloud centroid(s) and create top-down
-        grasp poses. Returns list of (position_xyz, confidence).
+        Simple heuristic: cluster points and create top-down grasp poses.
+        Returns list of (position_xyz, confidence).
         """
         if points.shape[0] < self.min_points:
             return []
 
-        # Grasp at object centroid
-        grasp_pos = np.array([centroid[0], centroid[1], centroid[2]])
+        # Cluster points using scipy.spatial.KDTree
+        try:
+            from scipy.spatial import KDTree
+            tree = KDTree(points)
+            visited = np.zeros(len(points), dtype=bool)
+            clusters = []
+            cluster_radius = 0.04  # 4cm radius
+            for i in range(len(points)):
+                if visited[i]:
+                    continue
+                neighbors = tree.query_ball_point(points[i], r=cluster_radius)
+                if len(neighbors) < self.min_points:
+                    continue
+                cluster_indices = set(neighbors)
+                queue = list(neighbors)
+                while queue:
+                    curr = queue.pop()
+                    if visited[curr]:
+                        continue
+                    visited[curr] = True
+                    cluster_indices.add(curr)
+                    sub_nbrs = tree.query_ball_point(points[curr], r=cluster_radius)
+                    if len(sub_nbrs) >= self.min_points // 2:
+                        for n in sub_nbrs:
+                            if not visited[n] and n not in cluster_indices:
+                                cluster_indices.add(n)
+                                queue.append(n)
 
+                cluster_pts = points[list(cluster_indices)]
+                if len(cluster_pts) >= self.min_points:
+                    clusters.append(cluster_pts)
+
+            grasps = []
+            for cl in clusters:
+                c = np.mean(cl, axis=0)
+                conf = min(0.95, 0.5 + 0.5 * (len(cl) / 200.0))
+                grasps.append((c, conf))
+
+            if grasps:
+                # Sort by distance to base (prefer nearest reachable object)
+                grasps.sort(key=lambda g: np.linalg.norm(g[0][:2]))
+                return grasps
+        except Exception as e:
+            self.get_logger().warn(f"Clustering error: {e}, falling back to overall centroid")
+
+        centroid = np.mean(points, axis=0)
+        grasp_pos = np.array([centroid[0], centroid[1], centroid[2]])
         return [(grasp_pos, 0.8)]
 
     def _anygrasp_detection(
