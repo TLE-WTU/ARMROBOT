@@ -1,0 +1,41 @@
+grasp_detection_node:
+  ros__parameters:
+    # AnyGrasp SDK settings
+    use_anygrasp: false                # Set true khi có license
+    checkpoint_path: ""                # Path tới AnyGrasp checkpoint
+    max_gripper_width: 0.06            # Max gripper opening (m)
+    gripper_height: 0.04               # Gripper finger length (m)
+    top_down_grasp: true               # Chỉ detect top-down grasps (phù hợp 3 DoF)
+
+    # ROS2 topics / frames
+    point_cloud_topic: "/camera/points"
+    camera_frame: "camera_link"
+    base_frame: "base_link"
+
+    # Detection parameters
+    min_points: 50                     # Min points in cluster to detect grasp
+    voxel_size: 0.005                  # Voxel downsample size (m)
+    workspace_bounds:                  # Workspace limits in base_link frame [min, max]
+      x: [0.05, 0.45]
+      y: [-0.25, 0.25]
+      z: [0.255, 0.55]                # Trên mặt bàn tới ngang vai robot
+
+pick_place_node:
+  ros__parameters:
+    # Approach / retreat offsets
+    pre_grasp_offset_z: 0.08           # Offset phía trên grasp pose (m)
+    post_grasp_lift_z: 0.10            # Nâng lên sau khi kẹp (m)
+
+    # Place position (base_link frame)
+    place_position:
+      x: 0.20
+      y: -0.15
+      z: 0.35
+
+    # Gripper
+    gripper_open_position: 0.03        # Mở tối đa
+    gripper_close_position: 0.0        # Đóng tối đa (kẹp chặt vào vật)
+
+    # Timing
+    move_duration_sec: 2.0
+    gripper_duration_sec: 1.0

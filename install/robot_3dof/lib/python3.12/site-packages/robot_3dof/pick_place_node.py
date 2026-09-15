@@ -1,0 +1,1 @@
+/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/src/robot_3dof/robot_3dof/pick_place_node.py

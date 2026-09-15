@@ -1,0 +1,102 @@
+Panels:
+  - Class: rviz_common/Displays
+    Help Height: 0
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /TF1
+        - /RobotModel1
+        - /PointCloud21
+      Splitter Ratio: 0.5
+    Tree Height: 400
+
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Enabled: true
+      Line Style:
+        Line Width: 0.03
+        Value: Lines
+      Normal Cell Count: 0
+      Cell Size: 0.1
+      Color: 160; 160; 164
+      Plane: XY
+      Plane Cell Count: 20
+      Reference Frame: <Fixed Frame>
+
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+      Marker Scale: 0.15
+
+    - Class: rviz_default_plugins/RobotModel
+      Name: RobotModel
+      Enabled: true
+      Description Source: Topic
+      Description Topic:
+        Value: /robot_description
+      Alpha: 1.0
+
+    - Class: rviz_default_plugins/PointCloud2
+      Name: PointCloud2
+      Enabled: true
+      Topic:
+        Value: /camera/points
+      Size (Pixels): 3
+      Size (m): 0.005
+      Style: Points
+      Color Transformer: RGB8
+      Decay Time: 0
+
+    - Class: rviz_default_plugins/Image
+      Name: Camera Image
+      Enabled: true
+      Topic:
+        Value: /camera/image
+
+    - Class: rviz_default_plugins/MarkerArray
+      Name: Grasp Markers
+      Enabled: true
+      Topic:
+        Value: /anygrasp/grasp_markers
+
+  Enabled: true
+  Global Options:
+    Background Color: 48; 48; 48
+    Fixed Frame: base_link
+    Frame Rate: 30
+
+  Tools:
+    - Class: rviz_default_plugins/Interact
+      Hide Inactive Objects: true
+    - Class: rviz_default_plugins/MoveCamera
+    - Class: rviz_default_plugins/Select
+    - Class: rviz_default_plugins/FocusCamera
+
+  Value: true
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 1.2
+      Focal Point:
+        X: 0.2
+        Y: 0
+        Z: 0.25
+      Focal Shape Fixed Size: true
+      Focal Shape Size: 0.05
+      Pitch: 0.6
+      Yaw: 0.8
+      Name: Current View
+      Near Clip Distance: 0.01
+
+Window Geometry:
+  Height: 900
+  Width: 1400
+  X: 100
+  Y: 100
