@@ -219,7 +219,7 @@ class GraspDetectionNode(Node):
             tree = KDTree(points)
             visited = np.zeros(len(points), dtype=bool)
             clusters = []
-            cluster_radius = 0.04  # 4cm radius
+            cluster_radius = 0.015  
             for i in range(len(points)):
                 if visited[i]:
                     continue
