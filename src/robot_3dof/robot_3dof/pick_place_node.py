@@ -163,12 +163,12 @@ class PickPlaceNode(Node):
         worker.start()
 
     def _execute_pick_and_place(self, gx: float, gy: float, gz: float):
-        """Execute the full pick-and-place sequence."""
+        """Execute the full pick-and-place sequence with smooth trajectory."""
         try:
-            # gz is the object centroid. Finger pad center is 0.025m below end_effector.
-            # Aligning end_effector at gz + 0.025 puts the finger pads directly around the object.
-            gripper_offset = 0.025
-            grasp_z = gz + gripper_offset
+            # IK solver directly targets the grasp center between finger pads.
+            # Table is at z=0.225. Finger tips are 0.02m below grasp center.
+            # Keep grasp_z >= 0.247 to leave 2mm clearance from table surface.
+            grasp_z = max(gz, 0.247)
             pre_grasp_z = grasp_z + self.pre_grasp_offset
 
             # 1. Open gripper
@@ -177,13 +177,13 @@ class PickPlaceNode(Node):
                 self._abort("Failed to open gripper")
                 return
 
-            # 2. Move to pre-grasp
+            # 2. Move to pre-grasp (above target)
             self.get_logger().info(
-                f"[2/8] Moving to pre-grasp ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f})..."
+                f"[2/8] Moving smoothly to pre-grasp ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f})..."
             )
             joints = solve_ik(gx, gy, pre_grasp_z)
             if joints is None:
-                self._abort(f"Pre-grasp position unreachable: ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f})")
+                self._abort(f"Pre-grasp unreachable: ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f})")
                 return
             if not self._send_trajectory(list(joints)):
                 self._abort("Failed to reach pre-grasp position")
@@ -191,7 +191,7 @@ class PickPlaceNode(Node):
 
             # 3. Move down to grasp
             self.get_logger().info(
-                f"[3/8] Moving down to grasp ({gx:.3f}, {gy:.3f}, {grasp_z:.3f})..."
+                f"[3/8] Lowering down to grasp ({gx:.3f}, {gy:.3f}, {grasp_z:.3f})..."
             )
             joints = solve_ik(gx, gy, grasp_z)
             if joints is None:
@@ -201,69 +201,105 @@ class PickPlaceNode(Node):
                 self._abort("Failed to reach grasp position")
                 return
 
-            # 4. Close gripper
-            self.get_logger().info("[4/8] Closing gripper around object...")
+            # 4. Close gripper around object
+            self.get_logger().info("[4/8] Closing gripper firmly around object...")
             if not self._send_gripper(self.gripper_close):
                 self._abort("Failed to close gripper")
                 return
 
-            # Short pause to let physics stabilize grasp
-            time.sleep(0.5)
+            # Allow physics friction to firmly settle contact before lifting
+            time.sleep(0.8)
 
-            # 5. Lift object
+            # 5. Lift object smoothly
             lift_z = grasp_z + self.lift_height
-            self.get_logger().info(f"[5/8] Lifting object to z={lift_z:.3f}...")
+            self.get_logger().info(f"[5/8] Lifting object smoothly to z={lift_z:.3f}...")
             joints = solve_ik(gx, gy, lift_z)
             if joints is None:
                 self._abort(f"Lift position unreachable: ({gx:.3f}, {gy:.3f}, {lift_z:.3f})")
                 return
             if not self._send_trajectory(list(joints)):
-                self._abort("Failed to lift")
+                self._abort("Failed to lift object")
                 return
 
-            # 6. Move to place position
+            # 6. Move to place position (pre-place above target, then descend)
             px, py, pz = self.place_pos
+            pre_place_z = pz + self.pre_grasp_offset
             self.get_logger().info(
-                f"[6/8] Moving to place position ({px:.3f}, {py:.3f}, {pz:.3f})..."
+                f"[6/8] Moving to place position ({px:.3f}, {py:.3f}, {pre_place_z:.3f})..."
             )
-            joints = solve_ik(px, py, pz)
+            joints = solve_ik(px, py, pre_place_z)
             if joints is None:
-                self._abort(f"Place position unreachable: ({px:.3f}, {py:.3f}, {pz:.3f})")
+                self._abort(f"Pre-place unreachable: ({px:.3f}, {py:.3f}, {pre_place_z:.3f})")
                 return
             if not self._send_trajectory(list(joints)):
-                self._abort("Failed to move to place")
+                self._abort("Failed to move to pre-place position")
                 return
+
+            # Lower to place height
+            joints = solve_ik(px, py, pz)
+            if joints is not None:
+                self._send_trajectory(list(joints))
 
             # 7. Open gripper to release
             self.get_logger().info("[7/8] Opening gripper to release object...")
             if not self._send_gripper(self.gripper_open):
                 self._abort("Failed to release gripper")
                 return
+            time.sleep(0.5)
+
+            # Lift back up to pre-place height before retreating
+            joints = solve_ik(px, py, pre_place_z)
+            if joints is not None:
+                self._send_trajectory(list(joints))
 
             # 8. Retreat to home
-            self.get_logger().info("[8/8] Retreating to home position...")
+            self.get_logger().info("[8/8] Retreating to ready home position...")
             self._move_to_home()
 
-            self.get_logger().info("🎉 ✅ Pick-and-place sequence complete!")
+            self.get_logger().info("🎉 ✅ Pick-and-place sequence complete successfully!")
 
         finally:
             with self.lock:
                 self.state = State.IDLE
 
-    def _send_trajectory(self, joint_positions: list) -> bool:
-        """Send joint trajectory goal and wait for completion."""
+    def _send_trajectory(self, joint_positions: list, duration: float = None) -> bool:
+        """
+        Send smooth multi-point joint trajectory with S-curve (cosine) velocity profile.
+        Eliminates jerk, motor stress, and sudden start/stop snapping.
+        """
         goal = FollowJointTrajectory.Goal()
         goal.trajectory = JointTrajectory()
         goal.trajectory.joint_names = ["joint1", "joint2", "joint3"]
 
-        point = JointTrajectoryPoint()
-        point.positions = joint_positions
-        point.velocities = [0.0, 0.0, 0.0]
-        duration_sec = int(self.move_duration)
-        duration_nsec = int((self.move_duration - duration_sec) * 1e9)
-        point.time_from_start = Duration(sec=duration_sec, nanosec=duration_nsec)
+        start_positions = list(self.current_joints)
 
-        goal.trajectory.points = [point]
+        # Dynamic duration proportional to maximum joint displacement
+        if duration is None:
+            max_disp = max(abs(joint_positions[i] - start_positions[i]) for i in range(3))
+            # Smooth speed ~ 0.6 rad/s, min 1.5s
+            duration = max(1.5, max_disp / 0.6)
+
+        num_points = 20
+        deltas = [joint_positions[i] - start_positions[i] for i in range(3)]
+
+        for k in range(1, num_points + 1):
+            tau = k / float(num_points)
+            t = tau * duration
+
+            # S-curve smooth cosine interpolation:
+            # s(tau) = 0.5 * (1 - cos(pi * tau))
+            # v(tau) = (pi / (2 * duration)) * sin(pi * tau) * delta
+            s = 0.5 * (1.0 - math.cos(math.pi * tau))
+            v_factor = (math.pi / (2.0 * duration)) * math.sin(math.pi * tau)
+
+            point = JointTrajectoryPoint()
+            point.positions = [start_positions[i] + s * deltas[i] for i in range(3)]
+            point.velocities = [v_factor * deltas[i] for i in range(3)]
+
+            sec = int(t)
+            nsec = int((t - sec) * 1e9)
+            point.time_from_start = Duration(sec=sec, nanosec=nsec)
+            goal.trajectory.points.append(point)
 
         event = threading.Event()
         goal_handle = None
@@ -299,7 +335,7 @@ class PickPlaceNode(Node):
         result_future = goal_handle.get_result_async()
         result_future.add_done_callback(get_result_cb)
 
-        if not result_event.wait(timeout=self.move_duration + 5.0) or result is None:
+        if not result_event.wait(timeout=duration + 5.0) or result is None:
             self.get_logger().error("Trajectory execution timed out")
             return False
 
@@ -352,9 +388,9 @@ class PickPlaceNode(Node):
         return True
 
     def _move_to_home(self):
-        """Move robot to home position (slightly bent ready pose)."""
-        home_joints = [0.0, 0.4, -0.4]
-        self._send_trajectory(home_joints)
+        """Move robot to natural crane ready pose."""
+        home_joints = [0.0, 0.3, 0.8]
+        self._send_trajectory(home_joints, duration=2.5)
 
     def _abort(self, reason: str):
         """Abort current operation."""

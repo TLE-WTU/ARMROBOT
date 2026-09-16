@@ -13,12 +13,12 @@ grasp_detection_node:
     base_frame: "base_link"
 
     # Detection parameters
-    min_points: 50                     # Min points in cluster to detect grasp
+    min_points: 30                     # Min points in cluster to detect grasp
     voxel_size: 0.005                  # Voxel downsample size (m)
     workspace_bounds:                  # Workspace limits in base_link frame [min, max]
       x: [0.05, 0.45]
       y: [-0.25, 0.25]
-      z: [0.255, 0.55]                # Trên mặt bàn tới ngang vai robot
+      z: [0.228, 0.50]                # Mặt bàn ở z=0.225, lấy từ 0.228 để lọc sạch mặt bàn và lấy trọn vật thể
 
 pick_place_node:
   ros__parameters:
@@ -30,7 +30,7 @@ pick_place_node:
     place_position:
       x: 0.20
       y: -0.15
-      z: 0.35
+      z: 0.30
 
     # Gripper
     gripper_open_position: 0.03        # Mở tối đa

@@ -1,0 +1,49 @@
+Built target ament_cmake_python_symlink_robot_3dof
+running egg_info
+writing robot_3dof.egg-info/PKG-INFO
+writing dependency_links to robot_3dof.egg-info/dependency_links.txt
+writing top-level names to robot_3dof.egg-info/top_level.txt
+reading manifest file 'robot_3dof.egg-info/SOURCES.txt'
+writing manifest file 'robot_3dof.egg-info/SOURCES.txt'
+Built target ament_cmake_python_build_robot_3dof_egg
+-- Install configuration: ""
+-- Execute custom install script
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/environment/pythonpath.sh
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/environment/pythonpath.dsv
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof-0.1.0-py3.12.egg-info/PKG-INFO
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof-0.1.0-py3.12.egg-info/SOURCES.txt
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof-0.1.0-py3.12.egg-info/dependency_links.txt
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof-0.1.0-py3.12.egg-info/top_level.txt
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof/__init__.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof/grasp_detection_node.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof/ik_solver.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof/pick_place_node.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/robot_3dof/grasp_detection_node.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/robot_3dof/pick_place_node.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//urdf/robot_3dof.urdf.xacro
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//urdf/robot_3dof_gazebo.xacro
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//urdf/robot_3dof_ros2_control.xacro
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//launch/gazebo.launch.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//launch/grasp_demo.launch.py
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//config/anygrasp_params.yaml
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//config/controllers.yaml
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//worlds/pick_and_place.sdf
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof//rviz/config.rviz
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/ament_index/resource_index/package_run_dependencies/robot_3dof
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/ament_index/resource_index/parent_prefix_path/robot_3dof
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/environment/ament_prefix_path.sh
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/environment/ament_prefix_path.dsv
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/environment/path.sh
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/environment/path.dsv
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/local_setup.bash
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/local_setup.sh
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/local_setup.zsh
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/local_setup.dsv
+-- Symlinking: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/package.dsv
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/ament_index/resource_index/packages/robot_3dof
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/cmake/robot_3dofConfig.cmake
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/cmake/robot_3dofConfig-version.cmake
+-- Up-to-date symlink: /home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/share/robot_3dof/package.xml
+Listing '/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof'...
+Compiling '/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof/ik_solver.py'...
+Compiling '/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/install/robot_3dof/lib/python3.12/site-packages/robot_3dof/pick_place_node.py'...
