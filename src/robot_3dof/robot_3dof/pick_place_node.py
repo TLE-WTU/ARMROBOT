@@ -166,9 +166,10 @@ class PickPlaceNode(Node):
         """Execute the full pick-and-place sequence with smooth trajectory."""
         try:
             # IK solver directly targets the grasp center between finger pads.
-            # Table is at z=0.225. Finger tips are 0.02m below grasp center.
-            # Keep grasp_z >= 0.247 to leave 2mm clearance from table surface.
-            grasp_z = max(gz, 0.247)
+            # Table is at z=0.225. Overhead camera detects the top surface of the object (gz ~ 0.254).
+            # Lower the grasp center down to z=0.245 so the fingers envelop the full height
+            # of the object while leaving 2mm clearance above the table surface.
+            grasp_z = 0.245
             pre_grasp_z = grasp_z + self.pre_grasp_offset
 
             # 1. Open gripper
