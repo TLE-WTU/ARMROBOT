@@ -15,6 +15,7 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   robot_3dof/grasp_detection_node.py
   robot_3dof/pick_place_node.py
+  robot_3dof/anygrasp_service.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

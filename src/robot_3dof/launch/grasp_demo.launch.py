@@ -15,12 +15,13 @@ from launch import LaunchDescription
 from launch.actions import (
     DeclareLaunchArgument,
     IncludeLaunchDescription,
+    ExecuteProcess,
 )
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
-from launch_ros.substitutions import FindPackageShare
+from launch_ros.substitutions import FindPackagePrefix, FindPackageShare
 
 
 def generate_launch_description():
@@ -82,9 +83,29 @@ def generate_launch_description():
         condition=IfCondition(LaunchConfiguration("use_rviz")),
     )
 
+    # ── AnyGrasp Deep Learning Inference Service ──
+    # Runs in Python 3.10 Conda environment 'robot_env' with GPU CUDA & MinkowskiEngine
+    conda_python = "/home/tienle/miniconda3/envs/robot_env/bin/python"
+    anygrasp_service_script = PathJoinSubstitution([
+        FindPackagePrefix("robot_3dof"), "lib", "robot_3dof", "anygrasp_service.py"
+    ])
+    anygrasp_service_proc = ExecuteProcess(
+        cmd=[
+            conda_python,
+            anygrasp_service_script,
+            "--checkpoint_path", "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar",
+            "--socket_path", "/tmp/anygrasp_ipc.sock",
+            "--max_gripper_width", "0.06",
+            "--gripper_height", "0.04",
+        ],
+        output="screen",
+        condition=IfCondition(LaunchConfiguration("use_anygrasp")),
+    )
+
     return LaunchDescription([
         use_anygrasp_arg,
         use_rviz_arg,
+        anygrasp_service_proc,
         gazebo_launch,
         grasp_detection_node,
         pick_place_node,

@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
 Grasp Detection Node — wraps AnyGrasp SDK with a fallback heuristic mode.
 
@@ -15,6 +15,9 @@ Publishes: /anygrasp/grasp_markers (visualization_msgs/MarkerArray)
 Subscribes: /camera/points (sensor_msgs/PointCloud2)
 """
 
+import os
+import pickle
+import socket
 import struct
 from typing import List, Tuple
 
@@ -41,6 +44,7 @@ class GraspDetectionNode(Node):
         # Declare parameters
         self.declare_parameter("use_anygrasp", False)
         self.declare_parameter("checkpoint_path", "")
+        self.declare_parameter("socket_path", "/tmp/anygrasp_ipc.sock")
         self.declare_parameter("max_gripper_width", 0.06)
         self.declare_parameter("gripper_height", 0.04)
         self.declare_parameter("top_down_grasp", True)
@@ -55,6 +59,7 @@ class GraspDetectionNode(Node):
 
         # Read parameters
         self.use_anygrasp = self.get_parameter("use_anygrasp").value
+        self.socket_path = self.get_parameter("socket_path").value
         self.max_gripper_width = self.get_parameter("max_gripper_width").value
         self.min_points = self.get_parameter("min_points").value
         self.base_frame = self.get_parameter("base_frame").value
@@ -96,33 +101,19 @@ class GraspDetectionNode(Node):
         # Periodic detection (every 2 seconds)
         self.detect_timer = self.create_timer(2.0, self._detect_callback)
 
-        # AnyGrasp SDK (lazy load)
-        self.anygrasp = None
         if self.use_anygrasp:
             self._init_anygrasp()
 
-        mode = "AnyGrasp SDK" if self.use_anygrasp else "Heuristic Fallback"
+        mode = "AnyGrasp AI (IPC Service)" if self.use_anygrasp else "Heuristic Fallback"
         self.get_logger().info(f"Grasp Detection Node started — mode: {mode}")
 
     def _init_anygrasp(self):
-        """Initialize AnyGrasp SDK."""
-        try:
-            from anygrasp_sdk import AnyGraspDetector
-            checkpoint = self.get_parameter("checkpoint_path").value
-            self.anygrasp = AnyGraspDetector(checkpoint_path=checkpoint)
-            self.anygrasp.load_net()
-            self.get_logger().info("AnyGrasp SDK loaded successfully")
-        except ImportError:
-            self.get_logger().error(
-                "AnyGrasp SDK not found! Install anygrasp_sdk first. "
-                "Falling back to heuristic mode."
-            )
-            self.use_anygrasp = False
-        except Exception as e:
-            self.get_logger().error(
-                f"Failed to load AnyGrasp: {e}. Falling back to heuristic."
-            )
-            self.use_anygrasp = False
+        """Check connection to AnyGrasp IPC Service."""
+        self.get_logger().info(f"AnyGrasp mode enabled via IPC socket: {self.socket_path}")
+        if os.path.exists(self.socket_path):
+            self.get_logger().info("✅ Found active AnyGrasp IPC socket!")
+        else:
+            self.get_logger().info("ℹ️ AnyGrasp IPC socket not yet created. Node will connect once service starts.")
 
     def _pc_callback(self, msg: PointCloud2):
         """Store latest point cloud."""
@@ -262,35 +253,105 @@ class GraspDetectionNode(Node):
         grasp_pos = np.array([centroid[0], centroid[1], centroid[2]])
         return [(grasp_pos, 0.8)]
 
+    def _rot_to_quat(self, R: np.ndarray) -> Tuple[float, float, float, float]:
+        """Convert 3x3 rotation matrix to quaternion (x, y, z, w)."""
+        tr = R[0, 0] + R[1, 1] + R[2, 2]
+        if tr > 0:
+            S = np.sqrt(tr + 1.0) * 2.0
+            qw = 0.25 * S
+            qx = (R[2, 1] - R[1, 2]) / S
+            qy = (R[0, 2] - R[2, 0]) / S
+            qz = (R[1, 0] - R[0, 1]) / S
+        elif (R[0, 0] > R[1, 1]) and (R[0, 0] > R[2, 2]):
+            S = np.sqrt(1.0 + R[0, 0] - R[1, 1] - R[2, 2]) * 2.0
+            qw = (R[2, 1] - R[1, 2]) / S
+            qx = 0.25 * S
+            qy = (R[0, 1] + R[1, 0]) / S
+            qz = (R[0, 2] + R[2, 0]) / S
+        elif R[1, 1] > R[2, 2]:
+            S = np.sqrt(1.0 + R[1, 1] - R[0, 0] - R[2, 2]) * 2.0
+            qw = (R[0, 2] - R[2, 0]) / S
+            qx = (R[0, 1] + R[1, 0]) / S
+            qy = 0.25 * S
+            qz = (R[1, 2] + R[2, 1]) / S
+        else:
+            S = np.sqrt(1.0 + R[2, 2] - R[0, 0] - R[1, 1]) * 2.0
+            qw = (R[1, 0] - R[0, 1]) / S
+            qx = (R[0, 2] + R[2, 0]) / S
+            qy = (R[1, 2] + R[2, 1]) / S
+            qz = 0.25 * S
+        return float(qx), float(qy), float(qz), float(qw)
+
+    def _call_anygrasp_service(self, points: np.ndarray) -> List[dict]:
+        """Send point cloud to AnyGrasp service via Unix domain socket."""
+        if not os.path.exists(self.socket_path):
+            self.get_logger().debug(f"AnyGrasp IPC socket {self.socket_path} not ready yet.")
+            return None
+
+        client = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+        client.settimeout(3.0)
+        try:
+            client.connect(self.socket_path)
+            req = {
+                "points": points,
+                "optional_params": {
+                    "dense_grasp": False,
+                    "collision_detection": False,
+                    "approach_steering": [0, 0, -1],
+                    "approach_thresh": 0.4,
+                }
+            }
+            payload = pickle.dumps(req, protocol=4)
+            client.sendall(struct.pack("!I", len(payload)) + payload)
+
+            # Read response length
+            raw_len = client.recv(4)
+            if not raw_len:
+                return None
+            msg_len = struct.unpack("!I", raw_len)[0]
+
+            # Read response payload
+            data = bytearray()
+            while len(data) < msg_len:
+                packet = client.recv(min(65536, msg_len - len(data)))
+                if not packet:
+                    break
+                data.extend(packet)
+
+            resp = pickle.loads(data)
+            if resp.get("status") == "ok":
+                return resp.get("grasps", [])
+            else:
+                self.get_logger().warn(f"AnyGrasp service error: {resp.get('message')}")
+                return None
+        except Exception as e:
+            self.get_logger().warn(f"AnyGrasp IPC error: {e}")
+            return None
+        finally:
+            client.close()
+
     def _anygrasp_detection(
         self, points: np.ndarray
-    ) -> List[Tuple[np.ndarray, float]]:
-        """Run AnyGrasp SDK detection on point cloud."""
-        if self.anygrasp is None:
-            return self._heuristic_grasp_detection(points)
-
-        try:
-            # AnyGrasp expects points in camera frame, but we'll pass base frame
-            # points and handle accordingly
-            grasp_group = self.anygrasp.get_grasp(
-                points,
-                max_gripper_width=self.max_gripper_width,
-                top_down_grasp=self.get_parameter("top_down_grasp").value,
+    ) -> List[Tuple[np.ndarray, float, np.ndarray]]:
+        """Run AnyGrasp inference on point cloud via IPC service."""
+        grasps_data = self._call_anygrasp_service(points)
+        if grasps_data is None or len(grasps_data) == 0:
+            self.get_logger().warn(
+                "AnyGrasp service unavailable or returned 0 grasps; using heuristic fallback"
             )
+            h_grasps = self._heuristic_grasp_detection(points)
+            return [(pos, conf, np.eye(3)) for pos, conf in h_grasps]
 
-            results = []
-            for grasp in grasp_group:
-                pos = grasp.translation
-                score = grasp.score
-                results.append((pos, score))
+        results = []
+        for g in grasps_data:
+            pos = np.array(g["translation"], dtype=np.float32)
+            score = float(g["score"])
+            rot = np.array(g["rotation"], dtype=np.float32)
+            results.append((pos, score, rot))
 
-            # Sort by confidence
-            results.sort(key=lambda x: x[1], reverse=True)
-            return results[:10]  # Top 10
-
-        except Exception as e:
-            self.get_logger().error(f"AnyGrasp detection failed: {e}")
-            return self._heuristic_grasp_detection(points)
+        # Sort by confidence score descending
+        results.sort(key=lambda x: x[1], reverse=True)
+        return results
 
     def _detect_callback(self):
         """Periodic detection callback."""
@@ -319,14 +380,15 @@ class GraspDetectionNode(Node):
         if self.use_anygrasp:
             grasps = self._anygrasp_detection(points_ws)
         else:
-            grasps = self._heuristic_grasp_detection(points_ws)
+            h_grasps = self._heuristic_grasp_detection(points_ws)
+            grasps = [(pos, conf, np.eye(3)) for pos, conf in h_grasps]
 
         if not grasps:
             self.get_logger().debug("No grasps detected")
             return
 
         # Publish best grasp
-        best_pos, best_conf = grasps[0]
+        best_pos, best_conf, best_rot = grasps[0]
         grasp_msg = PoseStamped()
         grasp_msg.header.stamp = self.get_clock().now().to_msg()
         grasp_msg.header.frame_id = self.base_frame
@@ -335,28 +397,36 @@ class GraspDetectionNode(Node):
             y=float(best_pos[1]),
             z=float(best_pos[2])
         )
-        # Top-down orientation (gripper pointing down, Z-axis of gripper = -Z world)
-        # Quaternion for 180° rotation around X: (1, 0, 0, 0)
-        grasp_msg.pose.orientation = Quaternion(x=1.0, y=0.0, z=0.0, w=0.0)
+
+        if self.use_anygrasp and best_conf > 0:
+            qx, qy, qz, qw = self._rot_to_quat(best_rot)
+            grasp_msg.pose.orientation = Quaternion(x=qx, y=qy, z=qz, w=qw)
+        else:
+            # Top-down orientation (gripper pointing down)
+            grasp_msg.pose.orientation = Quaternion(x=1.0, y=0.0, z=0.0, w=0.0)
+
         self.grasp_poses_pub.publish(grasp_msg)
 
         # Publish visualization markers
         self._publish_markers(grasps)
 
+        method_str = "AnyGrasp AI" if self.use_anygrasp else "Heuristic"
         self.get_logger().info(
-            f"Detected {len(grasps)} grasp(s). "
+            f"[{method_str}] Detected {len(grasps)} grasp(s). "
             f"Best: ({best_pos[0]:.3f}, {best_pos[1]:.3f}, {best_pos[2]:.3f}) "
-            f"conf={best_conf:.2f}"
+            f"score={best_conf:.3f}"
         )
 
     def _publish_markers(
-        self, grasps: List[Tuple[np.ndarray, float]]
+        self, grasps: List[Tuple[np.ndarray, float, np.ndarray]]
     ):
         """Publish grasp poses as RViz markers."""
         marker_array = MarkerArray()
 
-        for i, (pos, conf) in enumerate(grasps):
-            # Grasp position marker (arrow pointing down)
+        for i, item in enumerate(grasps):
+            pos, conf = item[0], item[1]
+            rot = item[2] if len(item) > 2 else np.eye(3)
+
             marker = Marker()
             marker.header.stamp = self.get_clock().now().to_msg()
             marker.header.frame_id = self.base_frame
@@ -365,8 +435,23 @@ class GraspDetectionNode(Node):
             marker.type = Marker.ARROW
             marker.action = Marker.ADD
 
-            # Arrow from above to grasp point
-            start = Point(x=float(pos[0]), y=float(pos[1]), z=float(pos[2]) + 0.05)
+            # Determine approach direction vector
+            if self.use_anygrasp:
+                # In GraspNet, approach vector is rot[:, 0]
+                approach_vec = rot[:, 0]
+                norm = np.linalg.norm(approach_vec)
+                if norm > 1e-4:
+                    approach_vec = approach_vec / norm
+                else:
+                    approach_vec = np.array([0, 0, -1])
+            else:
+                approach_vec = np.array([0, 0, -1])
+
+            start = Point(
+                x=float(pos[0] - 0.05 * approach_vec[0]),
+                y=float(pos[1] - 0.05 * approach_vec[1]),
+                z=float(pos[2] - 0.05 * approach_vec[2])
+            )
             end = Point(x=float(pos[0]), y=float(pos[1]), z=float(pos[2]))
             marker.points = [start, end]
 
@@ -375,9 +460,10 @@ class GraspDetectionNode(Node):
             marker.scale.z = 0.01   # Head length
 
             # Color: green for high confidence, red for low
+            conf_norm = min(1.0, max(0.0, conf * 5.0)) if self.use_anygrasp else float(conf)
             marker.color = ColorRGBA(
-                r=float(1.0 - conf),
-                g=float(conf),
+                r=float(1.0 - conf_norm),
+                g=float(conf_norm),
                 b=0.0,
                 a=0.8
             )

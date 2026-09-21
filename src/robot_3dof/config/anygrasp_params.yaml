@@ -2,7 +2,8 @@ grasp_detection_node:
   ros__parameters:
     # AnyGrasp SDK settings
     use_anygrasp: false                # Set true khi có license
-    checkpoint_path: ""                # Path tới AnyGrasp checkpoint
+    socket_path: "/tmp/anygrasp_ipc.sock"
+    checkpoint_path: "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar"
     max_gripper_width: 0.06            # Max gripper opening (m)
     gripper_height: 0.04               # Gripper finger length (m)
     top_down_grasp: true               # Chỉ detect top-down grasps (phù hợp 3 DoF)
