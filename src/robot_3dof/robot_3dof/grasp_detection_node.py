@@ -250,8 +250,12 @@ class GraspDetectionNode(Node):
                 grasps.append((c, conf, np.eye(3), 0.04, 0.04))
 
             if grasps:
-                # Sort by distance to base (prefer nearest reachable object)
-                grasps.sort(key=lambda g: np.linalg.norm(g[0][:2]))
+                if self.test_scenario == "transparent_bottle":
+                    # In transparent bottle scenario, prioritize ghost grasp (Y < -0.03) to demonstrate the failure
+                    grasps.sort(key=lambda g: 0 if g[0][1] < -0.03 else 1)
+                else:
+                    # Sort by distance to base (prefer nearest reachable object)
+                    grasps.sort(key=lambda g: np.linalg.norm(g[0][:2]))
                 return grasps
         except Exception as e:
             self.get_logger().warn(f"Clustering error: {e}, falling back to overall centroid")
@@ -391,10 +395,10 @@ class GraspDetectionNode(Node):
             return points
 
         if self.test_scenario == "transparent_bottle":
-            # Glass bottle is located at X ~ 0.28, Y ~ -0.07, body Z in [0.255, 0.320]
+            # Glass bottle is located at X ~ 0.28, Y ~ 0.00, body Z in [0.255, 0.320]
             # 1. Simulate optical transmission: 85% of body points are dropped (missing depth / NaN)
             in_bottle_x = (points[:, 0] >= 0.25) & (points[:, 0] <= 0.31)
-            in_bottle_y = (points[:, 1] >= -0.10) & (points[:, 1] <= -0.04)
+            in_bottle_y = (points[:, 1] >= -0.04) & (points[:, 1] <= 0.04)
             in_body_z = (points[:, 2] >= 0.255) & (points[:, 2] <= 0.320)
             bottle_body_mask = in_bottle_x & in_bottle_y & in_body_z
 
@@ -408,24 +412,19 @@ class GraspDetectionNode(Node):
             # 2. Simulate refraction & specular reflection: Ghost points floating in empty air
             n_ghost = 50
             np.random.seed(42)  # Consistent demonstration
-            ghost_x = np.random.normal(0.300, 0.008, n_ghost)
-            ghost_y = np.random.normal(-0.115, 0.010, n_ghost)  # Displaced by 4.5cm into air
+            ghost_x = np.random.normal(0.280, 0.008, n_ghost)
+            ghost_y = np.random.normal(-0.065, 0.010, n_ghost)  # Displaced by 6.5cm into air
             ghost_z = np.random.normal(0.275, 0.012, n_ghost)
             ghost_pts = np.column_stack([ghost_x, ghost_y, ghost_z])
 
             return np.vstack([filtered_points, ghost_pts])
 
         elif self.test_scenario == "flat_object":
-            # Focus on flat disc at X ~ 0.24, Y ~ 0.08, height 2.5mm (Z <= 0.2535)
-            # Filter other tall objects out to isolate AnyGrasp evaluation of thin object
-            disc_mask = (np.hypot(points[:, 0] - 0.24, points[:, 1] - 0.08) < 0.045) & (points[:, 2] <= 0.256)
-            disc_pts = points[disc_mask]
-            if len(disc_pts) >= 15:
-                return disc_pts
+            # In dedicated world, only flat disc is present at (0.28, 0.0, 0.251)
             return points
 
         elif self.test_scenario == "dense_clutter":
-            # Dense clutter: keep all points
+            # In dedicated world, mug and duck touch at (0.27, -0.02) and (0.27, 0.025)
             return points
 
         return points
@@ -453,8 +452,8 @@ class GraspDetectionNode(Node):
 
         # 1. Ghost grasp detection (Refraction artifact outside bottle body)
         if self.test_scenario == "transparent_bottle":
-            dist_to_bottle = np.hypot(pos[0] - 0.28, pos[1] - (-0.07))
-            if dist_to_bottle > 0.035 and pos[1] < -0.09:
+            dist_to_bottle = np.hypot(pos[0] - 0.28, pos[1] - 0.0)
+            if dist_to_bottle > 0.035 and pos[1] < -0.03:
                 return {
                     "status": "FAIL_GHOST_GRASP",
                     "tag": "⚠️ [FAIL: GHOST GRASP]",
@@ -488,7 +487,7 @@ class GraspDetectionNode(Node):
         # 4. Dense clutter collision
         if self.test_scenario == "dense_clutter":
             # If grasping near the junction of mug & duck
-            if abs(pos[1] - (-0.05)) < 0.04 and width > 0.035:
+            if abs(pos[1]) < 0.03 and width > 0.035:
                 return {
                     "status": "FAIL_CLUTTER_COLLISION",
                     "tag": "⚡ [FAIL: CLUTTER COLLISION]",
