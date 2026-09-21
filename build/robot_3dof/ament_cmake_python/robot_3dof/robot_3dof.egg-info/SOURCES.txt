@@ -1,9 +1,0 @@
-setup.py
-robot_3dof/__init__.py
-robot_3dof/grasp_detection_node.py
-robot_3dof/ik_solver.py
-robot_3dof/pick_place_node.py
-robot_3dof.egg-info/PKG-INFO
-robot_3dof.egg-info/SOURCES.txt
-robot_3dof.egg-info/dependency_links.txt
-robot_3dof.egg-info/top_level.txt

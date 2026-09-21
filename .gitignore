@@ -1,0 +1,47 @@
+# ROS 2 Build Artifacts
+build/
+install/
+log/
+.colcon/
+
+# Python Bytecode and Caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Large model weights and checkpoints (> 100MB, rejected by GitHub)
+*.tar
+*.pt
+*.pth
+*.bin
+*.onnx
+*.weights
+*.ckpt
+checkpoint_detection/
+checkpoint_detection.tar
+
+# Private licenses and credentials
+*.lic
+*.signature
+*.public_key
+id_rsa
+id_ed25519
+*.pem
+
+# IDEs & System Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
