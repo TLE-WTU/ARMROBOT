@@ -31,6 +31,7 @@ def launch_setup(context, *args, **kwargs):
     scenario = LaunchConfiguration("test_scenario").perform(context)
     use_anygrasp = LaunchConfiguration("use_anygrasp")
     use_rviz = LaunchConfiguration("use_rviz")
+    enable_ransac = LaunchConfiguration("enable_ransac")
 
     # Map scenario to dedicated Gazebo SDF world
     world_map = {
@@ -65,6 +66,7 @@ def launch_setup(context, *args, **kwargs):
             {
                 "use_anygrasp": use_anygrasp,
                 "test_scenario": scenario,
+                "enable_ransac": enable_ransac,
                 "use_sim_time": True,
             },
         ],
@@ -140,9 +142,16 @@ def generate_launch_description():
         description="Benchmark scenario: 'default', 'transparent_bottle', 'flat_object', 'dense_clutter'",
     )
 
+    enable_ransac_arg = DeclareLaunchArgument(
+        "enable_ransac",
+        default_value="true",
+        description="Enable RANSAC plane segmentation and geometric reduction",
+    )
+
     return LaunchDescription([
         use_anygrasp_arg,
         use_rviz_arg,
         test_scenario_arg,
+        enable_ransac_arg,
         OpaqueFunction(function=launch_setup),
     ])

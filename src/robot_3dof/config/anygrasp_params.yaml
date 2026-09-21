@@ -20,7 +20,14 @@ grasp_detection_node:
     workspace_bounds:                  # Workspace limits in base_link frame [min, max]
       x: [0.05, 0.45]
       y: [-0.25, 0.25]
-      z: [0.252, 0.50]                # Mặt bàn ở z=0.250, lấy từ 0.252 để lọc sạch mặt bàn và lấy trọn vật thể 3D
+      z: [0.22, 0.50]                  # Bao gồm cả mặt bàn (z=0.250) để RANSAC bóc tách tự động
+
+    # RANSAC Plane Segmentation & Geometric Reduction (Edge Grasp Benchmark)
+    enable_ransac: true
+    ransac_distance_threshold: 0.008   # Plane inlier distance threshold (m)
+    ransac_max_iterations: 150         # Max RANSAC iterations
+    target_point_count: 1024           # Reduced point count for fast inference
+    benchmark_csv_path: "/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/benchmark_results.csv"
 
 pick_place_node:
   ros__parameters:

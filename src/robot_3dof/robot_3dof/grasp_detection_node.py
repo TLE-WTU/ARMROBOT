@@ -19,6 +19,8 @@ import os
 import pickle
 import socket
 import struct
+import time
+import csv
 from typing import List, Tuple
 
 import numpy as np
@@ -56,7 +58,14 @@ class GraspDetectionNode(Node):
         self.declare_parameter("voxel_size", 0.005)
         self.declare_parameter("workspace_bounds.x", [0.10, 0.50])
         self.declare_parameter("workspace_bounds.y", [-0.20, 0.20])
-        self.declare_parameter("workspace_bounds.z", [0.25, 0.45])
+        self.declare_parameter("workspace_bounds.z", [0.22, 0.45])
+
+        # RANSAC & Benchmark parameters
+        self.declare_parameter("enable_ransac", True)
+        self.declare_parameter("ransac_distance_threshold", 0.008)
+        self.declare_parameter("ransac_max_iterations", 150)
+        self.declare_parameter("target_point_count", 1024)
+        self.declare_parameter("benchmark_csv_path", "/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/benchmark_results.csv")
 
         # Read parameters
         self.use_anygrasp = self.get_parameter("use_anygrasp").value
@@ -64,8 +73,14 @@ class GraspDetectionNode(Node):
         self.socket_path = self.get_parameter("socket_path").value
         self.max_gripper_width = self.get_parameter("max_gripper_width").value
         self.min_points = self.get_parameter("min_points").value
+        self.voxel_size = self.get_parameter("voxel_size").value
         self.base_frame = self.get_parameter("base_frame").value
         self.camera_frame = self.get_parameter("camera_frame").value
+        self.enable_ransac = self.get_parameter("enable_ransac").value
+        self.ransac_distance_threshold = self.get_parameter("ransac_distance_threshold").value
+        self.ransac_max_iterations = self.get_parameter("ransac_max_iterations").value
+        self.target_point_count = self.get_parameter("target_point_count").value
+        self.benchmark_csv_path = self.get_parameter("benchmark_csv_path").value
         pc_topic = self.get_parameter("point_cloud_topic").value
 
         ws_x = self.get_parameter("workspace_bounds.x").value
@@ -99,6 +114,14 @@ class GraspDetectionNode(Node):
             PointCloud2, "/anygrasp/workspace_cloud", 10
         )
 
+        # Publishers for separated RANSAC table & object point clouds (Ablation study inspection)
+        self.table_pc_pub = self.create_publisher(
+            PointCloud2, "/anygrasp/table_cloud", 10
+        )
+        self.object_pc_pub = self.create_publisher(
+            PointCloud2, "/anygrasp/object_cloud", 10
+        )
+
         # Service for grasp detection (simple request/response via topic)
         # Using a timer-triggered detection for demo simplicity
         self.grasp_poses_pub = self.create_publisher(
@@ -111,6 +134,8 @@ class GraspDetectionNode(Node):
         if self.use_anygrasp:
             self._init_anygrasp()
 
+        self._init_benchmark_csv()
+
         mode = "AnyGrasp AI (IPC Service)" if self.use_anygrasp else "Heuristic Fallback"
         self.get_logger().info(f"Grasp Detection Node started — mode: {mode}")
 
@@ -121,6 +146,210 @@ class GraspDetectionNode(Node):
             self.get_logger().info("✅ Found active AnyGrasp IPC socket!")
         else:
             self.get_logger().info("ℹ️ AnyGrasp IPC socket not yet created. Node will connect once service starts.")
+
+    def _init_benchmark_csv(self):
+        """Initialize CSV file for recording ablation/benchmark metrics."""
+        try:
+            csv_dir = os.path.dirname(self.benchmark_csv_path)
+            if csv_dir:
+                os.makedirs(csv_dir, exist_ok=True)
+            if not os.path.exists(self.benchmark_csv_path):
+                with open(self.benchmark_csv_path, mode="w", newline="") as f:
+                    writer = csv.writer(f)
+                    writer.writerow([
+                        "timestamp",
+                        "scenario",
+                        "ransac_enabled",
+                        "raw_points",
+                        "object_points",
+                        "reduction_pct",
+                        "ransac_ms",
+                        "reduction_ms",
+                        "inference_ms",
+                        "total_ms",
+                        "fps",
+                        "grasps_count",
+                        "best_score",
+                        "table_collision"
+                    ])
+                self.get_logger().info(f"📊 Benchmark logger initialized: {self.benchmark_csv_path}")
+        except Exception as e:
+            self.get_logger().warn(f"Failed to initialize benchmark CSV: {e}")
+
+    def _record_benchmark_row(
+        self,
+        raw_pts: int,
+        obj_pts: int,
+        reduct_pct: float,
+        ransac_ms: float,
+        reduct_ms: float,
+        infer_ms: float,
+        total_ms: float,
+        fps: float,
+        grasps_count: int,
+        best_score: float,
+        collision_flag: bool,
+    ):
+        """Append benchmark record to CSV."""
+        try:
+            with open(self.benchmark_csv_path, mode="a", newline="") as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    f"{self.get_clock().now().nanoseconds / 1e9:.2f}",
+                    self.test_scenario,
+                    self.enable_ransac,
+                    raw_pts,
+                    obj_pts,
+                    f"{reduct_pct:.1f}",
+                    f"{ransac_ms:.2f}",
+                    f"{reduct_ms:.2f}",
+                    f"{infer_ms:.2f}",
+                    f"{total_ms:.2f}",
+                    f"{fps:.1f}",
+                    grasps_count,
+                    f"{best_score:.4f}",
+                    collision_flag,
+                ])
+        except Exception as e:
+            self.get_logger().warn(f"Failed to record benchmark row: {e}")
+
+    def _ransac_plane_segmentation(
+        self, points: np.ndarray
+    ) -> Tuple[np.ndarray, np.ndarray, Tuple[float, float, float, float]]:
+        """
+        RANSAC plane segmentation to decouple tabletop from object point clouds.
+        Returns:
+            object_points: Points belonging to objects (outliers strictly above plane)
+            table_points: Points belonging to tabletop (inliers)
+            plane_model: (A, B, C, D) such that Ax + By + Cz + D = 0
+        """
+        if points.shape[0] < 50:
+            return points, np.empty((0, 3)), (0.0, 0.0, 1.0, -0.25)
+
+        n_pts = points.shape[0]
+        max_iters = self.ransac_max_iterations
+        thresh = self.ransac_distance_threshold
+
+        best_inliers_mask = np.zeros(n_pts, dtype=bool)
+        best_plane = (0.0, 0.0, 1.0, -0.25)
+        max_inlier_count = 0
+
+        rng = np.random.default_rng(42)
+
+        for _ in range(max_iters):
+            idx = rng.choice(n_pts, size=3, replace=False)
+            p1, p2, p3 = points[idx]
+
+            # Vector normal
+            v1 = p2 - p1
+            v2 = p3 - p1
+            normal = np.cross(v1, v2)
+            norm_len = np.linalg.norm(normal)
+            if norm_len < 1e-6:
+                continue
+            normal = normal / norm_len
+
+            # Table normal in base_link is predominantly vertical (|n_z| > 0.80)
+            if abs(normal[2]) < 0.80:
+                continue
+
+            if normal[2] < 0:
+                normal = -normal
+
+            d = -float(np.dot(normal, p1))
+
+            # Distances |Ax + By + Cz + D|
+            distances = np.abs(np.dot(points, normal) + d)
+            inliers_mask = distances < thresh
+            inlier_count = np.count_nonzero(inliers_mask)
+
+            if inlier_count > max_inlier_count:
+                max_inlier_count = inlier_count
+                best_inliers_mask = inliers_mask
+                best_plane = (float(normal[0]), float(normal[1]), float(normal[2]), d)
+
+        # Refine plane using SVD on inliers if enough inliers found
+        if max_inlier_count >= 50:
+            inlier_pts = points[best_inliers_mask]
+            centroid = np.mean(inlier_pts, axis=0)
+            shifted = inlier_pts - centroid
+            _, _, vh = np.linalg.svd(shifted, full_matrices=False)
+            refined_normal = vh[2]
+            if refined_normal[2] < 0:
+                refined_normal = -refined_normal
+            refined_d = -float(np.dot(refined_normal, centroid))
+
+            best_plane = (float(refined_normal[0]), float(refined_normal[1]), float(refined_normal[2]), refined_d)
+
+            # Object points: strictly above table surface (signed distance >= threshold)
+            signed_dist = np.dot(points, np.array(best_plane[:3])) + best_plane[3]
+            table_mask = np.abs(signed_dist) < thresh
+            object_mask = signed_dist >= thresh
+
+            table_points = points[table_mask]
+            object_points = points[object_mask]
+            return object_points, table_points, best_plane
+
+        return points, np.empty((0, 3)), best_plane
+
+    def _adaptive_geometric_reduction(
+        self, points: np.ndarray, target_k: int = 1024
+    ) -> np.ndarray:
+        """
+        Adaptive geometric reduction:
+        1. Voxel grid downsampling for uniform spatial density.
+        2. Uniform strided sampling down to exact target_k points.
+        """
+        if points.shape[0] <= target_k:
+            return points
+
+        # Voxel downsampling using integer hash
+        voxel_size = self.voxel_size
+        voxel_coords = np.floor(points / voxel_size).astype(np.int32)
+        _, unique_indices = np.unique(voxel_coords, axis=0, return_index=True)
+        downsampled = points[unique_indices]
+
+        if downsampled.shape[0] <= target_k:
+            return downsampled
+
+        # Uniform strided sampling to preserve spatial distribution across object
+        step = len(downsampled) / float(target_k)
+        selected_indices = [int(i * step) for i in range(target_k)]
+        return downsampled[selected_indices]
+
+    def _enforce_virtual_safety_floor(
+        self, grasps: list, plane_model: Tuple[float, float, float, float]
+    ) -> list:
+        """
+        Enforce analytical safety floor using RANSAC table plane equation.
+        Re-adjusts or prunes any grasps that penetrate below the virtual safety margin.
+        """
+        safe_grasps = []
+        normal = np.array(plane_model[:3])
+        d = plane_model[3]
+        safety_margin = 0.005  # 5mm above table surface
+
+        for g in grasps:
+            pos = g[0]
+            rot = g[2]
+            depth = g[4] if len(g) > 4 else 0.04
+            u_x = rot[:, 0]
+            # Gripper tip lowest point estimation
+            tip_pos = pos + depth * u_x if u_x[2] < 0 else pos
+
+            # Signed distance from tip to plane
+            dist_to_plane = float(np.dot(tip_pos, normal) + d)
+
+            if dist_to_plane < safety_margin:
+                # If grasp tip penetrates below safety margin, lift it analytically
+                pos_adjusted = pos.copy()
+                lift_amount = safety_margin - dist_to_plane
+                pos_adjusted[2] += lift_amount
+                safe_grasps.append((pos_adjusted, g[1] * 0.95, g[2], g[3], g[4]))
+            else:
+                safe_grasps.append(g)
+
+        return safe_grasps
 
     def _pc_callback(self, msg: PointCloud2):
         """Store latest point cloud."""
@@ -517,6 +746,8 @@ class GraspDetectionNode(Node):
         if self.latest_pc is None:
             return
 
+        t_start = time.perf_counter()
+
         # Convert point cloud
         points_cam = self._pointcloud2_to_xyz(self.latest_pc)
         if points_cam.shape[0] == 0:
@@ -532,7 +763,8 @@ class GraspDetectionNode(Node):
         # Apply benchmark scenario sensor & optical effects
         points_ws = self._apply_scenario_pointcloud_effects(points_ws)
 
-        if points_ws.shape[0] < self.min_points:
+        raw_pts_count = points_ws.shape[0]
+        if raw_pts_count < self.min_points:
             self.get_logger().debug(
                 f"Not enough points in workspace: {points_ws.shape[0]}"
             )
@@ -541,22 +773,78 @@ class GraspDetectionNode(Node):
         # Publish segmented workspace point cloud for RViz2
         self.ws_pc_pub.publish(self._create_pointcloud2(points_ws, self.base_frame))
 
-        # Run detection
-        if self.use_anygrasp:
-            grasps = self._anygrasp_detection(points_ws)
+        # ── RANSAC Plane Segmentation & Geometric Reduction Pipeline ──
+        table_plane = None
+        if self.enable_ransac:
+            t_ransac_start = time.perf_counter()
+            points_object, points_table, table_plane = self._ransac_plane_segmentation(points_ws)
+            t_ransac_ms = (time.perf_counter() - t_ransac_start) * 1000.0
+
+            # Publish separated clouds for RViz2
+            if points_table.shape[0] > 0:
+                self.table_pc_pub.publish(self._create_pointcloud2(points_table, self.base_frame))
+            if points_object.shape[0] > 0:
+                self.object_pc_pub.publish(self._create_pointcloud2(points_object, self.base_frame))
+
+            # Adaptive Geometric Reduction
+            t_reduct_start = time.perf_counter()
+            points_input = self._adaptive_geometric_reduction(points_object, target_k=self.target_point_count)
+            t_reduct_ms = (time.perf_counter() - t_reduct_start) * 1000.0
         else:
-            grasps = self._heuristic_grasp_detection(points_ws)
+            t_ransac_ms = 0.0
+            t_reduct_ms = 0.0
+            points_input = points_ws
+
+        filtered_pts_count = points_input.shape[0]
+        reduction_pct = max(0.0, (1.0 - filtered_pts_count / float(raw_pts_count)) * 100.0) if raw_pts_count > 0 else 0.0
+
+        if filtered_pts_count < 10:
+            self.get_logger().debug("Not enough points after filtering")
+            return
+
+        # Run grasp detection on processed point cloud
+        t_infer_start = time.perf_counter()
+        if self.use_anygrasp:
+            grasps = self._anygrasp_detection(points_input)
+        else:
+            grasps = self._heuristic_grasp_detection(points_input)
+        t_infer_ms = (time.perf_counter() - t_infer_start) * 1000.0
 
         if not grasps:
             self.get_logger().debug("No grasps detected")
             return
 
+        # Enforce analytical table safety floor if RANSAC is enabled
+        if self.enable_ransac and table_plane is not None:
+            grasps = self._enforce_virtual_safety_floor(grasps, table_plane)
+
         # Diagnose each detected grasp candidate
         diagnosed_grasps = []
+        table_collision_flag = False
         for g in grasps:
             pos, score, rot, width, depth = g
             diag = self._diagnose_grasp(pos, rot, width, depth, score)
+            if diag["status"] == "FAIL_TABLE_COLLISION":
+                table_collision_flag = True
             diagnosed_grasps.append((g, diag))
+
+        t_total_ms = (time.perf_counter() - t_start) * 1000.0
+        fps = 1000.0 / t_total_ms if t_total_ms > 0 else 0.0
+
+        # Record benchmark metrics to CSV
+        self._record_benchmark_row(
+            raw_pts=raw_pts_count,
+            obj_pts=filtered_pts_count,
+            reduct_pct=reduction_pct,
+            ransac_ms=t_ransac_ms,
+            reduct_ms=t_reduct_ms,
+            infer_ms=t_infer_ms,
+            total_ms=t_total_ms,
+            fps=fps,
+            grasps_count=len(grasps),
+            best_score=float(grasps[0][1]),
+            collision_flag=table_collision_flag,
+        )
 
         # Publish best grasp
         best_pos = grasps[0][0]
@@ -584,13 +872,21 @@ class GraspDetectionNode(Node):
         # Publish visualization markers (3D Gripper Wireframe, Labels, Arrows)
         self._publish_markers(diagnosed_grasps)
 
-        # Print clean formatted ASCII diagnostic table in terminal
+        # Print clean formatted ASCII diagnostic & benchmark table in terminal
         method_str = "AnyGrasp AI" if self.use_anygrasp else "Heuristic Fallback"
+        pipe_str = "RANSAC+Reduction (Proposed)" if self.enable_ransac else "Raw Cloud (Baseline)"
         scen_str = f" [Scenario: {self.test_scenario.upper()}]" if self.test_scenario != "default" else ""
-        print("\n" + "═" * 86)
-        print(f"🤖 [{method_str}{scen_str}] Detected {len(grasps)} Grasps on 3D Objects:")
+        print("\n" + "═" * 88)
+        print(f"🔬 [EDGE GRASP BENCHMARK] Pipeline: {pipe_str} │ Engine: {method_str}{scen_str}")
+        print("─" * 88)
+        print(f" 📊 Perception Telemetry:")
+        print(f"    • Points: Raw={raw_pts_count} → Processed={filtered_pts_count} ({reduction_pct:.1f}% reduced)")
+        print(f"    • Latency: RANSAC={t_ransac_ms:4.1f}ms │ Reduction={t_reduct_ms:4.1f}ms │ AnyGrasp={t_infer_ms:4.1f}ms")
+        print(f"    • Performance: Total={t_total_ms:4.1f}ms │ Throughput={fps:4.1f} FPS │ Table Collision: {'💥 YES' if table_collision_flag else '✅ ZERO'}")
+        print("─" * 88)
+        print(f" 🤖 Detected {len(grasps)} Grasps on 3D Objects:")
         print(f" {'Rank':<5} │ {'Score':<7} │ {'Position (X, Y, Z)':<24} │ {'Width':<7} │ {'Diagnostic / Failure Analysis'}")
-        print("─" * 86)
+        print("─" * 88)
         for idx, (g, diag) in enumerate(diagnosed_grasps[:5]):
             p = g[0]
             s = g[1]
@@ -598,7 +894,7 @@ class GraspDetectionNode(Node):
             tag = "★ " if idx == 0 else "  "
             desc = diag["desc"]
             print(f" {tag}#{idx+1:<3} │ {s:<7.4f} │ [{p[0]:5.2f}, {p[1]:5.2f}, {p[2]:5.2f}] │ {w*100:4.1f}cm │ {desc}")
-        print("═" * 86 + "\n")
+        print("═" * 88 + "\n")
 
     def _publish_markers(
         self, diagnosed_grasps: list
