@@ -1,5 +1,6 @@
 grasp_detection_node:
   ros__parameters:
+    use_sim_time: true
     # AnyGrasp SDK settings
     use_anygrasp: false                # Set true khi có license
     socket_path: "/tmp/anygrasp_ipc.sock"
@@ -23,6 +24,7 @@ grasp_detection_node:
 
 pick_place_node:
   ros__parameters:
+    use_sim_time: true
     # Approach / retreat offsets
     pre_grasp_offset_z: 0.08           # Offset phía trên grasp pose (m)
     post_grasp_lift_z: 0.10            # Nâng lên sau khi kẹp (m)

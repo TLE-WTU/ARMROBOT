@@ -65,6 +65,7 @@ def launch_setup(context, *args, **kwargs):
             {
                 "use_anygrasp": use_anygrasp,
                 "test_scenario": scenario,
+                "use_sim_time": True,
             },
         ],
     )
@@ -75,7 +76,10 @@ def launch_setup(context, *args, **kwargs):
         executable="pick_place_node.py",
         name="pick_place_node",
         output="screen",
-        parameters=[anygrasp_params_file],
+        parameters=[
+            anygrasp_params_file,
+            {"use_sim_time": True},
+        ],
     )
 
     # RViz2
@@ -85,6 +89,7 @@ def launch_setup(context, *args, **kwargs):
         executable="rviz2",
         name="rviz2",
         arguments=["-d", rviz_config],
+        parameters=[{"use_sim_time": True}],
         output="screen",
         condition=IfCondition(use_rviz),
     )
