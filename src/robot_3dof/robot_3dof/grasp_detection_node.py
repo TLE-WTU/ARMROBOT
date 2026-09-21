@@ -33,6 +33,7 @@ from geometry_msgs.msg import PoseStamped, Pose, Point, Quaternion
 from visualization_msgs.msg import Marker, MarkerArray
 from std_msgs.msg import Header, ColorRGBA
 from builtin_interfaces.msg import Duration
+from rcl_interfaces.msg import ParameterDescriptor
 
 import tf2_ros
 
@@ -44,7 +45,7 @@ class GraspDetectionNode(Node):
         super().__init__("grasp_detection_node")
 
         # Declare parameters
-        self.declare_parameter("use_anygrasp", False)
+        self.declare_parameter("use_anygrasp", False, ParameterDescriptor(dynamic_typing=True))
         self.declare_parameter("test_scenario", "default")
         self.declare_parameter("checkpoint_path", "")
         self.declare_parameter("socket_path", "/tmp/anygrasp_ipc.sock")
@@ -54,33 +55,36 @@ class GraspDetectionNode(Node):
         self.declare_parameter("point_cloud_topic", "/camera/points")
         self.declare_parameter("camera_frame", "camera_optical_link")
         self.declare_parameter("base_frame", "base_link")
-        self.declare_parameter("min_points", 50)
+        self.declare_parameter("min_points", 30)
         self.declare_parameter("voxel_size", 0.005)
         self.declare_parameter("workspace_bounds.x", [0.10, 0.50])
         self.declare_parameter("workspace_bounds.y", [-0.20, 0.20])
         self.declare_parameter("workspace_bounds.z", [0.22, 0.45])
 
         # RANSAC & Benchmark parameters
-        self.declare_parameter("enable_ransac", True)
+        self.declare_parameter("enable_ransac", True, ParameterDescriptor(dynamic_typing=True))
         self.declare_parameter("ransac_distance_threshold", 0.008)
         self.declare_parameter("ransac_max_iterations", 150)
         self.declare_parameter("target_point_count", 1024)
         self.declare_parameter("benchmark_csv_path", "/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/benchmark_results.csv")
 
-        # Read parameters
-        self.use_anygrasp = self.get_parameter("use_anygrasp").value
-        self.test_scenario = self.get_parameter("test_scenario").value
-        self.socket_path = self.get_parameter("socket_path").value
-        self.max_gripper_width = self.get_parameter("max_gripper_width").value
-        self.min_points = self.get_parameter("min_points").value
-        self.voxel_size = self.get_parameter("voxel_size").value
-        self.base_frame = self.get_parameter("base_frame").value
-        self.camera_frame = self.get_parameter("camera_frame").value
-        self.enable_ransac = self.get_parameter("enable_ransac").value
-        self.ransac_distance_threshold = self.get_parameter("ransac_distance_threshold").value
-        self.ransac_max_iterations = self.get_parameter("ransac_max_iterations").value
-        self.target_point_count = self.get_parameter("target_point_count").value
-        self.benchmark_csv_path = self.get_parameter("benchmark_csv_path").value
+        # Read parameters with robust type casting (handles strings from launch)
+        raw_anygrasp = self.get_parameter("use_anygrasp").value
+        self.use_anygrasp = raw_anygrasp.lower() in ("true", "1", "yes") if isinstance(raw_anygrasp, str) else bool(raw_anygrasp)
+        self.test_scenario = str(self.get_parameter("test_scenario").value)
+        self.socket_path = str(self.get_parameter("socket_path").value)
+        self.max_gripper_width = float(self.get_parameter("max_gripper_width").value)
+        self.min_points = int(self.get_parameter("min_points").value)
+        self.voxel_size = float(self.get_parameter("voxel_size").value)
+        self.base_frame = str(self.get_parameter("base_frame").value)
+        self.camera_frame = str(self.get_parameter("camera_frame").value)
+
+        raw_ransac = self.get_parameter("enable_ransac").value
+        self.enable_ransac = raw_ransac.lower() in ("true", "1", "yes") if isinstance(raw_ransac, str) else bool(raw_ransac)
+        self.ransac_distance_threshold = float(self.get_parameter("ransac_distance_threshold").value)
+        self.ransac_max_iterations = int(self.get_parameter("ransac_max_iterations").value)
+        self.target_point_count = int(self.get_parameter("target_point_count").value)
+        self.benchmark_csv_path = str(self.get_parameter("benchmark_csv_path").value)
         pc_topic = self.get_parameter("point_cloud_topic").value
 
         ws_x = self.get_parameter("workspace_bounds.x").value
@@ -356,9 +360,7 @@ class GraspDetectionNode(Node):
         self.latest_pc = msg
 
     def _pointcloud2_to_xyz(self, msg: PointCloud2) -> np.ndarray:
-        """Convert PointCloud2 message to Nx3 numpy array of XYZ points."""
-        points = []
-        # Determine field offsets
+        """Convert PointCloud2 message to Nx3 numpy array of XYZ points with fast vectorized unpacking."""
         x_off = y_off = z_off = None
         for field in msg.fields:
             if field.name == "x":
@@ -373,18 +375,22 @@ class GraspDetectionNode(Node):
             return np.array([]).reshape(0, 3)
 
         point_step = msg.point_step
-        data = msg.data
+        if len(msg.data) == 0:
+            return np.array([]).reshape(0, 3)
 
-        for i in range(msg.width * msg.height):
-            offset = i * point_step
-            x = struct.unpack_from("f", data, offset + x_off)[0]
-            y = struct.unpack_from("f", data, offset + y_off)[0]
-            z = struct.unpack_from("f", data, offset + z_off)[0]
+        try:
+            # Fast vectorized unpacking with stride 2 for real-time responsiveness
+            raw = np.frombuffer(msg.data, dtype=np.uint8).reshape(-1, point_step)
+            raw_sampled = raw[::2]
+            x = raw_sampled[:, x_off:x_off+4].copy().view(np.float32).reshape(-1)
+            y = raw_sampled[:, y_off:y_off+4].copy().view(np.float32).reshape(-1)
+            z = raw_sampled[:, z_off:z_off+4].copy().view(np.float32).reshape(-1)
 
-            if not (np.isnan(x) or np.isnan(y) or np.isnan(z)):
-                points.append([x, y, z])
-
-        return np.array(points).reshape(-1, 3)
+            valid = ~(np.isnan(x) | np.isnan(y) | np.isnan(z) | np.isinf(x) | np.isinf(y) | np.isinf(z))
+            return np.column_stack([x[valid], y[valid], z[valid]])
+        except Exception as e:
+            self.get_logger().warn(f"Fast point cloud unpacking failed: {e}")
+            return np.array([]).reshape(0, 3)
 
     def _transform_points_to_base(self, points: np.ndarray, source_frame: str = None) -> np.ndarray:
         """Transform points from camera frame to base frame using TF2."""
@@ -446,8 +452,8 @@ class GraspDetectionNode(Node):
             tree = KDTree(points)
             visited = np.zeros(len(points), dtype=bool)
             clusters = []
-            cluster_radius = 0.020 if self.test_scenario == "flat_object" else 0.015
-            req_min_pts = 20 if self.test_scenario == "flat_object" else self.min_points
+            cluster_radius = 0.020 if self.test_scenario == "flat_object" else 0.025
+            req_min_pts = 20 if self.test_scenario == "flat_object" else 15
             for i in range(len(points)):
                 if visited[i]:
                     continue
@@ -463,19 +469,22 @@ class GraspDetectionNode(Node):
                     visited[curr] = True
                     cluster_indices.add(curr)
                     sub_nbrs = tree.query_ball_point(points[curr], r=cluster_radius)
-                    if len(sub_nbrs) >= self.min_points // 2:
+                    if len(sub_nbrs) >= req_min_pts // 2:
                         for n in sub_nbrs:
                             if not visited[n] and n not in cluster_indices:
                                 cluster_indices.add(n)
                                 queue.append(n)
 
                 cluster_pts = points[list(cluster_indices)]
-                if len(cluster_pts) >= self.min_points:
+                if len(cluster_pts) >= req_min_pts:
                     clusters.append(cluster_pts)
 
             grasps = []
             for cl in clusters:
                 c = np.mean(cl, axis=0)
+                # Ignore clusters that are in the drop place zone (x <= 0.24, y <= -0.12)
+                if c[0] <= 0.24 and c[1] <= -0.12:
+                    continue
                 conf = min(0.95, 0.5 + 0.5 * (len(cl) / 200.0))
                 grasps.append((c, conf, np.eye(3), 0.04, 0.04))
 
@@ -484,8 +493,8 @@ class GraspDetectionNode(Node):
                     # In transparent bottle scenario, prioritize ghost grasp (Y < -0.03) to demonstrate the failure
                     grasps.sort(key=lambda g: 0 if g[0][1] < -0.03 else 1)
                 else:
-                    # Sort by distance to base (prefer nearest reachable object)
-                    grasps.sort(key=lambda g: np.linalg.norm(g[0][:2]))
+                    # Pick tallest object first (Mug -> Duck -> Torus) for clean, orderly pick-and-place
+                    grasps.sort(key=lambda g: -g[0][2])
                 return grasps
         except Exception as e:
             self.get_logger().warn(f"Clustering error: {e}, falling back to overall centroid")
@@ -793,7 +802,13 @@ class GraspDetectionNode(Node):
         else:
             t_ransac_ms = 0.0
             t_reduct_ms = 0.0
-            points_input = points_ws
+            # In baseline (No RANSAC), downsample slightly if point count is huge to prevent CPU freezing while preserving table points
+            if points_ws.shape[0] > 3000:
+                v_coords = np.floor(points_ws / 0.007).astype(np.int32)
+                _, u_idx = np.unique(v_coords, axis=0, return_index=True)
+                points_input = points_ws[u_idx]
+            else:
+                points_input = points_ws
 
         filtered_pts_count = points_input.shape[0]
         reduction_pct = max(0.0, (1.0 - filtered_pts_count / float(raw_pts_count)) * 100.0) if raw_pts_count > 0 else 0.0
