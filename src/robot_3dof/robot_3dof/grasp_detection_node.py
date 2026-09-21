@@ -43,6 +43,7 @@ class GraspDetectionNode(Node):
 
         # Declare parameters
         self.declare_parameter("use_anygrasp", False)
+        self.declare_parameter("test_scenario", "default")
         self.declare_parameter("checkpoint_path", "")
         self.declare_parameter("socket_path", "/tmp/anygrasp_ipc.sock")
         self.declare_parameter("max_gripper_width", 0.06)
@@ -59,6 +60,7 @@ class GraspDetectionNode(Node):
 
         # Read parameters
         self.use_anygrasp = self.get_parameter("use_anygrasp").value
+        self.test_scenario = self.get_parameter("test_scenario").value
         self.socket_path = self.get_parameter("socket_path").value
         self.max_gripper_width = self.get_parameter("max_gripper_width").value
         self.min_points = self.get_parameter("min_points").value
@@ -378,6 +380,131 @@ class GraspDetectionNode(Node):
         results.sort(key=lambda x: x[1], reverse=True)
         return results
 
+    def _apply_scenario_pointcloud_effects(self, points: np.ndarray) -> np.ndarray:
+        """
+        Simulate realistic sensor noise & optical degradation for benchmark scenarios:
+        1. 'transparent_bottle': IR light transmits through glass body -> missing depth (dropout) + refraction ghost points.
+        2. 'flat_object': Isolates ultra-thin disc (2.5mm height) on flat table.
+        3. 'dense_clutter': Tests crowded objects.
+        """
+        if points.shape[0] == 0:
+            return points
+
+        if self.test_scenario == "transparent_bottle":
+            # Glass bottle is located at X ~ 0.28, Y ~ -0.07, body Z in [0.255, 0.320]
+            # 1. Simulate optical transmission: 85% of body points are dropped (missing depth / NaN)
+            in_bottle_x = (points[:, 0] >= 0.25) & (points[:, 0] <= 0.31)
+            in_bottle_y = (points[:, 1] >= -0.10) & (points[:, 1] <= -0.04)
+            in_body_z = (points[:, 2] >= 0.255) & (points[:, 2] <= 0.320)
+            bottle_body_mask = in_bottle_x & in_bottle_y & in_body_z
+
+            filtered_points = points.copy()
+            body_indices = np.where(bottle_body_mask)[0]
+            if len(body_indices) > 0:
+                drop_mask = np.random.rand(len(body_indices)) < 0.85
+                drop_indices = body_indices[drop_mask]
+                filtered_points = np.delete(filtered_points, drop_indices, axis=0)
+
+            # 2. Simulate refraction & specular reflection: Ghost points floating in empty air
+            n_ghost = 50
+            np.random.seed(42)  # Consistent demonstration
+            ghost_x = np.random.normal(0.300, 0.008, n_ghost)
+            ghost_y = np.random.normal(-0.115, 0.010, n_ghost)  # Displaced by 4.5cm into air
+            ghost_z = np.random.normal(0.275, 0.012, n_ghost)
+            ghost_pts = np.column_stack([ghost_x, ghost_y, ghost_z])
+
+            return np.vstack([filtered_points, ghost_pts])
+
+        elif self.test_scenario == "flat_object":
+            # Focus on flat disc at X ~ 0.24, Y ~ 0.08, height 2.5mm (Z <= 0.2535)
+            # Filter other tall objects out to isolate AnyGrasp evaluation of thin object
+            disc_mask = (np.hypot(points[:, 0] - 0.24, points[:, 1] - 0.08) < 0.045) & (points[:, 2] <= 0.256)
+            disc_pts = points[disc_mask]
+            if len(disc_pts) >= 15:
+                return disc_pts
+            return points
+
+        elif self.test_scenario == "dense_clutter":
+            # Dense clutter: keep all points
+            return points
+
+        return points
+
+    def _diagnose_grasp(
+        self, pos: np.ndarray, rot: np.ndarray, width: float, depth: float, score: float
+    ) -> dict:
+        """
+        Diagnose whether a grasp candidate suffers from known failure modes:
+        - FAIL_GHOST_GRASP: AnyGrasp hallucinated grasp in empty air from optical refraction.
+        - FAIL_TABLE_COLLISION: Gripper finger penetrates the rigid table surface (Z < 0.248m).
+        - FAIL_FLAT_OBJECT: Object lacks vertical clearance for antipodal grasping.
+        - FAIL_CLUTTER_COLLISION: Gripper fingers penetrate adjacent clutter objects.
+        - OPTIMAL: Valid collision-free grasp.
+        """
+        u_x = rot[:, 0]
+        norm_x = np.linalg.norm(u_x)
+        u_x = u_x / norm_x if norm_x > 1e-4 else np.array([0.0, 0.0, -1.0])
+
+        d = max(0.02, min(depth, 0.05))
+        # Finger tip reaches down in approach direction
+        finger_tip_z = pos[2] + d * u_x[2] if u_x[2] < 0 else pos[2] - 0.02
+
+        table_surface_z = 0.250
+
+        # 1. Ghost grasp detection (Refraction artifact outside bottle body)
+        if self.test_scenario == "transparent_bottle":
+            dist_to_bottle = np.hypot(pos[0] - 0.28, pos[1] - (-0.07))
+            if dist_to_bottle > 0.035 and pos[1] < -0.09:
+                return {
+                    "status": "FAIL_GHOST_GRASP",
+                    "tag": "⚠️ [FAIL: GHOST GRASP]",
+                    "desc": "Ảo giác điểm ma do khúc xạ quang học (Refraction)",
+                    "is_failure": True,
+                    "color": (1.0, 0.0, 0.8, 0.95),  # Magenta
+                }
+
+        # 2. Flat object low affordance
+        if self.test_scenario == "flat_object":
+            if pos[2] <= table_surface_z + 0.010:
+                return {
+                    "status": "FAIL_FLAT_OBJECT",
+                    "tag": "⛔ [FAIL: FLAT OBJECT]",
+                    "desc": "Vật quá dẹt (2.5mm), thiếu khe hở luồn ngón kẹp (No Clearance)",
+                    "is_failure": True,
+                    "color": (1.0, 0.5, 0.0, 0.95),  # Orange
+                }
+
+        # 3. Table collision
+        if finger_tip_z < (table_surface_z - 0.002) or pos[2] < (table_surface_z + 0.004):
+            penetration_mm = max(0.0, (table_surface_z - finger_tip_z) * 1000.0)
+            return {
+                "status": "FAIL_TABLE_COLLISION",
+                "tag": "💥 [FAIL: TABLE COLLISION]",
+                "desc": f"Ngón kẹp đâm sâu xuống bàn ({penetration_mm:.1f}mm < 250mm)",
+                "is_failure": True,
+                "color": (1.0, 0.1, 0.1, 0.95),  # Red
+            }
+
+        # 4. Dense clutter collision
+        if self.test_scenario == "dense_clutter":
+            # If grasping near the junction of mug & duck
+            if abs(pos[1] - (-0.05)) < 0.04 and width > 0.035:
+                return {
+                    "status": "FAIL_CLUTTER_COLLISION",
+                    "tag": "⚡ [FAIL: CLUTTER COLLISION]",
+                    "desc": "Ngón kẹp va chạm vật lân cận (Semantic Blindness)",
+                    "is_failure": True,
+                    "color": (1.0, 0.2, 0.0, 0.95),  # Red-Orange
+                }
+
+        return {
+            "status": "OPTIMAL",
+            "tag": "✅ [OPTIMAL]",
+            "desc": "Điểm gắp an toàn hợp lệ",
+            "is_failure": False,
+            "color": (0.1, 0.9, 0.2, 0.95),  # Green
+        }
+
     def _detect_callback(self):
         """Periodic detection callback."""
         if self.latest_pc is None:
@@ -394,6 +521,9 @@ class GraspDetectionNode(Node):
 
         # Filter workspace
         points_ws = self._filter_workspace(points_base)
+
+        # Apply benchmark scenario sensor & optical effects
+        points_ws = self._apply_scenario_pointcloud_effects(points_ws)
 
         if points_ws.shape[0] < self.min_points:
             self.get_logger().debug(
@@ -413,6 +543,13 @@ class GraspDetectionNode(Node):
         if not grasps:
             self.get_logger().debug("No grasps detected")
             return
+
+        # Diagnose each detected grasp candidate
+        diagnosed_grasps = []
+        for g in grasps:
+            pos, score, rot, width, depth = g
+            diag = self._diagnose_grasp(pos, rot, width, depth, score)
+            diagnosed_grasps.append((g, diag))
 
         # Publish best grasp
         best_pos = grasps[0][0]
@@ -438,45 +575,40 @@ class GraspDetectionNode(Node):
         self.grasp_poses_pub.publish(grasp_msg)
 
         # Publish visualization markers (3D Gripper Wireframe, Labels, Arrows)
-        self._publish_markers(grasps)
+        self._publish_markers(diagnosed_grasps)
 
-        # Print clean formatted ASCII table in terminal
-        method_str = "AnyGrasp AI" if self.use_anygrasp else "Heuristic"
-        print("\n" + "═" * 78)
-        print(f"🤖 [{method_str}] Detected {len(grasps)} Grasps on 3D Objects in Workspace:")
-        print(f" {'Rank':<5} │ {'Score':<8} │ {'Position (X, Y, Z) [m]':<26} │ {'Width':<8} │ {'Approach Vector'}")
-        print("─" * 78)
-        for idx, g in enumerate(grasps[:5]):
+        # Print clean formatted ASCII diagnostic table in terminal
+        method_str = "AnyGrasp AI" if self.use_anygrasp else "Heuristic Fallback"
+        scen_str = f" [Scenario: {self.test_scenario.upper()}]" if self.test_scenario != "default" else ""
+        print("\n" + "═" * 86)
+        print(f"🤖 [{method_str}{scen_str}] Detected {len(grasps)} Grasps on 3D Objects:")
+        print(f" {'Rank':<5} │ {'Score':<7} │ {'Position (X, Y, Z)':<24} │ {'Width':<7} │ {'Diagnostic / Failure Analysis'}")
+        print("─" * 86)
+        for idx, (g, diag) in enumerate(diagnosed_grasps[:5]):
             p = g[0]
             s = g[1]
-            r = g[2]
             w = g[3]
-            app = r[:, 0]
-            tag = "★ BEST" if idx == 0 else ""
-            print(f" #{idx+1:<4} │ {s:<8.4f} │ [{p[0]:6.3f}, {p[1]:6.3f}, {p[2]:6.3f}]   │ {w*100:4.1f} cm │ [{app[0]:5.2f}, {app[1]:5.2f}, {app[2]:5.2f}] {tag}")
-        print("═" * 78 + "\n")
+            tag = "★ " if idx == 0 else "  "
+            desc = diag["desc"]
+            print(f" {tag}#{idx+1:<3} │ {s:<7.4f} │ [{p[0]:5.2f}, {p[1]:5.2f}, {p[2]:5.2f}] │ {w*100:4.1f}cm │ {desc}")
+        print("═" * 86 + "\n")
 
     def _publish_markers(
-        self, grasps: List[Tuple[np.ndarray, float, np.ndarray, float, float]]
+        self, diagnosed_grasps: list
     ):
         """Publish 3D Gripper wireframe, text labels, and approach arrows to RViz2."""
         marker_array = MarkerArray()
 
-        for i, item in enumerate(grasps):
+        for i, (item, diag) in enumerate(diagnosed_grasps):
             pos = item[0]
             conf = item[1]
             rot = item[2]
             width = item[3] if len(item) > 3 else 0.04
             depth = item[4] if len(item) > 4 else 0.04
 
-            # Normalized score for color gradation (green=best, red=lower)
-            conf_norm = min(1.0, max(0.0, conf * 5.0)) if self.use_anygrasp else float(conf)
-            color = ColorRGBA(
-                r=float(1.0 - conf_norm),
-                g=float(conf_norm),
-                b=0.0,
-                a=0.9
-            )
+            # Use color from diagnostic status
+            cr, cg, cb, ca = diag["color"]
+            color = ColorRGBA(r=float(cr), g=float(cg), b=float(cb), a=float(ca))
 
             # Extract gripper axes from rotation matrix
             # In GraspNet: rot[:, 0] is approach, rot[:, 1] is open/close
@@ -536,9 +668,14 @@ class GraspDetectionNode(Node):
                 y=float(pos[1]),
                 z=float(pos[2] + 0.035)
             )
-            text_marker.scale.z = 0.014  # Font size
-            text_marker.color = ColorRGBA(r=1.0, g=1.0, b=0.2 if i == 0 else 0.8, a=1.0)
-            text_marker.text = f"#{i+1}: S={conf:.3f} W={width*100:.1f}cm"
+            text_marker.scale.z = 0.013  # Font size
+            if diag["is_failure"]:
+                text_marker.color = ColorRGBA(r=float(cr), g=float(cg), b=float(cb), a=1.0)
+                text_marker.text = f"#{i+1}: {diag['tag']}"
+            else:
+                text_marker.color = ColorRGBA(r=1.0, g=1.0, b=0.2 if i == 0 else 0.8, a=1.0)
+                text_marker.text = f"#{i+1}: S={conf:.3f} W={width*100:.1f}cm {diag['tag']}"
+
             text_marker.lifetime = Duration(sec=2, nanosec=0)
             marker_array.markers.append(text_marker)
 

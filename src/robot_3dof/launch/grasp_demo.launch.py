@@ -40,6 +40,12 @@ def generate_launch_description():
         description="Launch RViz2 for visualization",
     )
 
+    test_scenario_arg = DeclareLaunchArgument(
+        "test_scenario",
+        default_value="default",
+        description="Benchmark scenario: 'default', 'transparent_bottle', 'flat_object', 'dense_clutter'",
+    )
+
     # ── Include base gazebo launch ──
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource([
@@ -59,7 +65,10 @@ def generate_launch_description():
         output="screen",
         parameters=[
             anygrasp_params_file,
-            {"use_anygrasp": LaunchConfiguration("use_anygrasp")},
+            {
+                "use_anygrasp": LaunchConfiguration("use_anygrasp"),
+                "test_scenario": LaunchConfiguration("test_scenario"),
+            },
         ],
     )
 
@@ -105,6 +114,7 @@ def generate_launch_description():
     return LaunchDescription([
         use_anygrasp_arg,
         use_rviz_arg,
+        test_scenario_arg,
         anygrasp_service_proc,
         gazebo_launch,
         grasp_detection_node,
