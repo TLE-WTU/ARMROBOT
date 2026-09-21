@@ -163,13 +163,14 @@ class PickPlaceNode(Node):
         worker.start()
 
     def _execute_pick_and_place(self, gx: float, gy: float, gz: float):
-        """Execute the full pick-and-place sequence with smooth trajectory."""
         try:
-            # IK solver directly targets the grasp center between finger pads.
-            # Table is at z=0.225. Overhead camera detects the top surface of the object (gz ~ 0.254).
-            # Lower the grasp center down to z=0.245 so the fingers envelop the full height
-            # of the object while leaving 2mm clearance above the table surface.
-            grasp_z = 0.245
+            # Table is at z=0.250 in base_link frame.
+            # Dynamic grasp height: AnyGrasp predicts 3D grasp center gz on complex objects (mug, duck, torus).
+            # Safety clamp: Ensure fingers never strike table (z >= 0.255) and stay within kinematic reach (z <= 0.350).
+            table_top_z = 0.250
+            min_grasp_z = table_top_z + 0.005  # 5mm clearance above table surface
+            max_grasp_z = 0.350
+            grasp_z = max(min_grasp_z, min(max_grasp_z, gz))
             pre_grasp_z = grasp_z + self.pre_grasp_offset
 
             # 1. Open gripper

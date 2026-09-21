@@ -26,6 +26,7 @@ install(DIRECTORY
   config
   worlds
   rviz
+  meshes
   DESTINATION share/${PROJECT_NAME}/
 )
 

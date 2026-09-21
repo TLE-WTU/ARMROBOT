@@ -66,6 +66,18 @@ Visualization Manager:
       Topic:
         Value: /anygrasp/grasp_markers
 
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Workspace Cloud (Objects)
+      Enabled: true
+      Topic:
+        Value: /anygrasp/workspace_cloud
+      Size (Pixels): 4
+      Size (m): 0.004
+      Style: Flat Squares
+      Color Transformer: AxisColor
+      Axis: Z
+      Decay Time: 0
+
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

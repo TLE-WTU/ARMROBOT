@@ -92,6 +92,11 @@ class GraspDetectionNode(Node):
             MarkerArray, "/anygrasp/grasp_markers", 10
         )
 
+        # Publisher for segmented workspace point cloud
+        self.ws_pc_pub = self.create_publisher(
+            PointCloud2, "/anygrasp/workspace_cloud", 10
+        )
+
         # Service for grasp detection (simple request/response via topic)
         # Using a timer-triggered detection for demo simplicity
         self.grasp_poses_pub = self.create_publisher(
@@ -240,7 +245,7 @@ class GraspDetectionNode(Node):
             for cl in clusters:
                 c = np.mean(cl, axis=0)
                 conf = min(0.95, 0.5 + 0.5 * (len(cl) / 200.0))
-                grasps.append((c, conf))
+                grasps.append((c, conf, np.eye(3), 0.04, 0.04))
 
             if grasps:
                 # Sort by distance to base (prefer nearest reachable object)
@@ -251,7 +256,7 @@ class GraspDetectionNode(Node):
 
         centroid = np.mean(points, axis=0)
         grasp_pos = np.array([centroid[0], centroid[1], centroid[2]])
-        return [(grasp_pos, 0.8)]
+        return [(grasp_pos, 0.8, np.eye(3), 0.04, 0.04)]
 
     def _rot_to_quat(self, R: np.ndarray) -> Tuple[float, float, float, float]:
         """Convert 3x3 rotation matrix to quaternion (x, y, z, w)."""
@@ -330,24 +335,44 @@ class GraspDetectionNode(Node):
         finally:
             client.close()
 
+    def _create_pointcloud2(self, points: np.ndarray, frame_id: str) -> PointCloud2:
+        """Construct PointCloud2 message from Nx3 numpy array."""
+        msg = PointCloud2()
+        msg.header.stamp = self.get_clock().now().to_msg()
+        msg.header.frame_id = frame_id
+        msg.height = 1
+        msg.width = points.shape[0]
+        msg.fields = [
+            PointField(name="x", offset=0, datatype=PointField.FLOAT32, count=1),
+            PointField(name="y", offset=4, datatype=PointField.FLOAT32, count=1),
+            PointField(name="z", offset=8, datatype=PointField.FLOAT32, count=1),
+        ]
+        msg.is_bigendian = False
+        msg.point_step = 12
+        msg.row_step = 12 * points.shape[0]
+        msg.is_dense = True
+        msg.data = points.astype(np.float32).tobytes()
+        return msg
+
     def _anygrasp_detection(
         self, points: np.ndarray
-    ) -> List[Tuple[np.ndarray, float, np.ndarray]]:
+    ) -> List[Tuple[np.ndarray, float, np.ndarray, float, float]]:
         """Run AnyGrasp inference on point cloud via IPC service."""
         grasps_data = self._call_anygrasp_service(points)
         if grasps_data is None or len(grasps_data) == 0:
             self.get_logger().warn(
                 "AnyGrasp service unavailable or returned 0 grasps; using heuristic fallback"
             )
-            h_grasps = self._heuristic_grasp_detection(points)
-            return [(pos, conf, np.eye(3)) for pos, conf in h_grasps]
+            return self._heuristic_grasp_detection(points)
 
         results = []
         for g in grasps_data:
             pos = np.array(g["translation"], dtype=np.float32)
             score = float(g["score"])
             rot = np.array(g["rotation"], dtype=np.float32)
-            results.append((pos, score, rot))
+            width = float(g.get("width", 0.04))
+            depth = float(g.get("depth", 0.04))
+            results.append((pos, score, rot, width, depth))
 
         # Sort by confidence score descending
         results.sort(key=lambda x: x[1], reverse=True)
@@ -376,19 +401,25 @@ class GraspDetectionNode(Node):
             )
             return
 
+        # Publish segmented workspace point cloud for RViz2
+        self.ws_pc_pub.publish(self._create_pointcloud2(points_ws, self.base_frame))
+
         # Run detection
         if self.use_anygrasp:
             grasps = self._anygrasp_detection(points_ws)
         else:
-            h_grasps = self._heuristic_grasp_detection(points_ws)
-            grasps = [(pos, conf, np.eye(3)) for pos, conf in h_grasps]
+            grasps = self._heuristic_grasp_detection(points_ws)
 
         if not grasps:
             self.get_logger().debug("No grasps detected")
             return
 
         # Publish best grasp
-        best_pos, best_conf, best_rot = grasps[0]
+        best_pos = grasps[0][0]
+        best_conf = grasps[0][1]
+        best_rot = grasps[0][2]
+        best_width = grasps[0][3]
+
         grasp_msg = PoseStamped()
         grasp_msg.header.stamp = self.get_clock().now().to_msg()
         grasp_msg.header.frame_id = self.base_frame
@@ -402,74 +433,136 @@ class GraspDetectionNode(Node):
             qx, qy, qz, qw = self._rot_to_quat(best_rot)
             grasp_msg.pose.orientation = Quaternion(x=qx, y=qy, z=qz, w=qw)
         else:
-            # Top-down orientation (gripper pointing down)
             grasp_msg.pose.orientation = Quaternion(x=1.0, y=0.0, z=0.0, w=0.0)
 
         self.grasp_poses_pub.publish(grasp_msg)
 
-        # Publish visualization markers
+        # Publish visualization markers (3D Gripper Wireframe, Labels, Arrows)
         self._publish_markers(grasps)
 
+        # Print clean formatted ASCII table in terminal
         method_str = "AnyGrasp AI" if self.use_anygrasp else "Heuristic"
-        self.get_logger().info(
-            f"[{method_str}] Detected {len(grasps)} grasp(s). "
-            f"Best: ({best_pos[0]:.3f}, {best_pos[1]:.3f}, {best_pos[2]:.3f}) "
-            f"score={best_conf:.3f}"
-        )
+        print("\n" + "═" * 78)
+        print(f"🤖 [{method_str}] Detected {len(grasps)} Grasps on 3D Objects in Workspace:")
+        print(f" {'Rank':<5} │ {'Score':<8} │ {'Position (X, Y, Z) [m]':<26} │ {'Width':<8} │ {'Approach Vector'}")
+        print("─" * 78)
+        for idx, g in enumerate(grasps[:5]):
+            p = g[0]
+            s = g[1]
+            r = g[2]
+            w = g[3]
+            app = r[:, 0]
+            tag = "★ BEST" if idx == 0 else ""
+            print(f" #{idx+1:<4} │ {s:<8.4f} │ [{p[0]:6.3f}, {p[1]:6.3f}, {p[2]:6.3f}]   │ {w*100:4.1f} cm │ [{app[0]:5.2f}, {app[1]:5.2f}, {app[2]:5.2f}] {tag}")
+        print("═" * 78 + "\n")
 
     def _publish_markers(
-        self, grasps: List[Tuple[np.ndarray, float, np.ndarray]]
+        self, grasps: List[Tuple[np.ndarray, float, np.ndarray, float, float]]
     ):
-        """Publish grasp poses as RViz markers."""
+        """Publish 3D Gripper wireframe, text labels, and approach arrows to RViz2."""
         marker_array = MarkerArray()
 
         for i, item in enumerate(grasps):
-            pos, conf = item[0], item[1]
-            rot = item[2] if len(item) > 2 else np.eye(3)
+            pos = item[0]
+            conf = item[1]
+            rot = item[2]
+            width = item[3] if len(item) > 3 else 0.04
+            depth = item[4] if len(item) > 4 else 0.04
 
-            marker = Marker()
-            marker.header.stamp = self.get_clock().now().to_msg()
-            marker.header.frame_id = self.base_frame
-            marker.ns = "grasps"
-            marker.id = i
-            marker.type = Marker.ARROW
-            marker.action = Marker.ADD
-
-            # Determine approach direction vector
-            if self.use_anygrasp:
-                # In GraspNet, approach vector is rot[:, 0]
-                approach_vec = rot[:, 0]
-                norm = np.linalg.norm(approach_vec)
-                if norm > 1e-4:
-                    approach_vec = approach_vec / norm
-                else:
-                    approach_vec = np.array([0, 0, -1])
-            else:
-                approach_vec = np.array([0, 0, -1])
-
-            start = Point(
-                x=float(pos[0] - 0.05 * approach_vec[0]),
-                y=float(pos[1] - 0.05 * approach_vec[1]),
-                z=float(pos[2] - 0.05 * approach_vec[2])
-            )
-            end = Point(x=float(pos[0]), y=float(pos[1]), z=float(pos[2]))
-            marker.points = [start, end]
-
-            marker.scale.x = 0.005  # Shaft diameter
-            marker.scale.y = 0.01   # Head diameter
-            marker.scale.z = 0.01   # Head length
-
-            # Color: green for high confidence, red for low
+            # Normalized score for color gradation (green=best, red=lower)
             conf_norm = min(1.0, max(0.0, conf * 5.0)) if self.use_anygrasp else float(conf)
-            marker.color = ColorRGBA(
+            color = ColorRGBA(
                 r=float(1.0 - conf_norm),
                 g=float(conf_norm),
                 b=0.0,
-                a=0.8
+                a=0.9
             )
-            marker.lifetime = Duration(sec=2, nanosec=0)
 
-            marker_array.markers.append(marker)
+            # Extract gripper axes from rotation matrix
+            # In GraspNet: rot[:, 0] is approach, rot[:, 1] is open/close
+            u_x = rot[:, 0]
+            u_y = rot[:, 1]
+            norm_x = np.linalg.norm(u_x)
+            u_x = u_x / norm_x if norm_x > 1e-4 else np.array([0.0, 0.0, -1.0])
+            norm_y = np.linalg.norm(u_y)
+            u_y = u_y / norm_y if norm_y > 1e-4 else np.array([0.0, 1.0, 0.0])
+
+            w2 = max(0.015, min(width, 0.065)) / 2.0
+            d = max(0.02, min(depth, 0.05))
+
+            # ── 1. 3D Gripper Jaws Wireframe (Marker.LINE_LIST) ──
+            b_center = pos - d * u_x
+            l_base = b_center - w2 * u_y
+            r_base = b_center + w2 * u_y
+            l_tip = l_base + d * u_x
+            r_tip = r_base + d * u_x
+            stem = b_center - 0.03 * u_x
+
+            jaw_marker = Marker()
+            jaw_marker.header.stamp = self.get_clock().now().to_msg()
+            jaw_marker.header.frame_id = self.base_frame
+            jaw_marker.ns = "gripper_jaws"
+            jaw_marker.id = i
+            jaw_marker.type = Marker.LINE_LIST
+            jaw_marker.action = Marker.ADD
+            jaw_marker.scale.x = 0.003  # 3mm line thickness
+            jaw_marker.color = color
+            jaw_marker.lifetime = Duration(sec=2, nanosec=0)
+
+            def to_pt(arr):
+                return Point(x=float(arr[0]), y=float(arr[1]), z=float(arr[2]))
+
+            # Base crossbar
+            jaw_marker.points.extend([to_pt(l_base), to_pt(r_base)])
+            # Left finger
+            jaw_marker.points.extend([to_pt(l_base), to_pt(l_tip)])
+            # Right finger
+            jaw_marker.points.extend([to_pt(r_base), to_pt(r_tip)])
+            # Wrist stem
+            jaw_marker.points.extend([to_pt(b_center), to_pt(stem)])
+
+            marker_array.markers.append(jaw_marker)
+
+            # ── 2. 3D Text Label (Marker.TEXT_VIEW_FACING) ──
+            text_marker = Marker()
+            text_marker.header.stamp = self.get_clock().now().to_msg()
+            text_marker.header.frame_id = self.base_frame
+            text_marker.ns = "grasp_labels"
+            text_marker.id = i
+            text_marker.type = Marker.TEXT_VIEW_FACING
+            text_marker.action = Marker.ADD
+            text_marker.pose.position = Point(
+                x=float(pos[0]),
+                y=float(pos[1]),
+                z=float(pos[2] + 0.035)
+            )
+            text_marker.scale.z = 0.014  # Font size
+            text_marker.color = ColorRGBA(r=1.0, g=1.0, b=0.2 if i == 0 else 0.8, a=1.0)
+            text_marker.text = f"#{i+1}: S={conf:.3f} W={width*100:.1f}cm"
+            text_marker.lifetime = Duration(sec=2, nanosec=0)
+            marker_array.markers.append(text_marker)
+
+            # ── 3. Approach Vector Arrow (Marker.ARROW) ──
+            arrow_marker = Marker()
+            arrow_marker.header.stamp = self.get_clock().now().to_msg()
+            arrow_marker.header.frame_id = self.base_frame
+            arrow_marker.ns = "approach_arrows"
+            arrow_marker.id = i
+            arrow_marker.type = Marker.ARROW
+            arrow_marker.action = Marker.ADD
+            start_pt = Point(
+                x=float(pos[0] - 0.05 * u_x[0]),
+                y=float(pos[1] - 0.05 * u_x[1]),
+                z=float(pos[2] - 0.05 * u_x[2])
+            )
+            end_pt = Point(x=float(pos[0]), y=float(pos[1]), z=float(pos[2]))
+            arrow_marker.points = [start_pt, end_pt]
+            arrow_marker.scale.x = 0.003
+            arrow_marker.scale.y = 0.006
+            arrow_marker.scale.z = 0.008
+            arrow_marker.color = color
+            arrow_marker.lifetime = Duration(sec=2, nanosec=0)
+            marker_array.markers.append(arrow_marker)
 
         self.marker_pub.publish(marker_array)
 

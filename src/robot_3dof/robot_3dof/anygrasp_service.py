@@ -131,6 +131,7 @@ class AnyGraspService:
                             "rotation": g.rotation_matrix.tolist(),
                             "score": float(g.score),
                             "width": float(g.width),
+                            "depth": float(g.depth) if hasattr(g, "depth") else 0.04,
                         })
 
                 response = {"status": "ok", "grasps": grasps}
