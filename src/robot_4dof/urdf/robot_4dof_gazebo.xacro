@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ===================== GAZEBO PLUGIN: ros2_control ===================== -->
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find robot_4dof)/config/controllers.yaml</parameters>
+    </plugin>
+  </gazebo>
+
+  <!-- ===================== GAZEBO COLORS ===================== -->
+  <gazebo reference="base_link">
+    <material>
+      <ambient>0.3 0.3 0.3 1</ambient>
+      <diffuse>0.3 0.3 0.3 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="link1">
+    <material>
+      <ambient>0.2 0.4 0.8 1</ambient>
+      <diffuse>0.2 0.4 0.8 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="link2">
+    <material>
+      <ambient>0.9 0.6 0.1 1</ambient>
+      <diffuse>0.9 0.6 0.1 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="link3">
+    <material>
+      <ambient>0.4 0.7 0.9 1</ambient>
+      <diffuse>0.4 0.7 0.9 1</diffuse>
+    </material>
+  </gazebo>
+
+  <!-- Link4 - Wrist (NEW: 4th DOF, green) -->
+  <gazebo reference="link4">
+    <material>
+      <ambient>0.2 0.8 0.3 1</ambient>
+      <diffuse>0.2 0.8 0.3 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="gripper_base_link">
+    <material>
+      <ambient>0.5 0.5 0.5 1</ambient>
+      <diffuse>0.5 0.5 0.5 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="finger_left_link">
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.0</maxVel>
+    <material>
+      <ambient>0.7 0.7 0.7 1</ambient>
+      <diffuse>0.7 0.7 0.7 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="finger_right_link">
+    <mu1>100.0</mu1>
+    <mu2>100.0</mu2>
+    <kp>1000000.0</kp>
+    <kd>1.0</kd>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.0</maxVel>
+    <material>
+      <ambient>0.7 0.7 0.7 1</ambient>
+      <diffuse>0.7 0.7 0.7 1</diffuse>
+    </material>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <material>
+      <ambient>0.1 0.1 0.1 1</ambient>
+      <diffuse>0.1 0.1 0.1 1</diffuse>
+    </material>
+  </gazebo>
+
+  <!-- ===================== GAZEBO SENSOR: RGBD CAMERA ===================== -->
+  <gazebo reference="camera_link">
+    <sensor name="rgbd_camera" type="rgbd_camera">
+      <camera>
+        <horizontal_fov>1.047</horizontal_fov>
+        <image>
+          <width>640</width>
+          <height>480</height>
+          <format>R8G8B8</format>
+        </image>
+        <clip>
+          <near>0.05</near>
+          <far>3.0</far>
+        </clip>
+        <depth_camera>
+          <clip>
+            <near>0.05</near>
+            <far>3.0</far>
+          </clip>
+        </depth_camera>
+      </camera>
+      <always_on>1</always_on>
+      <update_rate>15</update_rate>
+      <visualize>true</visualize>
+      <topic>camera</topic>
+      <gz_frame_id>camera_link</gz_frame_id>
+    </sensor>
+  </gazebo>
+
+</robot>
