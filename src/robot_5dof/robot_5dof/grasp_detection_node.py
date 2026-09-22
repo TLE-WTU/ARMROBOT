@@ -970,7 +970,7 @@ class GraspDetectionNode(Node):
         pipe_str = "RANSAC+Reduction (Proposed)" if self.enable_ransac else "Raw Cloud (Baseline)"
         scen_str = f" [Scenario: {self.test_scenario.upper()}]" if self.test_scenario != "default" else ""
         print("\n" + "═" * 96)
-        print(f"🔬 [EDGE GRASP BENCHMARK] Pipeline: {pipe_str} │ Engine: {method_str}{scen_str} │ DOF: 4")
+        print(f"🔬 [EDGE GRASP BENCHMARK] Pipeline: {pipe_str} │ Engine: {method_str}{scen_str} │ DOF: 5")
         print("─" * 96)
         print(f" 📊 Perception Telemetry:")
         print(f"    • Points: Raw={raw_pts_count} → Processed={filtered_pts_count} ({reduction_pct:.1f}% reduced)")
