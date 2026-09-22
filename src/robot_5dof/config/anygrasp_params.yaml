@@ -1,0 +1,51 @@
+grasp_detection_node:
+  ros__parameters:
+    use_sim_time: true
+    # AnyGrasp SDK settings
+    use_anygrasp: false                # Set true khi có license
+    socket_path: "/tmp/anygrasp_ipc.sock"
+    checkpoint_path: "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar"
+    max_gripper_width: 0.06            # Max gripper opening (m)
+    gripper_height: 0.04               # Gripper finger length (m)
+    top_down_grasp: true               # Chỉ detect top-down grasps (phù hợp 5 DoF)
+
+    # ROS2 topics / frames
+    point_cloud_topic: "/camera/points"
+    camera_frame: "camera_link"
+    base_frame: "base_link"
+
+    # Detection parameters
+    min_points: 30                     # Min points in cluster to detect grasp
+    voxel_size: 0.005                  # Voxel downsample size (m)
+    workspace_bounds:                  # Workspace limits in base_link frame [min, max]
+      x: [0.05, 0.45]
+      y: [-0.25, 0.25]
+      z: [0.22, 0.50]                  # Bao gồm cả mặt bàn (z=0.250) để RANSAC bóc tách tự động
+
+    # RANSAC Plane Segmentation & Geometric Reduction (Edge Grasp Benchmark)
+    enable_ransac: true
+    ransac_distance_threshold: 0.008   # Plane inlier distance threshold (m)
+    ransac_max_iterations: 150         # Max RANSAC iterations
+    target_point_count: 1024           # Reduced point count for fast inference
+    benchmark_csv_path: "/home/tienle/.gemini/antigravity/scratch/robot_3dof_ws/benchmark_results.csv"
+
+pick_place_node:
+  ros__parameters:
+    use_sim_time: true
+    # Approach / retreat offsets
+    pre_grasp_offset_z: 0.08           # Offset phía trên grasp pose (m)
+    post_grasp_lift_z: 0.10            # Nâng lên sau khi kẹp (m)
+
+    # Place position (base_link frame)
+    place_position:
+      x: 0.20
+      y: -0.15
+      z: 0.30
+
+    # Gripper
+    gripper_open_position: 0.03        # Mở tối đa
+    gripper_close_position: 0.0        # Đóng tối đa (kẹp chặt vào vật)
+
+    # Timing
+    move_duration_sec: 2.0
+    gripper_duration_sec: 1.0
