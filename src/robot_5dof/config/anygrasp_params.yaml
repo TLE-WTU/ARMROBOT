@@ -40,7 +40,7 @@ pick_place_node:
     place_position:
       x: 0.20
       y: -0.15
-      z: 0.30
+      z: 0.26
 
     # Gripper
     gripper_open_position: 0.03        # Mở tối đa

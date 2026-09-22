@@ -57,7 +57,7 @@ class PickPlaceNode(Node):
         self.declare_parameter("post_grasp_lift_z", 0.10)
         self.declare_parameter("place_position.x", 0.20)
         self.declare_parameter("place_position.y", -0.15)
-        self.declare_parameter("place_position.z", 0.30)
+        self.declare_parameter("place_position.z", 0.26)
         self.declare_parameter("gripper_open_position", 0.03)
         self.declare_parameter("gripper_close_position", 0.005)
         self.declare_parameter("move_duration_sec", 2.0)
