@@ -427,8 +427,9 @@ class PickPlaceNode(Node):
         # theta4 must compensate so total pitch = pi (gripper points down)
         # theta4 = pi - (theta2 + theta3)
         import math
-        t2_home, t3_home = -1.0, 1.0
-        t4_home = math.pi - (t2_home + t3_home)
+        t2_home = 0.0
+        t3_home = 0.5
+        t4_home = 0.5
         home_joints = [0.0, t2_home, t3_home, t4_home, 0.0]  # [base, shoulder, elbow, wrist_pitch, wrist_roll]
         return self._send_trajectory(home_joints, duration=2.5)
 
