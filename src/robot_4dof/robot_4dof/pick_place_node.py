@@ -179,7 +179,7 @@ class PickPlaceNode(Node):
             # Dynamic grasp height: AnyGrasp predicts 3D grasp center gz on complex objects.
             # Safety clamp: Ensure fingers never strike table (z >= 0.255) and stay within kinematic reach (z <= 0.350).
             table_top_z = 0.250
-            min_grasp_z = table_top_z + 0.005  # 5mm clearance above table surface
+            min_grasp_z = table_top_z + 0.025  # 20mm finger length + 5mm clearance above table surface
             max_grasp_z = 0.350
             grasp_z = max(min_grasp_z, min(max_grasp_z, gz))
             pre_grasp_z = grasp_z + self.pre_grasp_offset
@@ -407,7 +407,7 @@ class PickPlaceNode(Node):
         # theta4 must compensate so total pitch = pi (gripper points down)
         # theta4 = pi - (theta2 + theta3)
         import math
-        t2_home, t3_home = 0.3, 0.8
+        t2_home, t3_home = -1.0, 1.0
         t4_home = math.pi - (t2_home + t3_home)
         home_joints = [0.0, t2_home, t3_home, t4_home]  # [base, shoulder, elbow, wrist_pitch]
         self._send_trajectory(home_joints, duration=2.5)
