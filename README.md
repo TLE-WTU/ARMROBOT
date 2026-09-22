@@ -33,6 +33,12 @@ An autonomous Pick-and-Place robotics framework featuring a **5-DoF Articulated 
   - Separated point cloud topics for table and object points.
   - Live ASCII telemetry dashboard printing throughput (FPS), point cloud reduction percentage, and grasp metrics.
 
+## 🎥 Demo Video
+
+> **Video thực tế quá trình chạy tay gắp 5-DoF (Hình học RANSAC + PCA + AnyGrasp):**
+> 
+> File video đính kèm trong repository: [`media/demo_5dof_grasp.webm`](media/demo_5dof_grasp.webm)
+
 ---
 
 ## 🏗️ System Architecture
