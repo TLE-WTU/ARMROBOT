@@ -178,13 +178,53 @@ class PickPlaceNode(Node):
     def _execute_pick_and_place(self, gx: float, gy: float, gz: float, yaw: float):
         try:
             # Table is at z=0.250 in base_link frame.
-            # Dynamic grasp height: AnyGrasp predicts 3D grasp center gz on complex objects.
-            # Safety clamp: Ensure fingers never strike table (z >= 0.255) and stay within kinematic reach (z <= 0.350).
             table_top_z = 0.250
-            min_grasp_z = table_top_z + 0.025  # 20mm finger length + 5mm clearance above table surface
-            max_grasp_z = 0.350
+            min_grasp_z = table_top_z + 0.025
+            
+            # Calculate maximum safe Z at this (gx, gy) reach
+            L1 = 0.25
+            L2 = 0.20
+            L_HAND = 0.08
+            BASE_HEIGHT = 0.15
+            
+            r_target = math.sqrt(gx**2 + gy**2)
+            max_reach = L1 + L2
+            if r_target > max_reach:
+                self._abort(f"Target too far: r={r_target:.3f} > max={max_reach:.3f}")
+                return
+                
+            # dz_max = sqrt((L1+L2)^2 - r^2)
+            dz_max = math.sqrt(max_reach**2 - r_target**2)
+            z_wrist_max = BASE_HEIGHT + dz_max
+            target_z_max = z_wrist_max - L_HAND
+            
+            max_grasp_z = min(0.350, target_z_max - 0.05) # Keep some margin
+            
             grasp_z = max(min_grasp_z, min(max_grasp_z, gz))
-            pre_grasp_z = grasp_z + self.pre_grasp_offset
+            pre_grasp_z = min(grasp_z + self.pre_grasp_offset, target_z_max - 0.02)
+            lift_z = min(grasp_z + self.lift_height, target_z_max - 0.01)
+            
+            px, py, pz = self.place_pos
+            pre_place_z = pz + self.pre_grasp_offset
+            
+            # ==========================================
+            # PRE-CHECK ENTIRE TRAJECTORY BEFORE MOVING!
+            # ==========================================
+            j_pre = inverse_kinematics(gx, gy, pre_grasp_z, yaw=yaw)
+            j_grasp = inverse_kinematics(gx, gy, grasp_z, yaw=yaw)
+            j_lift = inverse_kinematics(gx, gy, lift_z, yaw=yaw)
+            j_pre_place = inverse_kinematics(px, py, pre_place_z, yaw=0.0)
+            j_place = inverse_kinematics(px, py, pz, yaw=0.0)
+            
+            if not all([j_pre, j_grasp, j_lift, j_pre_place, j_place]):
+                self.get_logger().error(f"❌ Trajectory Pre-check failed! Some points are unreachable.")
+                self.get_logger().error(f"  Pre-grasp: {j_pre is not None} (z={pre_grasp_z:.3f})")
+                self.get_logger().error(f"  Grasp:     {j_grasp is not None} (z={grasp_z:.3f})")
+                self.get_logger().error(f"  Lift:      {j_lift is not None} (z={lift_z:.3f})")
+                self.get_logger().error(f"  Pre-place: {j_pre_place is not None} (z={pre_place_z:.3f})")
+                self.get_logger().error(f"  Place:     {j_place is not None} (z={pz:.3f})")
+                self._abort("Kinematic trajectory planning failed.")
+                return
 
             # 1. Open gripper
             self.get_logger().info("[1/8] Opening gripper...")
@@ -192,90 +232,68 @@ class PickPlaceNode(Node):
                 self._abort("Failed to open gripper")
                 return
 
-            # 2. Move to pre-grasp (above target, with wrist yaw aligned)
-            self.get_logger().info(
-                f"[2/8] Moving smoothly to pre-grasp ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f}, yaw={math.degrees(yaw):.1f}°)..."
-            )
-            joints = inverse_kinematics(gx, gy, pre_grasp_z, yaw=yaw)
-            if joints is None:
-                self._abort(f"Pre-grasp unreachable: ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f})")
-                return
-            if not self._send_trajectory(list(joints)):
+            # 2. Move to pre-grasp
+            self.get_logger().info(f"[2/8] Moving smoothly to pre-grasp ({gx:.3f}, {gy:.3f}, {pre_grasp_z:.3f}, yaw={math.degrees(yaw):.1f}°)...")
+            if not self._send_trajectory(list(j_pre)):
                 self._abort("Failed to reach pre-grasp position")
                 return
 
             # 3. Move down to grasp
-            self.get_logger().info(
-                f"[3/8] Lowering down to grasp ({gx:.3f}, {gy:.3f}, {grasp_z:.3f})..."
-            )
-            joints = inverse_kinematics(gx, gy, grasp_z, yaw=yaw)
-            if joints is None:
-                self._abort(f"Grasp position unreachable: ({gx:.3f}, {gy:.3f}, {grasp_z:.3f})")
-                return
-            if not self._send_trajectory(list(joints)):
+            self.get_logger().info(f"[3/8] Lowering down to grasp ({gx:.3f}, {gy:.3f}, {grasp_z:.3f})...")
+            if not self._send_trajectory(list(j_grasp)):
                 self._abort("Failed to reach grasp position")
                 return
 
-            # 4. Close gripper around object
+            # 4. Close gripper
             self.get_logger().info("[4/8] Closing gripper firmly around object...")
             if not self._send_gripper(self.gripper_close):
                 self._abort("Failed to close gripper")
                 return
+            time.sleep(0.5)
 
-            # Allow physics friction to firmly settle contact before lifting
-            time.sleep(0.8)
-
-            # 5. Lift object smoothly
-            lift_z = grasp_z + self.lift_height
+            # 5. Lift object
             self.get_logger().info(f"[5/8] Lifting object smoothly to z={lift_z:.3f}...")
-            joints = inverse_kinematics(gx, gy, lift_z, yaw=yaw)
-            if joints is None:
-                self._abort(f"Lift position unreachable: ({gx:.3f}, {gy:.3f}, {lift_z:.3f})")
-                return
-            if not self._send_trajectory(list(joints)):
+            if not self._send_trajectory(list(j_lift)):
                 self._abort("Failed to lift object")
                 return
 
-            # 6. Move to place position (pre-place above target, then descend)
-            px, py, pz = self.place_pos
-            pre_place_z = pz + self.pre_grasp_offset
-            self.get_logger().info(
-                f"[6/8] Moving to place position ({px:.3f}, {py:.3f}, {pre_place_z:.3f})..."
-            )
-            joints = inverse_kinematics(px, py, pre_place_z, yaw=0.0)
-            if joints is None:
-                self._abort(f"Pre-place unreachable: ({px:.3f}, {py:.3f}, {pre_place_z:.3f})")
-                return
-            if not self._send_trajectory(list(joints)):
+            # 6. Move to pre-place
+            self.get_logger().info(f"[6/8] Moving to place position ({px:.3f}, {py:.3f}, {pre_place_z:.3f})...")
+            if not self._send_trajectory(list(j_pre_place)):
                 self._abort("Failed to move to pre-place position")
                 return
 
-            # Lower to place height
-            joints = inverse_kinematics(px, py, pz, yaw=0.0)
-            if joints is not None:
-                self._send_trajectory(list(joints))
+            # Lower to place
+            if not self._send_trajectory(list(j_place)):
+                self._abort("Failed to lower to place position")
+                return
 
-            # 7. Open gripper to release
+            # 7. Open gripper
             self.get_logger().info("[7/8] Opening gripper to release object...")
             if not self._send_gripper(self.gripper_open):
-                self._abort("Failed to release gripper")
+                self._abort("Failed to release object")
                 return
             time.sleep(0.5)
+            
+            # Rise to pre-place before home
+            if not self._send_trajectory(list(j_pre_place)):
+                self.get_logger().warn("Failed to rise after place, returning home anyway")
 
-            # Lift back up to pre-place height before retreating
-            joints = inverse_kinematics(px, py, pre_place_z, yaw=0.0)
-            if joints is not None:
-                self._send_trajectory(list(joints))
+            # 8. Return to home
+            self.get_logger().info("[8/8] Returning to home position...")
+            if not self._move_to_home():
+                self._abort("Failed to return home")
+                return
 
-            # 8. Retreat to home
-            self.get_logger().info("[8/8] Retreating to ready home position...")
-            self._move_to_home()
-
-            self.get_logger().info("🎉 ✅ Pick-and-place sequence complete successfully!")
-
-        finally:
+            self.get_logger().info("✅ Pick and Place sequence completed successfully!")
+            
             with self.lock:
                 self.state = State.IDLE
+
+        except Exception as e:
+            self.get_logger().error(f"Exception during pick and place: {e}")
+            self._abort(str(e))
+
 
     def _send_trajectory(self, joint_positions: list, duration: float = None) -> bool:
         """
@@ -412,7 +430,7 @@ class PickPlaceNode(Node):
         t2_home, t3_home = -1.0, 1.0
         t4_home = math.pi - (t2_home + t3_home)
         home_joints = [0.0, t2_home, t3_home, t4_home, 0.0]  # [base, shoulder, elbow, wrist_pitch, wrist_roll]
-        self._send_trajectory(home_joints, duration=2.5)
+        return self._send_trajectory(home_joints, duration=2.5)
 
     def _abort(self, reason: str):
         """Abort current operation."""
