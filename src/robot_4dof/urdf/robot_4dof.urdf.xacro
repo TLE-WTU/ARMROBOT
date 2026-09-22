@@ -24,7 +24,7 @@
   <xacro:property name="link3_length" value="0.20"/>
   <xacro:property name="link3_mass" value="0.5"/>
 
-  <!-- Link4 - Wrist (new 4th DOF: rotation around Z) -->
+  <!-- Link4 - Wrist (new 4th DOF: wrist pitch around Y) -->
   <xacro:property name="link4_radius" value="0.025"/>
   <xacro:property name="link4_height" value="0.03"/>
   <xacro:property name="link4_mass" value="0.15"/>
@@ -179,12 +179,12 @@
     </collision>
   </link>
 
-  <!-- Link4 - Wrist (4th DOF: rotates around Z for wrist roll) -->
+  <!-- Link4 - Wrist (4th DOF: rotates around Y for wrist pitch) -->
   <joint name="joint4" type="revolute">
     <parent link="link3"/>
     <child link="link4"/>
     <origin xyz="0 0 ${link3_length}" rpy="0 0 0"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 1 0"/>
     <limit lower="${-pi}" upper="${pi}" velocity="3.0" effort="20.0"/>
     <dynamics damping="0.2" friction="0.05"/>
   </joint>

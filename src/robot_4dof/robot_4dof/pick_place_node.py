@@ -57,7 +57,7 @@ class PickPlaceNode(Node):
         self.declare_parameter("post_grasp_lift_z", 0.10)
         self.declare_parameter("place_position.x", 0.20)
         self.declare_parameter("place_position.y", -0.15)
-        self.declare_parameter("place_position.z", 0.35)
+        self.declare_parameter("place_position.z", 0.30)
         self.declare_parameter("gripper_open_position", 0.03)
         self.declare_parameter("gripper_close_position", 0.005)
         self.declare_parameter("move_duration_sec", 2.0)
@@ -403,8 +403,13 @@ class PickPlaceNode(Node):
         return True
 
     def _move_to_home(self):
-        """Move robot to natural crane ready pose with wrist centered."""
-        home_joints = [0.0, 0.3, 0.8, 0.0]  # [base, shoulder, elbow, wrist]
+        """Move robot to natural crane ready pose with gripper pointing straight down."""
+        # theta4 must compensate so total pitch = pi (gripper points down)
+        # theta4 = pi - (theta2 + theta3)
+        import math
+        t2_home, t3_home = 0.3, 0.8
+        t4_home = math.pi - (t2_home + t3_home)
+        home_joints = [0.0, t2_home, t3_home, t4_home]  # [base, shoulder, elbow, wrist_pitch]
         self._send_trajectory(home_joints, duration=2.5)
 
     def _abort(self, reason: str):
