@@ -342,9 +342,9 @@ class GraspDetectionNode(Node):
             pos = g[0]
             rot = g[2]
             depth = g[4] if len(g) > 4 else 0.04
-            u_x = rot[:, 0]
-            # Gripper tip lowest point estimation
-            tip_pos = pos + depth * u_x if u_x[2] < 0 else pos
+            # Gripper tip lowest point estimation (fingers extend 20mm below grasp center for top-down grasps)
+            finger_tip_offset = depth if (u_x[2] < -0.5) else 0.020
+            tip_pos = np.array([pos[0], pos[1], pos[2] - finger_tip_offset])
 
             # Signed distance from tip to plane
             dist_to_plane = float(np.dot(tip_pos, normal) + d)
@@ -769,7 +769,7 @@ class GraspDetectionNode(Node):
         # Finger tip reaches down in approach direction
         finger_tip_z = pos[2] + d * u_x[2] if u_x[2] < 0 else pos[2] - 0.02
 
-        table_surface_z = 0.250
+        table_surface_z = 0.225
 
         # 1. Ghost grasp detection (Refraction artifact outside bottle body)
         if self.test_scenario == "transparent_bottle":
@@ -800,7 +800,7 @@ class GraspDetectionNode(Node):
             return {
                 "status": "FAIL_TABLE_COLLISION",
                 "tag": "💥 [FAIL: TABLE COLLISION]",
-                "desc": f"Ngón kẹp đâm sâu xuống bàn ({penetration_mm:.1f}mm < 250mm)",
+                "desc": f"Ngón kẹp đâm sâu xuống bàn ({penetration_mm:.1f}mm < 225mm)",
                 "is_failure": True,
                 "color": (1.0, 0.1, 0.1, 0.95),  # Red
             }

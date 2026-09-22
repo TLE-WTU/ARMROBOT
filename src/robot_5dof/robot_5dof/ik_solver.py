@@ -35,10 +35,10 @@ def forward_kinematics(t1, t2, t3, t4, t5):
     x_end = x_end_local * math.cos(t1)
     y_end = x_end_local * math.sin(t1)
     
-    # The gripper's total yaw in world frame is base_yaw + wrist_roll
-    # However, this is only perfectly true if the gripper is pointing straight down
-    yaw = t1 + t5
-    # Normalize yaw
+    # The gripper finger opening vector in world frame (when pitch = pi) is:
+    # finger_angle = pi/2 + t1 - t5
+    yaw = (math.pi / 2.0) + t1 - t5
+    # Normalize yaw to [-pi, pi]
     yaw = math.atan2(math.sin(yaw), math.cos(yaw))
     
     return x_end, y_end, z_end, yaw
@@ -53,10 +53,14 @@ def inverse_kinematics(target_x, target_y, target_z, yaw):
     t1 = math.atan2(target_y, target_x)
     
     # 2. Compute wrist roll (t5)
-    # total_yaw = t1 + t5  => t5 = yaw - t1
-    t5 = yaw - t1
-    # Normalize to [-pi, pi]
-    t5 = math.atan2(math.sin(t5), math.cos(t5))
+    # When gripper points straight down (pitch = pi), the finger opening vector in the XY plane is:
+    # finger_angle = pi/2 + t1 - t5
+    # To align the finger opening with the target grasp yaw:
+    # t5 = pi/2 + t1 - yaw
+    # Since the parallel-jaw gripper is symmetric under 180-deg (pi) rotation,
+    # normalize t5 into [-pi/2, pi/2] so it stays comfortably within joint5's physical limits:
+    t5_raw = (math.pi / 2.0) + t1 - yaw
+    t5 = math.atan2(math.sin(2.0 * t5_raw), math.cos(2.0 * t5_raw)) / 2.0
     
     # 3. Reduce to 2D planar problem
     r_target = math.sqrt(target_x**2 + target_y**2)

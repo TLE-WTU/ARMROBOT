@@ -53,13 +53,13 @@ class PickPlaceNode(Node):
         super().__init__("pick_place_node")
 
         # Parameters
-        self.declare_parameter("pre_grasp_offset_z", 0.08)
-        self.declare_parameter("post_grasp_lift_z", 0.10)
+        self.declare_parameter("pre_grasp_offset_z", 0.025)
+        self.declare_parameter("post_grasp_lift_z", 0.035)
         self.declare_parameter("place_position.x", 0.20)
         self.declare_parameter("place_position.y", -0.15)
-        self.declare_parameter("place_position.z", 0.26)
+        self.declare_parameter("place_position.z", 0.250)
         self.declare_parameter("gripper_open_position", 0.03)
-        self.declare_parameter("gripper_close_position", 0.005)
+        self.declare_parameter("gripper_close_position", 0.002)
         self.declare_parameter("move_duration_sec", 2.0)
         self.declare_parameter("gripper_duration_sec", 1.0)
 
@@ -177,9 +177,10 @@ class PickPlaceNode(Node):
 
     def _execute_pick_and_place(self, gx: float, gy: float, gz: float, yaw: float):
         try:
-            # Table is at z=0.250 in base_link frame.
-            table_top_z = 0.250
-            min_grasp_z = table_top_z + 0.025
+            # Table is at z=0.250 in world frame, which is z=0.225 in base_link frame (base_height/2 = 0.025).
+            table_top_z = 0.225
+            # Grasp center should ensure finger tips (20mm lower) are at least 2mm above the table surface
+            min_grasp_z = table_top_z + 0.022
             
             # Calculate maximum safe Z at this (gx, gy) reach
             L1 = 0.25
@@ -198,7 +199,8 @@ class PickPlaceNode(Node):
             z_wrist_max = BASE_HEIGHT + dz_max
             target_z_max = z_wrist_max - L_HAND
             
-            max_grasp_z = min(0.350, target_z_max - 0.05) # Keep some margin
+            # Maximum grasp Z to avoid wrist folding backwards into forearm (t4 > 90 deg)
+            max_grasp_z = min(0.290, target_z_max - 0.03)
             
             grasp_z = max(min_grasp_z, min(max_grasp_z, gz))
             pre_grasp_z = min(grasp_z + self.pre_grasp_offset, target_z_max - 0.02)

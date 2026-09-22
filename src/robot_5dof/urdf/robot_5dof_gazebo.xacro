@@ -37,11 +37,19 @@
     </material>
   </gazebo>
 
-  <!-- Link4 - Wrist (NEW: 4th DOF, green) -->
+  <!-- Link4 - Wrist (4th DOF, wrist pitch, green) -->
   <gazebo reference="link4">
     <material>
       <ambient>0.2 0.8 0.3 1</ambient>
       <diffuse>0.2 0.8 0.3 1</diffuse>
+    </material>
+  </gazebo>
+
+  <!-- Link5 - Wrist Roll (5th DOF, wrist roll, blue) -->
+  <gazebo reference="link5">
+    <material>
+      <ambient>0.2 0.4 0.8 1</ambient>
+      <diffuse>0.2 0.4 0.8 1</diffuse>
     </material>
   </gazebo>
 
