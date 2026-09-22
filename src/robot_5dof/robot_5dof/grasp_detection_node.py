@@ -342,6 +342,7 @@ class GraspDetectionNode(Node):
             pos = g[0]
             rot = g[2]
             depth = g[4] if len(g) > 4 else 0.04
+            u_x = rot[:, 0]
             # Gripper tip lowest point estimation (fingers extend 20mm below grasp center for top-down grasps)
             finger_tip_offset = depth if (u_x[2] < -0.5) else 0.020
             tip_pos = np.array([pos[0], pos[1], pos[2] - finger_tip_offset])

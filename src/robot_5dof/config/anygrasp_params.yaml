@@ -33,18 +33,18 @@ pick_place_node:
   ros__parameters:
     use_sim_time: true
     # Approach / retreat offsets
-    pre_grasp_offset_z: 0.08           # Offset phía trên grasp pose (m)
-    post_grasp_lift_z: 0.10            # Nâng lên sau khi kẹp (m)
+    pre_grasp_offset_z: 0.025          # 2.5cm clearance above grasp pose (m)
+    post_grasp_lift_z: 0.035           # 3.5cm lift (m) to avoid wrist pitch folding
 
-    # Place position (base_link frame)
+    # Place position (base_link frame, table is at z=0.225)
     place_position:
       x: 0.20
       y: -0.15
-      z: 0.26
+      z: 0.250
 
     # Gripper
-    gripper_open_position: 0.03        # Mở tối đa
-    gripper_close_position: 0.0        # Đóng tối đa (kẹp chặt vào vật)
+    gripper_open_position: 0.03        # Mở tối đa (60mm opening)
+    gripper_close_position: 0.002      # Đóng tối đa (kẹp chặt vào vật)
 
     # Timing
     move_duration_sec: 2.0

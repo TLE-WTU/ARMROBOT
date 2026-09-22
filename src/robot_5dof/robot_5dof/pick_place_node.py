@@ -125,8 +125,13 @@ class PickPlaceNode(Node):
         while not self.gripper_client.wait_for_server(timeout_sec=2.0):
             self.get_logger().info("Waiting for /gripper_controller...")
 
-        self.get_logger().info("✅ Action servers connected! Moving to home position...")
-        self._move_to_home()
+        self.get_logger().info("✅ Action servers connected! Waiting for controller activation...")
+        time.sleep(1.0)
+        for attempt in range(5):
+            if self._move_to_home():
+                break
+            self.get_logger().info(f"Retrying home move (attempt {attempt+2}/5)...")
+            time.sleep(1.0)
 
         with self.lock:
             self.state = State.IDLE
