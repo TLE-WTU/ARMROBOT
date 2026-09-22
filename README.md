@@ -35,9 +35,9 @@ An autonomous Pick-and-Place robotics framework featuring a **5-DoF Articulated 
 
 ## 🎥 Demo Video
 
-> **Video thực tế quá trình chạy tay gắp 5-DoF (Hình học RANSAC + PCA + AnyGrasp):**
+> **ARM_ROBOT 5-DoF (RANSAC + PCA + AnyGrasp):**
 > 
-> File video đính kèm trong repository: [`media/demo_5dof_grasp.webm`](media/demo_5dof_grasp.webm)
+> File video in repository: [`media/demo_5dof_grasp.webm`](media/demo_5dof_grasp.webm)
 
 ---
 
