@@ -190,7 +190,7 @@
     <child link="link4"/>
     <origin xyz="0 0 ${link3_length}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="${-pi/2}" upper="${pi/2}" velocity="3.0" effort="20.0"/>
+    <limit lower="-2.2" upper="2.2" velocity="3.0" effort="20.0"/>
     <dynamics damping="0.2" friction="0.05"/>
   </joint>
 
@@ -282,7 +282,7 @@
     <child link="finger_left_link"/>
     <origin xyz="0 ${finger_y/2} ${gripper_base_z/2 + finger_z/2}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="0.0" upper="0.03" velocity="0.5" effort="20.0"/>
+    <limit lower="0.0" upper="0.035" velocity="0.5" effort="20.0"/>
     <dynamics damping="0.1"/>
   </joint>
 
@@ -309,7 +309,7 @@
     <child link="finger_right_link"/>
     <origin xyz="0 ${-finger_y/2} ${gripper_base_z/2 + finger_z/2}" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-0.03" upper="0.0" velocity="0.5" effort="20.0"/>
+    <limit lower="-0.035" upper="0.0" velocity="0.5" effort="20.0"/>
     <mimic joint="gripper_left_joint" multiplier="-1" offset="0"/>
     <dynamics damping="0.1"/>
   </joint>

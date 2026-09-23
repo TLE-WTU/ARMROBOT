@@ -90,7 +90,7 @@
 
     <!-- Object 1: Coffee Mug with handle -->
     <model name="coffee_mug">
-      <pose>0.25 0.03 0.251 0 0 0</pose>
+      <pose>0.25 0.02 0.251 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.045</mass>
@@ -149,7 +149,7 @@
 
     <!-- Object 2: Rubber Duck (organic curved surface) -->
     <model name="rubber_duck">
-      <pose>0.28 -0.05 0.251 0 0 -0.5</pose>
+      <pose>0.28 0.09 0.251 0 0 0</pose>
       <link name="link">
         <inertial>
           <mass>0.060</mass>
@@ -191,7 +191,7 @@
 
     <!-- Object 3: Torus Toy (donut ring shape) -->
     <model name="torus_toy">
-      <pose>0.30 0.08 0.251 0 0 0.4</pose>
+      <pose>0.32 -0.01 0.251 0 0 0.4</pose>
       <link name="link">
         <inertial>
           <mass>0.030</mass>

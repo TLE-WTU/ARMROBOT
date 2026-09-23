@@ -102,12 +102,13 @@ def inverse_kinematics(target_x, target_y, target_z, yaw):
     # The total pitch angle must be pi (180 degrees) to point straight down
     # total_pitch = t2 + t3 + t4 = pi
     t4 = math.pi - (t2 + t3)
-    # Prevent wrist from folding backwards into forearm (>90 deg)
-    if t4 > math.pi/2:
-        print(f'[IK WARNING] Wrist pitch {math.degrees(t4):.1f}° clamped to 90° to prevent self-collision!')
-        t4 = math.pi/2
-    elif t4 < -math.pi/2:
-        t4 = -math.pi/2
+    # Prevent wrist from folding backwards beyond physical joint limits (>126 deg)
+    max_pitch = 2.2
+    if t4 > max_pitch:
+        print(f'[IK WARNING] Wrist pitch {math.degrees(t4):.1f}° clamped to {math.degrees(max_pitch):.1f}°!')
+        t4 = max_pitch
+    elif t4 < -max_pitch:
+        t4 = -max_pitch
     
     return [t1, t2, t3, t4, t5]
 

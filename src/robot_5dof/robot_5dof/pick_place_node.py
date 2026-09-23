@@ -53,12 +53,12 @@ class PickPlaceNode(Node):
         super().__init__("pick_place_node")
 
         # Parameters
-        self.declare_parameter("pre_grasp_offset_z", 0.025)
-        self.declare_parameter("post_grasp_lift_z", 0.035)
+        self.declare_parameter("pre_grasp_offset_z", 0.060)
+        self.declare_parameter("post_grasp_lift_z", 0.060)
         self.declare_parameter("place_position.x", 0.20)
         self.declare_parameter("place_position.y", -0.15)
         self.declare_parameter("place_position.z", 0.250)
-        self.declare_parameter("gripper_open_position", 0.03)
+        self.declare_parameter("gripper_open_position", 0.035)
         self.declare_parameter("gripper_close_position", 0.002)
         self.declare_parameter("move_duration_sec", 2.0)
         self.declare_parameter("gripper_duration_sec", 1.0)
@@ -204,12 +204,12 @@ class PickPlaceNode(Node):
             z_wrist_max = BASE_HEIGHT + dz_max
             target_z_max = z_wrist_max - L_HAND
             
-            # Maximum grasp Z to avoid wrist folding backwards into forearm (t4 > 90 deg)
-            max_grasp_z = min(0.290, target_z_max - 0.03)
+            # Maximum grasp Z within kinematic dexterity bounds
+            max_grasp_z = min(0.310, target_z_max - 0.01)
             
             grasp_z = max(min_grasp_z, min(max_grasp_z, gz))
-            pre_grasp_z = min(grasp_z + self.pre_grasp_offset, target_z_max - 0.02)
-            lift_z = min(grasp_z + self.lift_height, target_z_max - 0.01)
+            pre_grasp_z = min(grasp_z + self.pre_grasp_offset, target_z_max)
+            lift_z = min(grasp_z + self.lift_height, target_z_max)
             
             px, py, pz = self.place_pos
             pre_place_z = pz + self.pre_grasp_offset

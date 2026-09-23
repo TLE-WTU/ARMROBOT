@@ -107,7 +107,7 @@ def launch_setup(context, *args, **kwargs):
             anygrasp_service_script,
             "--checkpoint_path", "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar",
             "--socket_path", "/tmp/anygrasp_ipc.sock",
-            "--max_gripper_width", "0.06",
+            "--max_gripper_width", "0.07",
             "--gripper_height", "0.04",
         ],
         output="screen",
