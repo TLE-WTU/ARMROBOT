@@ -1,10 +1,10 @@
-# 🤖 5-DoF Robotic Arm with AI Grasp Synthesis & Perception Pipeline
+# 5-DoF Robotic Arm with AI Grasp Synthesis & Perception Pipeline
 
 An autonomous Pick-and-Place robotics framework featuring a **5-DoF Articulated Robotic Arm** with a parallel-jaw gripper, simulated in **ROS 2 Jazzy** and **Gazebo Harmonic**, integrated with **AnyGrasp** (Deep Learning 6-DoF grasp synthesis with MinkowskiEngine & PyTorch) and an analytical **RANSAC Tabletop Segmentation & Adaptive Geometric Reduction** perception pipeline.
 
 ---
 
-## 🌟 Key Highlights
+## Key Highlights
 
 - **5-DoF Kinematic Structure**:
   - **Joint 1 (Base Turret)**: Continuous/Revolute yaw rotation around $Z$.
@@ -33,7 +33,7 @@ An autonomous Pick-and-Place robotics framework featuring a **5-DoF Articulated 
   - Separated point cloud topics for table and object points.
   - Live ASCII telemetry dashboard printing throughput (FPS), point cloud reduction percentage, and grasp metrics.
 
-## 🎥 Demo Video
+## Demo Video
 
 > **ARM_ROBOT 5-DoF (RANSAC + PCA + AnyGrasp):**
 > 
@@ -72,7 +72,7 @@ An autonomous Pick-and-Place robotics framework featuring a **5-DoF Articulated 
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 robot_3dof_ws/
@@ -109,7 +109,7 @@ robot_3dof_ws/
 
 ---
 
-## ⚙️ Kinematic & Mechanical Specifications
+## Kinematic & Mechanical Specifications
 
 | Parameter | Value | Description |
 | :--- | :--- | :--- |
@@ -133,7 +133,7 @@ robot_3dof_ws/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Prerequisites
 - **Ubuntu 24.04 LTS** (or 22.04 LTS)
@@ -150,7 +150,7 @@ robot_3dof_ws/
 
 ---
 
-## 🛠️ Build & Installation
+## Build & Installation
 
 Always build inside the workspace directory (`robot_3dof_ws`):
 
@@ -167,7 +167,7 @@ source install/setup.bash
 
 ---
 
-## 🎮 Running the Simulation
+## Running the Simulation
 
 ### Option A: Autonomous Pick-and-Place (Heuristic Mode - Default)
 Launches Gazebo Harmonic, spawns the 5-DoF robot, loads the table with 3D benchmark objects, runs the RANSAC perception node, and executes autonomous pick-and-place with top-down antipodal grasping:
@@ -208,7 +208,7 @@ ros2 launch robot_5dof grasp_demo.launch.py scenario:=dense_clutter
 
 ---
 
-## 📊 Perception & Motion Telemetry
+## Perception & Motion Telemetry
 
 During execution, the terminal displays real-time telemetry:
 
@@ -232,7 +232,7 @@ During execution, the terminal displays real-time telemetry:
 
 ---
 
-## 📜 License & Acknowledgments
+## License & Acknowledgments
 
 - **Core Framework**: Released under the MIT License.
 - **AnyGrasp**: Subject to the original authors' licensing terms.
