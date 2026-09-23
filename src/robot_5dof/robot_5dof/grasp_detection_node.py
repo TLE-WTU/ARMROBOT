@@ -694,6 +694,40 @@ class GraspDetectionNode(Node):
             )
             return self._heuristic_grasp_detection(points)
 
+        # Cluster object points to find true object body centroids
+        clusters = []
+        try:
+            from scipy.spatial import KDTree
+            tree = KDTree(points)
+            visited = np.zeros(len(points), dtype=bool)
+            cluster_radius = 0.025
+            req_min_pts = 15
+            for i in range(len(points)):
+                if visited[i]:
+                    continue
+                neighbors = tree.query_ball_point(points[i], r=cluster_radius)
+                if len(neighbors) < req_min_pts:
+                    continue
+                cluster_indices = set(neighbors)
+                queue = list(neighbors)
+                while queue:
+                    curr = queue.pop()
+                    if visited[curr]:
+                        continue
+                    visited[curr] = True
+                    cluster_indices.add(curr)
+                    sub_nbrs = tree.query_ball_point(points[curr], r=cluster_radius)
+                    if len(sub_nbrs) >= req_min_pts // 2:
+                        for n in sub_nbrs:
+                            if not visited[n] and n not in cluster_indices:
+                                cluster_indices.add(n)
+                                queue.append(n)
+                cl_pts = points[list(cluster_indices)]
+                if len(cl_pts) >= req_min_pts:
+                    clusters.append(cl_pts)
+        except Exception:
+            clusters = []
+
         results = []
         for g in grasps_data:
             pos = np.array(g["translation"], dtype=np.float32)
@@ -705,6 +739,17 @@ class GraspDetectionNode(Node):
             # Ignore grasps that are in the drop place zone (x <= 0.24, y <= -0.12)
             if pos[0] <= 0.24 and pos[1] <= -0.12:
                 continue
+
+            # Snap grasp position to nearest object body centroid:
+            # AnyGrasp detects surface affordance and yaw, but placing the gripper at the object body
+            # center ensures the fingers descend around the solid waist of the object (not slipping off the thin rim)
+            if clusters:
+                centroids = [np.mean(cl, axis=0) for cl in clusters]
+                dists = [np.linalg.norm(pos[:2] - c[:2]) for c in centroids]
+                best_idx = int(np.argmin(dists))
+                if dists[best_idx] < 0.05:
+                    c = centroids[best_idx]
+                    pos = np.array([c[0], c[1], c[2]], dtype=np.float32)
 
             # Extract yaw from AnyGrasp rotation matrix:
             # In GraspNet/AnyGrasp conventions:
