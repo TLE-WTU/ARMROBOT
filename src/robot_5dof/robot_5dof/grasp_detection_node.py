@@ -735,29 +735,37 @@ class GraspDetectionNode(Node):
             rot = np.array(g["rotation"], dtype=np.float32)
             width = float(g.get("width", 0.04))
             depth = float(g.get("depth", 0.04))
+            # Extract yaw from AnyGrasp rotation matrix (opening direction in XY plane)
+            yaw = math.atan2(rot[1, 1], rot[0, 1])
 
             # Ignore grasps that are in the drop place zone (x <= 0.24, y <= -0.12)
             if pos[0] <= 0.24 and pos[1] <= -0.12:
                 continue
 
-            # Snap grasp position to nearest object body centroid:
-            # AnyGrasp detects surface affordance and yaw, but placing the gripper at the object body
-            # center ensures the fingers descend around the solid waist of the object (not slipping off the thin rim)
+            # Snap grasp position to nearest object body centroid and refine yaw:
             if clusters:
-                centroids = [np.mean(cl, axis=0) for cl in clusters]
+                centroids = [np.mean(cluster, axis=0) for cluster in clusters]
                 dists = [np.linalg.norm(pos[:2] - c[:2]) for c in centroids]
                 best_idx = int(np.argmin(dists))
                 if dists[best_idx] < 0.05:
+                    cl = clusters[best_idx]
                     c = centroids[best_idx]
                     pos = np.array([c[0], c[1], c[2]], dtype=np.float32)
 
-            # Extract yaw from AnyGrasp rotation matrix:
-            # In GraspNet/AnyGrasp conventions:
-            #   rot[:, 0] is the approach vector (directed along -Z in top-down mode)
-            #   rot[:, 1] is the gripper jaw opening/closing vector (in XY plane)
-            #   rot[:, 2] is the gripper height vector
-            # The gripper opening angle (yaw) in the XY plane must be extracted from rot[:, 1]:
-            yaw = math.atan2(rot[1, 1], rot[0, 1])
+                    # For elongated asymmetric objects (e.g. rubber duck) where length approaches gripper aperture (60mm),
+                    # an oblique yaw will cause parallel jaws to collide with corners during descent.
+                    # If the cluster has significant eccentricity (ratio > 1.3), align yaw along the minor principal axis:
+                    if cl.shape[0] >= 10:
+                        cl_xy = cl[:, :2] - c[:2]
+                        cov = np.cov(cl_xy.T)
+                        eigvals, eigvecs = np.linalg.eigh(cov)
+                        if eigvals[0] > 1e-6 and (eigvals[1] / eigvals[0]) > 1.3:
+                            minor_axis = eigvecs[:, 0]
+                            pca_yaw = math.atan2(minor_axis[1], minor_axis[0])
+                            diff1 = abs(math.atan2(math.sin(yaw - pca_yaw), math.cos(yaw - pca_yaw)))
+                            diff2 = abs(math.atan2(math.sin(yaw - (pca_yaw + math.pi)), math.cos(yaw - (pca_yaw + math.pi))))
+                            yaw = pca_yaw if diff1 <= diff2 else (pca_yaw + math.pi)
+
             results.append((pos, score, rot, width, depth, yaw))
 
         if not results:
