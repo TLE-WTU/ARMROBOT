@@ -214,19 +214,19 @@ During execution, the terminal displays real-time telemetry:
 
 ```
 ════════════════════════════════════════════════════════════════════════════════════════════════
-🔬 [EDGE GRASP BENCHMARK] Pipeline: RANSAC+Reduction (Proposed) │ Engine: Heuristic Fallback │ DOF: 5
+[EDGE GRASP BENCHMARK] Pipeline: RANSAC+Reduction (Proposed) │ Engine: Heuristic Fallback │ DOF: 5
 ────────────────────────────────────────────────────────────────────────────────────────────────
- 📊 Perception Telemetry:
+Perception Telemetry:
     • Points: Raw=2540 → Processed=642 (74.7% reduced)
     • Latency: RANSAC=3.2ms │ Reduction=1.8ms │ Inference=2.1ms
-    • Performance: Total=7.1ms │ Throughput=140.8 FPS │ Table Collision: ✅ ZERO
+    • Performance: Total=7.1ms │ Throughput=140.8 FPS │ Table Collision: ZERO
 ────────────────────────────────────────────────────────────────────────────────────────────────
- 🤖 Detected 3 Grasps on 3D Objects (5 DoF with Wrist Pitch & Roll):
+Detected 3 Grasps on 3D Objects (5 DoF with Wrist Pitch & Roll):
  Rank  │ Score   │ Position (X, Y, Z)       │ Yaw°    │ Width   │ Diagnostic / Analysis
 ────────────────────────────────────────────────────────────────────────────────────────────────
- ★ #1  │ 0.9500  │ [ 0.30,  0.08,  0.25]    │  23.5°  │  4.0cm  │ ✅ [OPTIMAL] Điểm gắp an toàn hợp lệ
-   #2  │ 0.9200  │ [ 0.25,  0.03,  0.25]    │ -12.1°  │  4.0cm  │ ✅ [OPTIMAL] Điểm gắp an toàn hợp lệ
-   #3  │ 0.8800  │ [ 0.34, -0.06,  0.25]    │  54.2°  │  4.0cm  │ ✅ [OPTIMAL] Điểm gắp an toàn hợp lệ
+ ★ #1  │ 0.9500  │ [ 0.30,  0.08,  0.25]    │  23.5°  │  4.0cm  │ [OPTIMAL] Điểm gắp an toàn hợp lệ
+   #2  │ 0.9200  │ [ 0.25,  0.03,  0.25]    │ -12.1°  │  4.0cm  │ [OPTIMAL] Điểm gắp an toàn hợp lệ
+   #3  │ 0.8800  │ [ 0.34, -0.06,  0.25]    │  54.2°  │  4.0cm  │ [OPTIMAL] Điểm gắp an toàn hợp lệ
 ════════════════════════════════════════════════════════════════════════════════════════════════
 ```
 
@@ -237,3 +237,4 @@ During execution, the terminal displays real-time telemetry:
 - **Core Framework**: Released under the MIT License.
 - **AnyGrasp**: Subject to the original authors' licensing terms.
 - Built with **ROS 2 Jazzy**, **Gazebo Harmonic**, and **ros2_control**.
+- Special thanks any documents from anygrasp and gazebo, RVIZ
