@@ -701,6 +701,11 @@ class GraspDetectionNode(Node):
             rot = np.array(g["rotation"], dtype=np.float32)
             width = float(g.get("width", 0.04))
             depth = float(g.get("depth", 0.04))
+
+            # Ignore grasps that are in the drop place zone (x <= 0.24, y <= -0.12)
+            if pos[0] <= 0.24 and pos[1] <= -0.12:
+                continue
+
             # Extract yaw from AnyGrasp rotation matrix:
             # In GraspNet/AnyGrasp conventions:
             #   rot[:, 0] is the approach vector (directed along -Z in top-down mode)
@@ -710,8 +715,15 @@ class GraspDetectionNode(Node):
             yaw = math.atan2(rot[1, 1], rot[0, 1])
             results.append((pos, score, rot, width, depth, yaw))
 
-        # Sort by confidence score descending
-        results.sort(key=lambda x: x[1], reverse=True)
+        if not results:
+            self.get_logger().warn(
+                "No valid grasps from AnyGrasp; using heuristic fallback"
+            )
+            return self._heuristic_grasp_detection(points)
+
+        # Sort: Prioritize taller objects first (Mug -> Duck -> Torus) to prevent collision with obstacles,
+        # then sort by highest AI confidence score among candidates at that height tier.
+        results.sort(key=lambda x: (round(float(x[0][2]), 2), x[1]), reverse=True)
         return results
 
     def _apply_scenario_pointcloud_effects(self, points: np.ndarray) -> np.ndarray:
@@ -956,12 +968,15 @@ class GraspDetectionNode(Node):
             collision_flag=table_collision_flag,
         )
 
-        # Publish best grasp
-        best_pos = grasps[0][0]
-        best_conf = grasps[0][1]
-        best_rot = grasps[0][2]
-        best_width = grasps[0][3]
-        best_yaw = grasps[0][5]
+        # Publish best grasp: prefer valid non-colliding grasp if available
+        valid_grasps = [item for (item, diag) in diagnosed_grasps if not diag["is_failure"]]
+        best_candidate = valid_grasps[0] if valid_grasps else grasps[0]
+
+        best_pos = best_candidate[0]
+        best_conf = best_candidate[1]
+        best_rot = best_candidate[2]
+        best_width = best_candidate[3]
+        best_yaw = best_candidate[5]
 
         grasp_msg = PoseStamped()
         grasp_msg.header.stamp = self.get_clock().now().to_msg()
