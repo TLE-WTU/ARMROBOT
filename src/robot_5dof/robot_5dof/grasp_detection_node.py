@@ -818,7 +818,7 @@ class GraspDetectionNode(Node):
             r = np.sqrt(np.random.uniform(0, 0.026**2, n_disc))
             dx = r * np.cos(theta)
             dy = r * np.sin(theta)
-            dz = np.random.uniform(0.2515, 0.2530, n_disc)
+            dz = np.random.uniform(0.2255, 0.2275, n_disc)
             disc_pts = np.column_stack([0.28 + dx, 0.0 + dy, dz])
             return disc_pts
 
