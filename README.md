@@ -41,7 +41,7 @@ An autonomous Pick-and-Place robotics framework featuring a **5-DoF Articulated 
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ```
                                   +---------------------------+
