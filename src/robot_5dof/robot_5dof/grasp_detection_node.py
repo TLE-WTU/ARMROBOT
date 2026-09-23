@@ -528,7 +528,13 @@ class GraspDetectionNode(Node):
                 conf = min(0.95, 0.5 + 0.5 * (len(cl) / 200.0))
                 # Compute optimal gripper yaw using PCA (4th DOF)
                 yaw = self._compute_grasp_yaw_pca(cl)
-                grasps.append((c, conf, np.eye(3), 0.04, 0.04, yaw))
+                # Construct proper GraspNet rotation matrix:
+                # col0: approach [0, 0, -1], col1: jaw opening [cos(yaw), sin(yaw), 0], col2: normal
+                col0 = np.array([0.0, 0.0, -1.0])
+                col1 = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+                col2 = np.cross(col0, col1)
+                rot = np.column_stack([col0, col1, col2])
+                grasps.append((c, conf, rot, 0.04, 0.04, yaw))
 
             if grasps:
                 if self.test_scenario == "transparent_bottle":
@@ -544,7 +550,11 @@ class GraspDetectionNode(Node):
         centroid = np.mean(points, axis=0)
         grasp_pos = np.array([centroid[0], centroid[1], centroid[2]])
         yaw = self._compute_grasp_yaw_pca(points)
-        return [(grasp_pos, 0.8, np.eye(3), 0.04, 0.04, yaw)]
+        col0 = np.array([0.0, 0.0, -1.0])
+        col1 = np.array([math.cos(yaw), math.sin(yaw), 0.0])
+        col2 = np.cross(col0, col1)
+        rot = np.column_stack([col0, col1, col2])
+        return [(grasp_pos, 0.8, rot, 0.04, 0.04, yaw)]
 
     def _rot_to_quat(self, R: np.ndarray) -> Tuple[float, float, float, float]:
         """Convert 3x3 rotation matrix to quaternion (x, y, z, w)."""
@@ -691,8 +701,13 @@ class GraspDetectionNode(Node):
             rot = np.array(g["rotation"], dtype=np.float32)
             width = float(g.get("width", 0.04))
             depth = float(g.get("depth", 0.04))
-            # Extract yaw from AnyGrasp rotation matrix
-            yaw = math.atan2(rot[1, 0], rot[0, 0])
+            # Extract yaw from AnyGrasp rotation matrix:
+            # In GraspNet/AnyGrasp conventions:
+            #   rot[:, 0] is the approach vector (directed along -Z in top-down mode)
+            #   rot[:, 1] is the gripper jaw opening/closing vector (in XY plane)
+            #   rot[:, 2] is the gripper height vector
+            # The gripper opening angle (yaw) in the XY plane must be extracted from rot[:, 1]:
+            yaw = math.atan2(rot[1, 1], rot[0, 1])
             results.append((pos, score, rot, width, depth, yaw))
 
         # Sort by confidence score descending
