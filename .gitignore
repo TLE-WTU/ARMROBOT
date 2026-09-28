@@ -1,24 +1,45 @@
-# ROS 2 Build Artifacts
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+install/
+log/
+
+# ROS 2 / Colcon
 build/
 install/
 log/
 .colcon/
 
-# Python Bytecode and Caches
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.pytest_cache/
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 
-# Environments
-.env
-.venv
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated data (benchmark outputs)
+benchmark_results.csv
+
+# Compiled URDF
+*.urdf
+
+# Conda / Virtual environments
+.conda/
+.venv/
 env/
 venv/
-ENV/
 
-# Large model weights and checkpoints (> 100MB, rejected by GitHub)
+# Large model weights and checkpoints (> 100MB)
 *.tar
 *.pt
 *.pth
@@ -26,22 +47,11 @@ ENV/
 *.onnx
 *.weights
 *.ckpt
-checkpoint_detection/
-checkpoint_detection.tar
 
 # Private licenses and credentials
 *.lic
 *.signature
-*.public_key
-id_rsa
-id_ed25519
+*.key
+id_rsa*
+id_ed25519*
 *.pem
-
-# IDEs & System Files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db

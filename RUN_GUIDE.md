@@ -1,47 +1,108 @@
-# Hướng dẫn chạy Hệ thống Robot 5 Bậc Tự Do (5-DOF)
+# 🚀 Run Guide — ARMROBOT v2.0
 
-Hệ thống đã được nâng cấp lên 5 bậc tự do (Z-Y-Y-Y-Z) để giải quyết vấn đề hướng kẹp (Yaw). Giờ đây robot có thể xoay cổ tay để gắp các vật thể ở mọi góc độ, trong khi vẫn duy trì hướng kẹp thẳng đứng từ trên xuống.
+## Prerequisites
 
-## 1. Chuẩn bị môi trường
+### System Requirements
+- **Ubuntu 24.04 LTS** (Noble Numbat)
+- **ROS 2 Jazzy** (desktop install)
+- **Gazebo Harmonic** (gz-sim8)
+- Python 3.12+
 
-Mở một terminal mới (hoặc sử dụng terminator để mở nhiều tab).
-Luôn nhớ phải tắt các tiến trình cũ trước khi chạy mới để tránh xung đột cổng hoặc lỗi "Trajectory goal rejected".
-
+### Install ROS 2 Jazzy
 ```bash
-# Tắt mọi tiến trình ROS 2 và Gazebo cũ
-killall -9 python3 ruby gz rviz2 robot_state_publisher parameter_bridge ros2 || true
+# Follow official instructions: https://docs.ros.org/en/jazzy/Installation.html
+sudo apt install ros-jazzy-desktop
 ```
 
-## 2. Build lại workspace (Nếu có chỉnh sửa code)
-
+### Install Gazebo Harmonic & ROS 2 Bridge
 ```bash
-cd ~/scratch/robot_3dof_ws
-# Cấu hình môi trường ROS 2 Jazzy (bỏ qua conda nếu có)
-CONDA_PREFIX="" PATH="/opt/ros/jazzy/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin" PYTHONPATH="/opt/ros/jazzy/lib/python3.12/site-packages:/opt/ros/jazzy/local/lib/python3.12/dist-packages" source /opt/ros/jazzy/setup.bash
-
-# Build package
-colcon build --packages-select robot_5dof --symlink-install --cmake-args -DPython3_EXECUTABLE=/usr/bin/python3
+sudo apt install ros-jazzy-ros-gz ros-jazzy-ros2-control ros-jazzy-ros2-controllers
+sudo apt install ros-jazzy-xacro ros-jazzy-robot-state-publisher
 ```
 
-## 3. Khởi chạy Hệ thống
+### Install Python Dependencies
+```bash
+pip install numpy scipy
+```
+
+---
+
+## Build
 
 ```bash
-cd ~/scratch/robot_3dof_ws
+cd ARMROBOT
 source /opt/ros/jazzy/setup.bash
+colcon build --packages-select robot_arm --symlink-install
 source install/setup.bash
-
-# Chạy toàn bộ hệ thống (Gazebo + RViz + Controllers + Tầm nhìn + Gắp vật)
-ros2 launch robot_5dof grasp_demo.launch.py
 ```
 
-## 4. Cách hệ thống hoạt động
+---
 
-Khi khởi chạy, các cửa sổ sau sẽ xuất hiện:
-1. **Gazebo Harmonic**: Môi trường mô phỏng 3D với robot và các vật thể trên bàn.
-2. **RViz2**: Giao diện trực quan hoá dữ liệu ROS. Hiển thị PointCloud2 (Dữ liệu 3D từ camera) và các marker (Grasp poses, Bounding boxes).
+## Launch Commands
 
-**Tiến trình Pick-and-Place:**
-- Node `grasp_detection_node` liên tục lấy dữ liệu từ Depth Camera, dùng thuật toán RANSAC để loại bỏ mặt bàn, sau đó dự đoán các vị trí gắp khả thi (X, Y, Z, Yaw).
-- Node `pick_place_node` nhận tín hiệu gắp tốt nhất, tính toán Động học ngược (Inverse Kinematics) cho 5 khớp.
-- Trình tự thực thi: `Mở kẹp -> Di chuyển mượt đến vị trí chờ (Pre-grasp) -> Đưa tay xuống -> Kẹp vật -> Nhấc lên -> Quay về Home -> Thả vật`.
-- Góc Yaw của vật thể giờ đây được khớp số 5 (Wrist Roll) bù trừ hoàn hảo.
+### Basic Gazebo Simulation
+```bash
+# 5-DOF (default)
+ros2 launch robot_arm gazebo.launch.py
+
+# Specify DOF
+ros2 launch robot_arm gazebo.launch.py dof:=3
+ros2 launch robot_arm gazebo.launch.py dof:=5
+
+# Specify world
+ros2 launch robot_arm gazebo.launch.py world:=pick_and_place_bottle
+```
+
+### Full Grasp Demo (Perception + Pick-and-Place)
+```bash
+# Default mode with RANSAC perception
+ros2 launch robot_arm grasp_demo.launch.py dof:=5
+
+# With AnyGrasp AI (requires separate AnyGrasp service)
+ros2 launch robot_arm grasp_demo.launch.py dof:=5 use_anygrasp:=true
+
+# Disable RANSAC for baseline comparison
+ros2 launch robot_arm grasp_demo.launch.py dof:=5 enable_ransac:=false
+```
+
+### Benchmark Scenarios
+```bash
+# Transparent bottle (optical refraction ghost grasps)
+ros2 launch robot_arm grasp_demo.launch.py test_scenario:=transparent_bottle
+
+# Ultra-thin flat object (low affordance)
+ros2 launch robot_arm grasp_demo.launch.py test_scenario:=flat_object
+
+# Dense clutter (adjacent object collision)
+ros2 launch robot_arm grasp_demo.launch.py test_scenario:=dense_clutter
+```
+
+---
+
+## AnyGrasp AI Setup (Optional)
+
+AnyGrasp requires a separate Conda environment with Python 3.10:
+
+```bash
+# Create conda environment
+conda create -n anygrasp python=3.10
+conda activate anygrasp
+pip install torch torchvision MinkowskiEngine
+
+# Start the AnyGrasp IPC service
+python src/robot_arm/robot_arm/anygrasp_service.py
+```
+
+The service communicates with the ROS 2 nodes via a JSON-encoded Unix domain socket at `/tmp/anygrasp_ipc.sock`.
+
+---
+
+## Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Gazebo crashes on start | Ensure `gz-sim8` is installed: `sudo apt install gz-harmonic` |
+| Controllers not found | Run `source install/setup.bash` after building |
+| Mesh not loading in Gazebo | Verify `GZ_SIM_RESOURCE_PATH` includes the install directory |
+| AnyGrasp socket not found | Start `anygrasp_service.py` in conda environment first |
+| Point cloud empty | Check camera topic: `ros2 topic echo /camera/points --once` |

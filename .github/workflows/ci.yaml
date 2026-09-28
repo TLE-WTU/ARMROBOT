@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install linting tools
+        run: pip install flake8 black
+
+      - name: Run flake8
+        run: flake8 src/robot_arm/robot_arm/ --max-line-length=120 --ignore=E501,W503
+
+      - name: Check formatting with black
+        run: black --check --line-length 120 src/robot_arm/robot_arm/
+
+  test:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest numpy scipy
+
+      - name: Install package in development mode
+        run: |
+          pip install -e src/robot_arm/ 2>/dev/null || true
+
+      - name: Run unit tests
+        run: |
+          cd src/robot_arm && python -m pytest ../../tests/ -v --tb=short
+        env:
+          PYTHONPATH: src/robot_arm
+
+  build:
+    name: ROS 2 Build Check
+    runs-on: ubuntu-latest
+    container:
+      image: ros:jazzy
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y python3-pip python3-colcon-common-extensions
+          rosdep update
+          rosdep install --from-paths src/robot_arm --ignore-src -r -y || true
+
+      - name: Build with colcon
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --packages-select robot_arm --cmake-args -DCMAKE_BUILD_TYPE=Release

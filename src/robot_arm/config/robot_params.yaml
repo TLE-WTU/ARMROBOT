@@ -1,0 +1,38 @@
+robot:
+  # Geometric parameters (meters in base_link frame)
+  link_lengths:
+    base_height: 0.175    # Distance from base_link origin to joint2 shoulder
+    link2_length: 0.25    # Upper arm
+    link3_length: 0.20    # Forearm
+    hand_length: 0.1534   # 5-DOF: link4(0.03) + link5(0.02) + Franka TCP(0.1034)
+    hand_length_4dof: 0.1334 # 4-DOF: link4(0.03) + Franka TCP(0.1034)
+    hand_length_3dof: 0.3034 # 3-DOF: link3(0.20) + Franka TCP(0.1034)
+  table:
+    height_world: 0.250   # Table surface Z in world frame
+    height_base: 0.225    # Table surface Z in base_link frame (0.250 - 0.025)
+    safety_margin: 0.005  # 5mm above table surface
+  drop_zone:
+    x_max: 0.24
+    y_max: -0.12
+  gripper:
+    max_width: 0.07       # Franka finger opening (2 * 0.035m)
+    finger_tip_offset: 0.020
+    open_position: 0.035
+    close_position: 0.005 # Safe close position for gripped objects
+    max_effort: 50.0
+  pick_place:
+    pre_grasp_offset_z: 0.060
+    post_grasp_lift_z: 0.060
+    place_position: [0.20, -0.15, 0.250]
+    move_duration_sec: 2.0
+    gripper_duration_sec: 1.0
+  perception:
+    min_points: 30
+    voxel_size: 0.005
+    ransac_distance_threshold: 0.008
+    ransac_max_iterations: 150
+    target_point_count: 1024
+  workspace_bounds:
+    x: [0.10, 0.50]
+    y: [-0.20, 0.20]
+    z: [0.22, 0.45]

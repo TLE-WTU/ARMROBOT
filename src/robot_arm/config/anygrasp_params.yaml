@@ -1,0 +1,16 @@
+grasp_detection_node:
+  ros__parameters:
+    use_anygrasp: true
+    grasp_mode: "hybrid"  # "hybrid" (AnyGrasp AI + Geometric Ensemble), "anygrasp", "heuristic"
+    geometric_refinement: "ransac_primitive"  # "ransac_primitive", "obb", "pca", "normals", "slice"
+    test_scenario: "default"
+    checkpoint_path: "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar"
+    socket_path: "/tmp/anygrasp_ipc.sock"
+    max_gripper_width: 0.07
+    gripper_height: 0.04
+    top_down_grasp: true
+    point_cloud_topic: "/camera/points"
+    camera_frame: "camera_optical_link"
+    base_frame: "base_link"
+    enable_ransac: true
+    benchmark_csv_path: ""  # Empty = auto-generate in /tmp
