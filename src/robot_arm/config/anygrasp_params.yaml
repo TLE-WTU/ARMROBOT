@@ -1,10 +1,10 @@
 grasp_detection_node:
   ros__parameters:
-    use_anygrasp: true
-    grasp_mode: "hybrid"  # "hybrid" (AnyGrasp AI + Geometric Ensemble), "anygrasp", "heuristic"
+    use_anygrasp: false
+    grasp_mode: "heuristic"  # "heuristic", "hybrid" (AnyGrasp AI + Geometric Ensemble), "anygrasp"
     geometric_refinement: "ransac_primitive"  # "ransac_primitive", "obb", "pca", "normals", "slice"
     test_scenario: "default"
-    checkpoint_path: "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar"
+    checkpoint_path: ""  # Set via launch arg or ANYGRASP_CHECKPOINT env var
     socket_path: "/tmp/anygrasp_ipc.sock"
     max_gripper_width: 0.07
     gripper_height: 0.04

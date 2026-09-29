@@ -89,6 +89,22 @@ class TestInverseKinematics:
                 err = math.sqrt((x - fx) ** 2 + (y - fy) ** 2 + (z - fz) ** 2)
                 assert err < 0.005, f"Round-trip error {err*1000:.1f}mm > 5mm for target ({x}, {y}, {z})"
 
+    def test_fk_ik_roundtrip_4dof(self):
+        """FK -> IK -> FK for 4-DOF."""
+        from robot_arm.ik_solver import IKSolver
+        solver = IKSolver(dof=4)
+        targets = [
+            (0.25, 0.0, 0.25),
+            (0.30, 0.08, 0.28),
+            (0.20, -0.12, 0.32),
+        ]
+        for x, y, z in targets:
+            joints = solver.inverse_kinematics(x, y, z)
+            if joints is not None:
+                fx, fy, fz, _ = solver.forward_kinematics(*joints)
+                err = math.sqrt((x - fx) ** 2 + (y - fy) ** 2 + (z - fz) ** 2)
+                assert err < 0.005, f"4-DOF error {err*1000:.1f}mm > 5mm for target ({x}, {y}, {z})"
+
     def test_fk_ik_roundtrip_3dof(self):
         """FK -> IK -> FK for 3-DOF."""
         from robot_arm.ik_solver import IKSolver
@@ -104,6 +120,14 @@ class TestInverseKinematics:
         solver = IKSolver(dof=5)
         result = solver.inverse_kinematics(0.20, -0.10, 0.30, yaw=0.0)
         assert result is not None
+
+    def test_ik_pitch_limit_rejection(self):
+        """Points with extreme pitch requirement (e.g. high Z close to base) should be rejected."""
+        from robot_arm.ik_solver import IKSolver
+        solver = IKSolver(dof=5)
+        # Point close to base requiring wrist pitch > 2.2 rad
+        result = solver.inverse_kinematics(0.08, 0.0, 0.44, yaw=0.0)
+        assert result is None, "Expected point with extreme pitch to be rejected as unreachable"
 
 
 class TestTrajectoryValidation:

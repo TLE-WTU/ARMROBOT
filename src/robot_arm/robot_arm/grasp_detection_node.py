@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Grasp Detection Node for Unified Robot Arm (3/4/5 DoF) — wraps AnyGrasp SDK with a fallback heuristic mode.
 
@@ -55,6 +55,15 @@ except ImportError:
     KDTree = None
 
 from robot_arm.geometric_refinement import get_geometric_refiner, BaseGeometricRefiner
+from robot_arm.perception_pipeline import (
+    filter_workspace,
+    compute_grasp_yaw_pca,
+    yaw_to_quaternion_tuple,
+    ransac_plane_segmentation,
+    adaptive_geometric_reduction,
+    enforce_virtual_safety_floor,
+    is_in_drop_zone,
+)
 
 
 def encode_json(obj: Any) -> Any:
@@ -111,6 +120,8 @@ class GraspDetectionNode(Node):
         self.declare_parameter("workspace_bounds.x", [0.10, 0.50])
         self.declare_parameter("workspace_bounds.y", [-0.20, 0.20])
         self.declare_parameter("workspace_bounds.z", [0.22, 0.45])
+        self.declare_parameter("drop_zone.x_max", 0.24)
+        self.declare_parameter("drop_zone.y_max", -0.12)
 
         # RANSAC & Benchmark parameters
         self.declare_parameter("enable_ransac", True, ParameterDescriptor(dynamic_typing=True))
@@ -129,6 +140,8 @@ class GraspDetectionNode(Node):
         self.test_scenario = str(self.get_parameter("test_scenario").value)
         self.socket_path = str(self.get_parameter("socket_path").value)
         self.max_gripper_width = float(self.get_parameter("max_gripper_width").value)
+        self.drop_zone_x_max = float(self.get_parameter("drop_zone.x_max").value)
+        self.drop_zone_y_max = float(self.get_parameter("drop_zone.y_max").value)
 
         raw_geo = self.get_parameter("geometric_refinement").value
         self.geometric_refinement_name = str(raw_geo).lower() if raw_geo else "pca"
@@ -236,98 +249,26 @@ class GraspDetectionNode(Node):
         except Exception as e:
             self.get_logger().warn(f"Failed to record benchmark row: {e}")
 
+    def _is_in_drop_zone(self, pos: np.ndarray) -> bool:
+        """Returns True if position falls inside the designated placement drop zone."""
+        return is_in_drop_zone(pos, x_max=self.drop_zone_x_max, y_max=self.drop_zone_y_max)
+
     def _ransac_plane_segmentation(self, points: np.ndarray) -> Tuple[np.ndarray, np.ndarray, Tuple[float, float, float, float]]:
-        if points.shape[0] < 50:
-            return points, np.empty((0, 3)), (0.0, 0.0, 1.0, -0.25)
-
-        n_pts = points.shape[0]
-        max_iters = self.ransac_max_iterations
-        thresh = self.ransac_distance_threshold
-        best_plane = (0.0, 0.0, 1.0, -0.25)
-        max_inlier_count = 0
-        rng = np.random.default_rng(42)
-
-        # Fast decimation subset for plane hypothesis if cloud is massive (> 4096 pts)
-        if n_pts > 4096:
-            step_fit = n_pts // 4096
-            fit_pts = points[::step_fit]
-        else:
-            fit_pts = points
-        n_fit = fit_pts.shape[0]
-
-        for _ in range(max_iters):
-            idx = rng.choice(n_fit, size=3, replace=False)
-            p1, p2, p3 = fit_pts[idx]
-            v1 = p2 - p1
-            v2 = p3 - p1
-            normal = np.cross(v1, v2)
-            norm_len = np.linalg.norm(normal)
-            if norm_len < 1e-6:
-                continue
-            normal = normal / norm_len
-            if abs(normal[2]) < 0.80:
-                continue
-            if normal[2] < 0:
-                normal = -normal
-            d = -float(np.dot(normal, p1))
-            distances = np.abs(np.dot(fit_pts, normal) + d)
-            inliers_mask = distances < thresh
-            inlier_count = np.count_nonzero(inliers_mask)
-            if inlier_count > max_inlier_count:
-                max_inlier_count = inlier_count
-                best_plane = (float(normal[0]), float(normal[1]), float(normal[2]), d)
-                # Early stop: Table accounts for majority of workspace points
-                if inlier_count >= int(0.70 * n_fit) and abs(normal[2]) >= 0.90:
-                    break
-
-        # Fast vectorized segmentation on the full point cloud
-        signed_dist = np.dot(points, np.array(best_plane[:3])) + best_plane[3]
-        table_mask = np.abs(signed_dist) < thresh
-        object_mask = signed_dist >= thresh
-        if np.count_nonzero(table_mask) >= 50:
-            return points[object_mask], points[table_mask], best_plane
-
-        return points, np.empty((0, 3)), best_plane
+        return ransac_plane_segmentation(
+            points,
+            max_iters=self.ransac_max_iterations,
+            thresh=self.ransac_distance_threshold
+        )
 
     def _adaptive_geometric_reduction(self, points: np.ndarray, target_k: int = 1024) -> np.ndarray:
-        if points.shape[0] <= target_k:
-            return points
-        # Fast pre-stride if cloud is massive (> 10k points) to avoid expensive Lexsort on 2D arrays
-        if points.shape[0] > 10000:
-            step_pre = points.shape[0] // 8192
-            pts_work = points[::step_pre]
-        else:
-            pts_work = points
-        voxel_coords = np.floor(pts_work / self.voxel_size).astype(np.int32)
-        _, unique_indices = np.unique(voxel_coords, axis=0, return_index=True)
-        downsampled = pts_work[unique_indices]
-        if downsampled.shape[0] <= target_k:
-            return downsampled
-        step = len(downsampled) / float(target_k)
-        selected_indices = [int(i * step) for i in range(target_k)]
-        return downsampled[selected_indices]
+        return adaptive_geometric_reduction(
+            points,
+            voxel_size=self.voxel_size,
+            target_k=target_k
+        )
 
     def _enforce_virtual_safety_floor(self, grasps: list, plane_model: Tuple[float, float, float, float]) -> list:
-        safe_grasps = []
-        normal = np.array(plane_model[:3])
-        d = plane_model[3]
-        safety_margin = 0.005
-
-        for g in grasps:
-            pos = g[0]
-            rot = g[2]
-            depth = g[4] if len(g) > 4 else 0.04
-            u_x = rot[:, 0]
-            finger_tip_offset = depth if (u_x[2] < -0.5) else 0.020
-            tip_pos = np.array([pos[0], pos[1], pos[2] - finger_tip_offset])
-            dist_to_plane = float(np.dot(tip_pos, normal) + d)
-            if dist_to_plane < safety_margin:
-                pos_adjusted = pos.copy()
-                pos_adjusted[2] += safety_margin - dist_to_plane
-                safe_grasps.append((pos_adjusted, g[1] * 0.95, g[2], g[3], g[4], g[5]))
-            else:
-                safe_grasps.append(g)
-        return safe_grasps
+        return enforce_virtual_safety_floor(grasps, plane_model, safety_margin=0.005)
 
     def _pc_callback(self, msg: PointCloud2):
         self.latest_pc = msg
@@ -378,26 +319,10 @@ class GraspDetectionNode(Node):
         ])
 
     def _filter_workspace(self, points: np.ndarray) -> np.ndarray:
-        if points.shape[0] == 0:
-            return points
-        bounds = self.workspace_bounds
-        mask = (
-            (points[:, 0] >= bounds["x"][0]) & (points[:, 0] <= bounds["x"][1]) &
-            (points[:, 1] >= bounds["y"][0]) & (points[:, 1] <= bounds["y"][1]) &
-            (points[:, 2] >= bounds["z"][0]) & (points[:, 2] <= bounds["z"][1])
-        )
-        return points[mask]
+        return filter_workspace(points, self.workspace_bounds)
 
     def _compute_grasp_yaw_pca(self, cluster_points: np.ndarray) -> float:
-        if cluster_points.shape[0] < 5:
-            return 0.0
-        xy = cluster_points[:, :2]
-        centroid_xy = np.mean(xy, axis=0)
-        centered = xy - centroid_xy
-        cov = np.cov(centered.T)
-        _, eigenvectors = np.linalg.eigh(cov)
-        minor_axis = eigenvectors[:, 0]
-        return math.atan2(minor_axis[1], minor_axis[0])
+        return compute_grasp_yaw_pca(cluster_points)
         
     def _cluster_points(self, points: np.ndarray, radius: float, min_pts: int) -> List[np.ndarray]:
         """Cluster points using KDTree (if available) or simple fallback."""
@@ -447,7 +372,7 @@ class GraspDetectionNode(Node):
         if clusters:
             for cl in clusters:
                 c = np.mean(cl, axis=0)
-                if c[0] <= 0.24 and c[1] <= -0.12:
+                if self._is_in_drop_zone(c):
                     continue
                 conf = min(0.95, 0.5 + 0.5 * (len(cl) / 200.0))
                 yaw = self._compute_grasp_yaw_pca(cl)
@@ -465,6 +390,8 @@ class GraspDetectionNode(Node):
                 return grasps
 
         centroid = np.mean(points, axis=0)
+        if self._is_in_drop_zone(centroid):
+            return []
         grasp_pos = np.array([centroid[0], centroid[1], centroid[2]])
         yaw = self._compute_grasp_yaw_pca(points)
         col0 = np.array([0.0, 0.0, -1.0])
@@ -474,10 +401,8 @@ class GraspDetectionNode(Node):
         return [(grasp_pos, 0.8, rot, 0.04, 0.04, yaw)]
 
     def _yaw_to_quaternion(self, yaw: float) -> Quaternion:
-        half_yaw = yaw / 2.0
-        sz = math.sin(half_yaw)
-        cz = math.cos(half_yaw)
-        return Quaternion(x=cz, y=sz, z=0.0, w=0.0)
+        x, y, z, w = yaw_to_quaternion_tuple(yaw)
+        return Quaternion(x=x, y=y, z=z, w=w)
 
     def _send_ipc_request(self, req: dict) -> Optional[dict]:
         """Send JSON payload to IPC socket with retry backoff."""
@@ -571,7 +496,7 @@ class GraspDetectionNode(Node):
             depth = float(g.get("depth", 0.04))
             yaw = math.atan2(rot[1, 1], rot[0, 1])
 
-            if pos[0] <= 0.24 and pos[1] <= -0.12:
+            if self._is_in_drop_zone(pos):
                 continue
 
             if clusters:
@@ -617,6 +542,7 @@ class GraspDetectionNode(Node):
 
         # 1. Obtain baseline geometric proposals using configured refiner
         geo_grasps = self.refiner.generate_heuristic_grasps(points, clusters=clusters, table_z=0.225)
+        geo_grasps = [g for g in geo_grasps if not self._is_in_drop_zone(g[0])]
 
         # 2. Query AnyGrasp Deep Learning service
         ai_grasps_raw = self._call_anygrasp_service(points)
@@ -627,12 +553,13 @@ class GraspDetectionNode(Node):
 
         # 3. Refine AnyGrasp candidates using the configured geometric refiner
         fused_grasps = self.refiner.refine(ai_grasps_raw, points, clusters=clusters, table_z=0.225)
+        fused_grasps = [g for g in fused_grasps if not self._is_in_drop_zone(g[0])]
 
         # 4. Include distinct geometric candidates that AI might have missed
         combined = list(fused_grasps)
         for gg in geo_grasps:
             g_pos = gg[0]
-            if not any(np.linalg.norm(g_pos[:2] - fg[0][:2]) < 0.035 for fg in fused_grasps):
+            if not self._is_in_drop_zone(g_pos) and not any(np.linalg.norm(g_pos[:2] - fg[0][:2]) < 0.035 for fg in fused_grasps):
                 combined.append((gg[0], min(0.75, gg[1]), gg[2], gg[3], gg[4], gg[5]))
 
         if self.test_scenario == "transparent_bottle":

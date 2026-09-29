@@ -16,7 +16,7 @@ import sys
 import time
 import numpy as np
 
-ANYGRASP_DIR = "/home/tienle/anygrasp_sdk/grasp_detection"
+ANYGRASP_DIR = os.environ.get("ANYGRASP_PATH", os.path.expanduser("~/anygrasp_sdk/grasp_detection"))
 if os.path.exists(ANYGRASP_DIR):
     if ANYGRASP_DIR not in sys.path:
         sys.path.insert(0, ANYGRASP_DIR)
@@ -196,9 +196,13 @@ class AnyGraspService:
 
 def main():
     parser = argparse.ArgumentParser(description="AnyGrasp IPC Inference Service")
+    default_ckpt = os.environ.get(
+        "ANYGRASP_CHECKPOINT",
+        os.path.join(ANYGRASP_DIR, "log", "checkpoint_detection.tar")
+    )
     parser.add_argument(
         "--checkpoint_path",
-        default="/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar",
+        default=default_ckpt,
         help="Path to checkpoint_detection.tar"
     )
     parser.add_argument(
@@ -213,7 +217,7 @@ def main():
 
     if create_detector is None:
         print(f"[ERROR] Cannot load AnyGrasp detector: {import_error_msg}")
-        print("Note: AnyGrasp requires a Python 3.10 environment (e.g. /home/tienle/miniconda3/envs/robot_env/bin/python).")
+        print("Note: AnyGrasp requires a Python 3.10 environment with AnyGrasp SDK installed.")
         sys.exit(1)
 
     service = AnyGraspService(

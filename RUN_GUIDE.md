@@ -106,3 +106,5 @@ The service communicates with the ROS 2 nodes via a JSON-encoded Unix domain soc
 | Mesh not loading in Gazebo | Verify `GZ_SIM_RESOURCE_PATH` includes the install directory |
 | AnyGrasp socket not found | Start `anygrasp_service.py` in conda environment first |
 | Point cloud empty | Check camera topic: `ros2 topic echo /camera/points --once` |
+| `ModuleNotFoundError: No module named 'catkin_pkg'` | If Conda is activated, build using: `colcon build --cmake-args -DPython3_EXECUTABLE=/usr/bin/python3` |
+

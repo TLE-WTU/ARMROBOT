@@ -90,9 +90,15 @@ class AnyGraspClient:
             return True
 
         # Check if conda python and service script exist
-        conda_py = "/home/tienle/miniconda3/envs/robot_env/bin/python"
+        conda_py = os.environ.get(
+            "CONDA_PYTHON",
+            os.path.expanduser("~/miniconda3/envs/robot_env/bin/python")
+        )
         service_script = os.path.join(SRC_DIR, "robot_arm", "anygrasp_service.py")
-        ckpt = "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar"
+        ckpt = os.environ.get(
+            "ANYGRASP_CHECKPOINT",
+            os.path.expanduser("~/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar")
+        )
 
         if not os.path.exists(conda_py) or not os.path.exists(ckpt):
             print("⚠️ [Warning] Conda python or AnyGrasp checkpoint not found. Will use mock/fallback.")

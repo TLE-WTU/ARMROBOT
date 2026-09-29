@@ -4,6 +4,8 @@ An autonomous Pick-and-Place robotics framework featuring a **3/4/5-DoF Articula
 
 > **v2.0** — Unified architecture with parameterized DOF support, SO-ARM100 mesh integration, and improved code quality.
 
+https://github.com/user-attachments/assets/demo_5dof_grasp (or see [`media/demo_5dof_grasp.webm`](media/demo_5dof_grasp.webm))
+
 ---
 
 ## ✨ Key Highlights
@@ -72,18 +74,21 @@ ARMROBOT/
 │       │   ├── arm/                     # SO-ARM100 STL meshes
 │       │   └── objects/                 # Benchmark objects (OBJ)
 │       ├── robot_arm/
-│       │   ├── ik_solver.py             # Multi-DOF IK solver
-│       │   ├── grasp_detection_node.py  # Perception pipeline
-│       │   ├── pick_place_node.py       # FSM orchestrator
-│       │   └── anygrasp_service.py      # Secure JSON IPC bridge
+│       │   ├── ik_solver.py                 # Multi-DOF IK solver
+│       │   ├── perception_pipeline.py       # Pure Python perception (RANSAC, PCA, safety floor)
+│       │   ├── geometric_refinement.py      # Modular refiners (PCA, OBB, normals, slice, cylinder)
+│       │   ├── grasp_detection_node.py      # ROS 2 Perception wrapper node
+│       │   ├── pick_place_node.py           # FSM orchestrator
+│       │   └── anygrasp_service.py          # Secure JSON IPC bridge
 │       ├── urdf/
-│       │   ├── robot_arm.urdf.xacro     # Parameterized by DOF
+│       │   ├── robot_arm.urdf.xacro         # Parameterized by DOF
 │       │   ├── robot_arm_gazebo.xacro
 │       │   └── robot_arm_ros2_control.xacro
-│       └── worlds/                      # Gazebo SDF worlds
+│       └── worlds/                          # Gazebo SDF worlds
 └── tests/
     ├── test_ik_solver.py
-    └── test_grasp_detection.py
+    ├── test_grasp_detection.py
+    └── test_geometric_refinement.py
 ```
 
 ---

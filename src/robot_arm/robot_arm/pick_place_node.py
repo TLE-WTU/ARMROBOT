@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """
 Unified Pick-and-Place Orchestrator Node.
 
@@ -34,6 +34,7 @@ class State(Enum):
     MOVING_TO_PLACE = auto()
     OPENING_GRIPPER = auto()
     RETREATING = auto()
+    ERROR_RECOVERY = auto()
 
 class PickPlaceNode(Node):
     def __init__(self):
@@ -75,6 +76,7 @@ class PickPlaceNode(Node):
         self.state = State.INITIALIZING
         self.lock = threading.Lock()
         self.current_joints = [0.0] * self.dof
+        self.has_received_joint_states = False
 
         self.cb_group = ReentrantCallbackGroup()
         self.grasp_sub = self.create_subscription(
@@ -104,8 +106,12 @@ class PickPlaceNode(Node):
         while not self.gripper_client.wait_for_server(timeout_sec=2.0):
             self.get_logger().info("Waiting for /gripper_controller...")
 
-        self.get_logger().info("✅ Action servers connected! Waiting for controller activation...")
-        time.sleep(1.0)
+        self.get_logger().info("✅ Action servers connected! Waiting for initial /joint_states message...")
+        while not self.has_received_joint_states:
+            time.sleep(0.1)
+
+        self.get_logger().info(f"✅ Joint states synchronized: {self.current_joints}")
+        time.sleep(0.5)
         for attempt in range(5):
             if self._move_to_home():
                 break
@@ -122,6 +128,7 @@ class PickPlaceNode(Node):
                 idx = self.joint_names.index(name)
                 if i < len(msg.position):
                     self.current_joints[idx] = msg.position[i]
+        self.has_received_joint_states = True
 
     def _extract_yaw_from_quaternion(self, q) -> float:
         siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
@@ -363,9 +370,20 @@ class PickPlaceNode(Node):
         return self._send_trajectory(home_joints, duration=2.5)
 
     def _abort(self, reason: str):
-        self.get_logger().error(f"❌ ABORT: {reason}")
+        self.get_logger().error(f"❌ ABORT: {reason}. Entering safe recovery...")
         with self.lock:
-            self.state = State.IDLE
+            self.state = State.ERROR_RECOVERY
+        try:
+            # 1. Release gripper
+            self._send_gripper(self.gripper_open)
+            # 2. Return arm to home position
+            self._move_to_home()
+        except Exception as e:
+            self.get_logger().warn(f"Error during abort recovery: {e}")
+        finally:
+            with self.lock:
+                self.state = State.IDLE
+            self.get_logger().info("✅ Safe recovery completed; FSM returned to IDLE.")
 
 def main(args=None):
     rclpy.init(args=args)

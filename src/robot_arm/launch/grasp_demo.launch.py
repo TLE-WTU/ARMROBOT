@@ -108,7 +108,8 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # AnyGrasp Deep Learning Inference Service
-    conda_python = "/home/tienle/miniconda3/envs/robot_env/bin/python"
+    conda_python = LaunchConfiguration("conda_python").perform(context)
+    checkpoint_path = LaunchConfiguration("checkpoint_path").perform(context)
     anygrasp_service_script = PathJoinSubstitution([
         FindPackagePrefix("robot_arm"), "lib", "robot_arm", "anygrasp_service.py"
     ])
@@ -116,7 +117,7 @@ def launch_setup(context, *args, **kwargs):
         cmd=[
             conda_python,
             anygrasp_service_script,
-            "--checkpoint_path", "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar",
+            "--checkpoint_path", checkpoint_path,
             "--socket_path", "/tmp/anygrasp_ipc.sock",
             "--max_gripper_width", "0.07",
             "--gripper_height", "0.04",
@@ -143,13 +144,13 @@ def generate_launch_description():
 
     grasp_mode_arg = DeclareLaunchArgument(
         "grasp_mode",
-        default_value="hybrid",
-        description="Grasp synthesis mode: 'hybrid' (AI + Geometric Ensemble), 'anygrasp', 'heuristic'",
+        default_value="heuristic",
+        description="Grasp synthesis mode: 'heuristic', 'hybrid' (AI + Geometric Ensemble), 'anygrasp'",
     )
 
     use_anygrasp_arg = DeclareLaunchArgument(
         "use_anygrasp",
-        default_value="true",
+        default_value="false",
         description="Launch AnyGrasp background inference service",
     )
 
@@ -171,6 +172,26 @@ def generate_launch_description():
         description="Enable RANSAC plane segmentation and geometric reduction",
     )
 
+    default_conda_py = os.environ.get(
+        "CONDA_PYTHON",
+        os.path.expanduser("~/miniconda3/envs/robot_env/bin/python")
+    )
+    conda_python_arg = DeclareLaunchArgument(
+        "conda_python",
+        default_value=default_conda_py,
+        description="Path to Python interpreter in AnyGrasp conda environment",
+    )
+
+    default_ckpt = os.environ.get(
+        "ANYGRASP_CHECKPOINT",
+        os.path.expanduser("~/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar")
+    )
+    checkpoint_path_arg = DeclareLaunchArgument(
+        "checkpoint_path",
+        default_value=default_ckpt,
+        description="Path to AnyGrasp model checkpoint file",
+    )
+
     return LaunchDescription([
         dof_arg,
         grasp_mode_arg,
@@ -178,5 +199,7 @@ def generate_launch_description():
         use_rviz_arg,
         test_scenario_arg,
         enable_ransac_arg,
+        conda_python_arg,
+        checkpoint_path_arg,
         OpaqueFunction(function=launch_setup),
     ])

@@ -90,7 +90,12 @@ class IKSolver:
             alpha = math.atan2(r, z_adj)
             beta = math.atan2(l2 * math.sin(t3), l1 + l2 * math.cos(t3))
             t2 = alpha - beta
-            return [t1, t2, t3]
+            joints = [t1, t2, t3]
+            fx, fy, fz, _ = self.forward_kinematics(*joints)
+            if math.sqrt((target_x - fx)**2 + (target_y - fy)**2 + (target_z - fz)**2) > 0.005:
+                self.logger.warning("[IK 3-DOF] Target position unreachable within 5mm tolerance")
+                return None
+            return joints
 
         elif self.dof == 4:
             t1 = math.atan2(target_y, target_x)
@@ -105,7 +110,7 @@ class IKSolver:
             l1 = self.config['l1']
             l2 = self.config['l2']
             if d > (l1 + l2) or d < abs(l1 - l2):
-                self.logger.error(f"[IK] Target unreachable: D={d:.3f} out of bounds")
+                self.logger.error(f"[IK 4-DOF] Target unreachable: D={d:.3f} out of bounds")
                 return None
             cos_t3 = max(-1.0, min(1.0, (d_sq - l1**2 - l2**2) / (2.0 * l1 * l2)))
             t3 = math.acos(cos_t3)
@@ -114,7 +119,18 @@ class IKSolver:
             t2 = alpha - beta
             t4 = math.pi - (t2 + t3)
             t4 = math.atan2(math.sin(t4), math.cos(t4))
-            return [t1, t2, t3, t4]
+
+            # Joint limit validation
+            if abs(t2) > 2.5 or abs(t3) > 2.5 or abs(t4) > 2.2:
+                self.logger.warning(f"[IK 4-DOF] Joint limit exceeded: t2={t2:.2f}, t3={t3:.2f}, t4={t4:.2f}")
+                return None
+
+            joints = [t1, t2, t3, t4]
+            fx, fy, fz, _ = self.forward_kinematics(*joints)
+            if math.sqrt((target_x - fx)**2 + (target_y - fy)**2 + (target_z - fz)**2) > 0.005:
+                self.logger.warning("[IK 4-DOF] Target position unreachable within 5mm tolerance")
+                return None
+            return joints
 
         else: # 5 DOF
             t1 = math.atan2(target_y, target_x)
@@ -129,7 +145,7 @@ class IKSolver:
             l1 = self.config['l1']
             l2 = self.config['l2']
             if D > (l1 + l2) or D < abs(l1 - l2):
-                self.logger.error(f"[IK] Target unreachable: D={D:.3f} out of bounds")
+                self.logger.error(f"[IK 5-DOF] Target unreachable: D={D:.3f} out of bounds")
                 return None
             cos_t3 = max(-1.0, min(1.0, (D**2 - l1**2 - l2**2) / (2.0 * l1 * l2)))
             t3 = math.acos(cos_t3)
@@ -137,13 +153,26 @@ class IKSolver:
             beta = math.atan2(l2 * math.sin(t3), l1 + l2 * math.cos(t3))
             t2 = (math.pi / 2.0) - (alpha + beta)
             t4 = math.pi - (t2 + t3)
-            max_pitch = 2.2
-            if t4 > max_pitch:
-                self.logger.warning(f'[IK WARNING] Wrist pitch {math.degrees(t4):.1f}° clamped to {math.degrees(max_pitch):.1f}°!')
-                t4 = max_pitch
-            elif t4 < -max_pitch:
-                t4 = -max_pitch
-            return [t1, t2, t3, t4, t5]
+
+            # Strictly enforce physical pitch limit (±2.2 rad / ±126.1°)
+            # Do NOT silently clamp as it introduces severe positional errors
+            if abs(t4) > 2.2:
+                self.logger.warning(
+                    f"[IK 5-DOF] Wrist pitch {math.degrees(t4):.1f}° exceeds limit ±126.1° (2.2 rad). Target unreachable."
+                )
+                return None
+
+            if abs(t2) > 2.5 or abs(t3) > 2.5 or abs(t5) > (math.pi / 2.0 + 1e-4):
+                self.logger.warning(f"[IK 5-DOF] Joint limit exceeded: t2={t2:.2f}, t3={t3:.2f}, t5={t5:.2f}")
+                return None
+
+            joints = [t1, t2, t3, t4, t5]
+            fx, fy, fz, _ = self.forward_kinematics(*joints)
+            pos_err = math.sqrt((target_x - fx)**2 + (target_y - fy)**2 + (target_z - fz)**2)
+            if pos_err > 0.005:
+                self.logger.warning(f"[IK 5-DOF] FK verification error {pos_err*1000:.1f} mm exceeds 5.0 mm threshold")
+                return None
+            return joints
 
     def validate_trajectory(self, waypoints: List[Tuple[float, float, float, float]]) -> Tuple[bool, List[Optional[List[float]]]]:
         """
