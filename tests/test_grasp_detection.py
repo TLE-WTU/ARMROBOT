@@ -124,6 +124,9 @@ class TestVirtualSafetyFloor:
         ]
         table_plane = (0.0, 0.0, 1.0, -0.225)
         safe = enforce_virtual_safety_floor(grasps, table_plane, safety_margin=0.005)
+        assert safe[0][0][2] >= 0.225 + 0.005 - 1e-5
+
+
 class TestDropZoneAndWorkspace:
     """Test drop zone exclusion and workspace bounding box filtering."""
 

@@ -103,8 +103,8 @@ class GraspDetectionNode(Node):
 
         # Declare parameters
         self.declare_parameter("dof", 5)
-        self.declare_parameter("use_anygrasp", True, ParameterDescriptor(dynamic_typing=True))
-        self.declare_parameter("grasp_mode", "hybrid", ParameterDescriptor(dynamic_typing=True))
+        self.declare_parameter("use_anygrasp", False, ParameterDescriptor(dynamic_typing=True))
+        self.declare_parameter("grasp_mode", "heuristic", ParameterDescriptor(dynamic_typing=True))
         self.declare_parameter("geometric_refinement", "pca", ParameterDescriptor(dynamic_typing=True))
         self.declare_parameter("test_scenario", "default")
         self.declare_parameter("checkpoint_path", "")
@@ -132,10 +132,10 @@ class GraspDetectionNode(Node):
 
         self.dof = self.get_parameter("dof").value
         raw_mode = self.get_parameter("grasp_mode").value
-        self.grasp_mode = str(raw_mode).lower() if raw_mode else "hybrid"
+        self.grasp_mode = str(raw_mode).lower() if raw_mode else "heuristic"
         raw_anygrasp = self.get_parameter("use_anygrasp").value
         self.use_anygrasp = raw_anygrasp.lower() in ("true", "1", "yes") if isinstance(raw_anygrasp, str) else bool(raw_anygrasp)
-        if self.grasp_mode == "hybrid":
+        if self.grasp_mode == "hybrid" and self.use_anygrasp:
             self.use_anygrasp = True
         self.test_scenario = str(self.get_parameter("test_scenario").value)
         self.socket_path = str(self.get_parameter("socket_path").value)
