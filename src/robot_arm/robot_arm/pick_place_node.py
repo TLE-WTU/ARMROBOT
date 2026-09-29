@@ -5,6 +5,15 @@ Unified Pick-and-Place Orchestrator Node.
 Supports 3, 4, and 5 DOF arms using a single configurable FSM and unified IK solver.
 """
 
+import os
+import sys
+
+# Ensure execution under Python with ROS 2 support (Ubuntu 24.04 uses Python 3.12 for ROS 2 Jazzy)
+if sys.version_info >= (3, 13) and "conda" in sys.executable.lower():
+    for _sys_py in ("/usr/bin/python3.12", "/usr/bin/python3"):
+        if os.path.exists(_sys_py):
+            os.execv(_sys_py, [_sys_py] + sys.argv)
+
 import math
 import threading
 import time
@@ -396,7 +405,8 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        rclpy.shutdown()
+        if rclpy.ok():
+            rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
