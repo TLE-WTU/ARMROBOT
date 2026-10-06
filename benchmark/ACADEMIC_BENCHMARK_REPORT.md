@@ -48,9 +48,7 @@
 
 ---
 
-## 4. LUẬN ĐIỂM KHOA HỌC DÙNG ĐỂ BẢO VỆ TRƯỚC HỘI ĐỒNG
-
-Khi hội đồng hỏi về cơ sở khoa học của bộ đánh giá này:
+## 4. LUẬN ĐIỂM KHOA HỌC
 1. **Dữ liệu kiểm thử:** Không dùng dữ liệu tự sinh theo công thức toán học; sử dụng trực tiếp mô hình 3D CAD chuẩn (Duck, Lego, Block) trên **PyBullet Physics Engine** và ảnh quét RGB-D thực tế từ camera RealSense.
 2. **Tiêu chuẩn thành công (GSR):** Được xác nhận bằng việc **nhấc vật thể lên cao 10 cm và giữ vững trong không gian** dưới tác dụng của trọng lực và ma sát thực tế (thay vì tự đặt công thức điểm số).
 3. **Tính khách quan:** Thuật toán AI và thuật toán Hình học được đối đầu trên cùng một tập dữ liệu đầu vào và chịu cùng một ràng buộc động học của cánh tay robot 5-DoF.
