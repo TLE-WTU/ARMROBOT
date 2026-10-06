@@ -1,37 +1,85 @@
 timestamp,object,trial,method,physical_success,table_collision,lift_height_m,force_closure_mu04,force_closure_mu08,ik_feasible,aperture_valid,confidence_score,latency_ms
-2026-10-06 20:05:46,duck,1,Pure Geometric (PCA),False,False,-0.0125,False,False,True,True,0.8,0.59
-2026-10-06 20:05:46,duck,1,Pure Geometric (OBB),False,False,-0.0009,False,False,True,True,0.85,0.55
-2026-10-06 20:05:46,duck,1,Pure AnyGrasp (AI),False,True,-0.0004,False,False,True,True,0.005,450.55
-2026-10-06 20:05:46,duck,1,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.003,95.39
-2026-10-06 20:05:47,duck,2,Pure Geometric (PCA),False,False,-0.0091,False,False,True,True,0.8,0.52
-2026-10-06 20:05:47,duck,2,Pure Geometric (OBB),False,False,-0.0047,False,False,True,True,0.85,0.55
-2026-10-06 20:05:47,duck,2,Pure AnyGrasp (AI),False,False,-0.0,False,False,True,True,0.005,117.31
-2026-10-06 20:05:47,duck,2,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.002,98.58
-2026-10-06 20:05:47,lego,1,Pure Geometric (PCA),True,False,0.0917,False,False,True,True,0.8,0.46
-2026-10-06 20:05:47,lego,1,Pure Geometric (OBB),False,False,0.0053,False,False,True,True,0.85,0.46
-2026-10-06 20:05:47,lego,1,Pure AnyGrasp (AI),False,True,-0.0969,False,False,True,True,0.001,108.39
-2026-10-06 20:05:47,lego,1,Hybrid (AI + Geometric Refinement),False,False,0.0076,False,False,True,True,0.018,93.15
-2026-10-06 20:05:47,lego,2,Pure Geometric (PCA),True,False,0.0914,False,False,True,True,0.8,0.39
-2026-10-06 20:05:47,lego,2,Pure Geometric (OBB),False,False,0.0001,False,False,True,True,0.85,0.42
-2026-10-06 20:05:47,lego,2,Pure AnyGrasp (AI),False,False,-0.0017,False,False,True,True,0.001,112.13
-2026-10-06 20:05:47,lego,2,Hybrid (AI + Geometric Refinement),False,False,-0.0898,False,False,True,True,0.003,97.39
-2026-10-06 20:05:48,block,1,Pure Geometric (PCA),True,False,0.0915,False,False,True,True,0.8,0.44
-2026-10-06 20:05:48,block,1,Pure Geometric (OBB),False,False,-0.0913,False,False,True,True,0.85,0.45
-2026-10-06 20:05:48,block,1,Pure AnyGrasp (AI),False,False,0.0,False,False,False,False,0.0,106.18
-2026-10-06 20:05:48,block,1,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.011,98.25
-2026-10-06 20:05:48,block,2,Pure Geometric (PCA),True,False,0.0915,False,False,True,True,0.8,0.49
-2026-10-06 20:05:48,block,2,Pure Geometric (OBB),False,False,-0.0913,False,False,True,True,0.85,0.5
-2026-10-06 20:05:48,block,2,Pure AnyGrasp (AI),False,False,0.0,False,False,False,False,0.0,112.53
-2026-10-06 20:05:48,block,2,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.005,107.06
-2026-10-06 20:05:48,clutter,1,Pure Geometric (PCA),False,False,-0.0107,False,False,True,True,0.8,0.51
-2026-10-06 20:05:48,clutter,1,Pure Geometric (OBB),False,False,-0.0015,False,False,True,True,0.4,0.56
-2026-10-06 20:05:48,clutter,1,Pure AnyGrasp (AI),False,True,-0.0016,False,False,True,True,0.006,121.9
-2026-10-06 20:05:48,clutter,1,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.005,108.64
-2026-10-06 20:05:49,clutter,2,Pure Geometric (PCA),False,False,0.0477,False,False,True,True,0.8,0.5
-2026-10-06 20:05:49,clutter,2,Pure Geometric (OBB),False,False,-0.049,False,False,True,True,0.4,0.56
-2026-10-06 20:05:49,clutter,2,Pure AnyGrasp (AI),False,True,-0.0124,False,False,True,True,0.0,123.46
-2026-10-06 20:05:49,clutter,2,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.001,107.36
-2026-10-06 20:05:49,real_realsense_scene,1,Pure Geometric (PCA),False,False,0.0,False,False,False,True,0.8,37.46
-2026-10-06 20:05:49,real_realsense_scene,1,Pure Geometric (OBB),False,False,0.0,False,False,False,True,0.4,48.84
-2026-10-06 20:05:49,real_realsense_scene,1,Pure AnyGrasp (AI),False,False,0.0,False,False,False,True,0.003,133.2
-2026-10-06 20:05:49,real_realsense_scene,1,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,False,True,0.8,157.24
+2026-10-06 20:11:05,duck,1,Pure Geometric (PCA),False,False,-0.0113,False,False,True,True,0.8,0.51
+2026-10-06 20:11:05,duck,1,Pure Geometric (OBB),False,False,-0.0025,False,False,True,True,0.85,0.48
+2026-10-06 20:11:05,duck,1,Pure AnyGrasp (AI),False,True,0.0,False,False,True,True,0.012,424.8
+2026-10-06 20:11:05,duck,1,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.002,94.25
+2026-10-06 20:11:05,duck,2,Pure Geometric (PCA),False,False,-0.0132,False,False,True,True,0.8,0.45
+2026-10-06 20:11:05,duck,2,Pure Geometric (OBB),False,False,-0.0006,False,False,True,True,0.85,0.47
+2026-10-06 20:11:05,duck,2,Pure AnyGrasp (AI),False,True,-0.0,False,False,True,True,0.002,104.48
+2026-10-06 20:11:05,duck,2,Hybrid (AI + Geometric Refinement),False,False,0.0009,False,False,True,True,0.0,93.79
+2026-10-06 20:11:05,duck,3,Pure Geometric (PCA),False,False,-0.0127,False,False,True,True,0.8,0.44
+2026-10-06 20:11:05,duck,3,Pure Geometric (OBB),False,False,0.0007,False,False,True,True,0.85,0.47
+2026-10-06 20:11:06,duck,3,Pure AnyGrasp (AI),False,False,-0.0018,False,False,True,True,0.0,106.64
+2026-10-06 20:11:06,duck,3,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.0,94.9
+2026-10-06 20:11:06,duck,4,Pure Geometric (PCA),False,False,-0.0054,False,False,True,True,0.8,0.46
+2026-10-06 20:11:06,duck,4,Pure Geometric (OBB),False,False,-0.0084,False,False,True,True,0.85,0.46
+2026-10-06 20:11:06,duck,4,Pure AnyGrasp (AI),False,False,-0.0,False,False,True,True,0.002,106.68
+2026-10-06 20:11:06,duck,4,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.002,95.48
+2026-10-06 20:11:06,duck,5,Pure Geometric (PCA),False,False,-0.0138,False,False,True,True,0.8,0.5
+2026-10-06 20:11:06,duck,5,Pure Geometric (OBB),False,False,0.0009,False,False,True,True,0.85,0.56
+2026-10-06 20:11:06,duck,5,Pure AnyGrasp (AI),False,False,-0.0007,False,False,True,True,0.0,110.0
+2026-10-06 20:11:06,duck,5,Hybrid (AI + Geometric Refinement),False,False,-0.0002,False,False,True,True,0.002,94.61
+2026-10-06 20:11:06,lego,1,Pure Geometric (PCA),True,False,0.0926,False,False,True,True,0.8,0.4
+2026-10-06 20:11:06,lego,1,Pure Geometric (OBB),False,False,-0.0009,False,False,True,True,0.85,0.41
+2026-10-06 20:11:07,lego,1,Pure AnyGrasp (AI),False,True,-0.0917,False,False,True,True,0.001,106.64
+2026-10-06 20:11:07,lego,1,Hybrid (AI + Geometric Refinement),False,False,0.0001,False,False,True,True,0.002,93.88
+2026-10-06 20:11:07,lego,2,Pure Geometric (PCA),True,False,0.0925,False,False,True,True,0.8,0.38
+2026-10-06 20:11:07,lego,2,Pure Geometric (OBB),False,False,-0.0002,False,False,True,True,0.85,0.42
+2026-10-06 20:11:07,lego,2,Pure AnyGrasp (AI),False,True,-0.0923,False,False,True,True,0.005,103.69
+2026-10-06 20:11:07,lego,2,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.005,92.65
+2026-10-06 20:11:07,lego,3,Pure Geometric (PCA),True,False,0.0914,False,False,True,True,0.8,0.41
+2026-10-06 20:11:07,lego,3,Pure Geometric (OBB),False,False,0.0005,False,False,True,True,0.85,0.42
+2026-10-06 20:11:07,lego,3,Pure AnyGrasp (AI),False,True,-0.0918,False,False,True,True,0.002,109.46
+2026-10-06 20:11:07,lego,3,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.005,91.83
+2026-10-06 20:11:07,lego,4,Pure Geometric (PCA),True,False,0.0928,False,False,True,True,0.8,0.39
+2026-10-06 20:11:07,lego,4,Pure Geometric (OBB),False,False,-0.0011,False,False,True,True,0.85,0.41
+2026-10-06 20:11:07,lego,4,Pure AnyGrasp (AI),False,True,-0.0917,False,False,True,True,0.007,103.45
+2026-10-06 20:11:08,lego,4,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.001,92.56
+2026-10-06 20:11:08,lego,5,Pure Geometric (PCA),True,False,0.0913,False,False,True,True,0.8,0.41
+2026-10-06 20:11:08,lego,5,Pure Geometric (OBB),False,False,-0.0915,False,False,True,True,0.85,0.42
+2026-10-06 20:11:08,lego,5,Pure AnyGrasp (AI),False,True,0.0001,False,False,True,True,0.002,106.91
+2026-10-06 20:11:08,lego,5,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.011,94.2
+2026-10-06 20:11:08,block,1,Pure Geometric (PCA),True,False,0.0896,False,False,True,True,0.8,0.41
+2026-10-06 20:11:08,block,1,Pure Geometric (OBB),False,False,-0.0894,False,False,True,True,0.85,0.43
+2026-10-06 20:11:08,block,1,Pure AnyGrasp (AI),False,True,0.0,False,False,True,True,0.006,106.27
+2026-10-06 20:11:08,block,1,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.006,92.85
+2026-10-06 20:11:08,block,2,Pure Geometric (PCA),True,False,0.0915,False,False,True,True,0.8,0.48
+2026-10-06 20:11:08,block,2,Pure Geometric (OBB),False,False,-0.0913,False,False,True,True,0.85,0.49
+2026-10-06 20:11:08,block,2,Pure AnyGrasp (AI),False,True,-0.0,False,False,True,True,0.008,107.6
+2026-10-06 20:11:08,block,2,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.004,94.44
+2026-10-06 20:11:09,block,3,Pure Geometric (PCA),True,False,0.0903,False,False,True,True,0.8,0.4
+2026-10-06 20:11:09,block,3,Pure Geometric (OBB),False,False,-0.0901,False,False,True,True,0.85,0.42
+2026-10-06 20:11:09,block,3,Pure AnyGrasp (AI),False,True,0.0,False,False,True,True,0.008,103.38
+2026-10-06 20:11:09,block,3,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.004,90.89
+2026-10-06 20:11:09,block,4,Pure Geometric (PCA),False,False,0.0002,False,False,True,True,0.8,0.43
+2026-10-06 20:11:09,block,4,Pure Geometric (OBB),False,False,-0.0,False,False,True,True,0.85,0.43
+2026-10-06 20:11:09,block,4,Pure AnyGrasp (AI),False,True,0.0,False,False,True,True,0.003,101.75
+2026-10-06 20:11:09,block,4,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.009,93.31
+2026-10-06 20:11:09,block,5,Pure Geometric (PCA),False,False,0.0002,False,False,True,True,0.8,0.4
+2026-10-06 20:11:09,block,5,Pure Geometric (OBB),False,False,-0.0,False,False,True,True,0.85,0.45
+2026-10-06 20:11:09,block,5,Pure AnyGrasp (AI),False,True,-0.0,False,False,True,True,0.001,105.95
+2026-10-06 20:11:09,block,5,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.001,92.26
+2026-10-06 20:11:09,clutter,1,Pure Geometric (PCA),False,False,-0.0107,False,False,True,True,0.8,0.48
+2026-10-06 20:11:09,clutter,1,Pure Geometric (OBB),False,False,0.05,False,False,True,True,0.4,0.53
+2026-10-06 20:11:10,clutter,1,Pure AnyGrasp (AI),False,False,0.0329,False,False,True,True,0.001,107.08
+2026-10-06 20:11:10,clutter,1,Hybrid (AI + Geometric Refinement),False,False,0.0341,False,False,True,True,0.001,96.08
+2026-10-06 20:11:10,clutter,2,Pure Geometric (PCA),False,False,0.0483,False,False,True,True,0.8,0.57
+2026-10-06 20:11:10,clutter,2,Pure Geometric (OBB),False,False,-0.0577,False,False,True,True,0.4,0.63
+2026-10-06 20:11:10,clutter,2,Pure AnyGrasp (AI),False,True,-0.0004,False,False,True,True,0.001,108.22
+2026-10-06 20:11:10,clutter,2,Hybrid (AI + Geometric Refinement),False,False,-0.0025,False,False,True,True,0.002,93.43
+2026-10-06 20:11:10,clutter,3,Pure Geometric (PCA),False,False,-0.0102,False,False,True,True,0.8,0.58
+2026-10-06 20:11:10,clutter,3,Pure Geometric (OBB),False,False,-0.0035,False,False,True,True,0.4,0.65
+2026-10-06 20:11:10,clutter,3,Pure AnyGrasp (AI),False,True,-0.0001,False,False,True,True,0.019,112.62
+2026-10-06 20:11:10,clutter,3,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.003,96.3
+2026-10-06 20:11:10,clutter,4,Pure Geometric (PCA),False,False,-0.01,False,False,True,True,0.8,0.56
+2026-10-06 20:11:10,clutter,4,Pure Geometric (OBB),False,False,-0.0036,False,False,True,True,0.4,0.64
+2026-10-06 20:11:11,clutter,4,Pure AnyGrasp (AI),False,True,-0.0,False,False,True,True,0.004,106.21
+2026-10-06 20:11:11,clutter,4,Hybrid (AI + Geometric Refinement),True,False,0.0861,False,False,True,True,0.001,95.02
+2026-10-06 20:11:11,clutter,5,Pure Geometric (PCA),False,False,0.0297,False,False,True,True,0.8,0.56
+2026-10-06 20:11:11,clutter,5,Pure Geometric (OBB),False,False,-0.0471,False,False,True,True,0.4,0.65
+2026-10-06 20:11:11,clutter,5,Pure AnyGrasp (AI),False,True,-0.0049,False,False,True,True,0.001,107.38
+2026-10-06 20:11:11,clutter,5,Hybrid (AI + Geometric Refinement),False,False,-0.0,False,False,True,True,0.0,95.65
+2026-10-06 20:11:11,real_realsense_scene,1,Pure Geometric (PCA),False,False,0.0,False,False,False,True,0.8,36.8
+2026-10-06 20:11:11,real_realsense_scene,1,Pure Geometric (OBB),False,False,0.0,False,False,False,True,0.4,42.74
+2026-10-06 20:11:12,real_realsense_scene,1,Pure AnyGrasp (AI),False,False,0.0,False,False,False,True,0.001,115.4
+2026-10-06 20:11:12,real_realsense_scene,1,Hybrid (AI + Geometric Refinement),False,False,0.0,False,False,True,True,0.049,104.13

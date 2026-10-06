@@ -1,9 +1,9 @@
 # 📊 BÁO CÁO ĐÁNH GIÁ THỰC NGHIỆM TAY GẮP ROBOT THEO CHUẨN QUỐC TẾ
 ## (Comparative Benchmark: Geometric Pipeline vs. Deep Learning AnyGrasp)
 
-**Thời gian thực nghiệm:** 2026-10-06 20:05:49  
+**Thời gian thực nghiệm:** 2026-10-06 20:11:12  
 **Môi trường kiểm thử:** PyBullet Physics Engine (Ground Truth Rollout) & Real Intel RealSense Sensor RGB-D  
-**Số lượng mẫu kiểm nghiệm:** 36 lượt thử nghiệm đối đầu  
+**Số lượng mẫu kiểm nghiệm:** 84 lượt thử nghiệm đối đầu  
 **Tiêu chuẩn khoa học:** Chuẩn đánh giá nón ma sát Coulomb (Ferrari & Canny 1992), va chạm hình học và kiểm nghiệm nhấc vật thể thực tế (Physical Grasp Success Rate - ICRA/IROS).
 
 ---
@@ -12,10 +12,10 @@
 
 | Hạng | Phương pháp | Tỷ lệ gắp thành công (GSR) | Nón ma sát Force-Closure ($\mu=0.8$) | Khả thi động học (IK) | Va chạm mặt bàn | Thời gian tính toán (Latency) |
 | :---: | :--- | :---: | :---: | :---: | :---: | :---: |
-| 🥇 | **Pure Geometric (PCA)** | **44.4%** | 0.0% | 88.9% | 0.0% | **4.6 ± 11.6 ms** |
-| 🥈 | **Hybrid (AI + Geometric Refinement)** | **0.0%** | 0.0% | 88.9% | 0.0% | **107.0 ± 18.5 ms** |
-| 🥉 | **Pure AnyGrasp (AI)** | **0.0%** | 0.0% | 66.7% | 44.4% | **154.0 ± 105.2 ms** |
-| 4 | **Pure Geometric (OBB)** | **0.0%** | 0.0% | 88.9% | 0.0% | **5.9 ± 15.2 ms** |
+| 🥇 | **Pure Geometric (PCA)** | **38.1%** | 0.0% | 95.2% | 0.0% | **2.2 ± 7.7 ms** |
+| 🥈 | **Hybrid (AI + Geometric Refinement)** | **4.8%** | 0.0% | 100.0% | 0.0% | **94.4 ± 2.6 ms** |
+| 🥉 | **Pure AnyGrasp (AI)** | **0.0%** | 0.0% | 95.2% | 76.2% | **122.1 ± 67.7 ms** |
+| 4 | **Pure Geometric (OBB)** | **0.0%** | 0.0% | 95.2% | 0.0% | **2.5 ± 9.0 ms** |
 
 ---
 
