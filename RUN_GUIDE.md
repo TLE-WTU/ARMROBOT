@@ -97,6 +97,24 @@ The service communicates with the ROS 2 nodes via a JSON-encoded Unix domain soc
 
 ---
 
+## 📊 Academic Grasp Benchmarking Suite
+
+Benchmark Geometric algorithms (RANSAC + PCA / OBB), Deep Learning (AnyGrasp), and Hybrid architectures on peer-reviewed metrics (Physical Grasp Success Rate, Force-Closure, Collision Rate, and Latency) using PyBullet physics and real sensor RGB-D scans:
+
+```bash
+# Run the benchmark suite (uses conda robot_env)
+./run_academic_benchmark.sh --trials 5
+
+# Optional: enable PyBullet GUI visualization
+./run_academic_benchmark.sh --trials 3 --gui
+```
+
+Results are saved to:
+- Raw metrics: `benchmark/academic_benchmark_results.csv`
+- Academic report: `benchmark/ACADEMIC_BENCHMARK_REPORT.md`
+
+---
+
 ## Troubleshooting
 
 | Issue | Solution |
