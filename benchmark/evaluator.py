@@ -24,6 +24,7 @@ if SRC_DIR not in sys.path:
 from robot_arm.geometric_refinement import (
     PCARefiner,
     OBBRefiner,
+    CrossSectionSliceRefiner,
     PrimitiveRANSACRefiner,
     SurfaceNormalRefiner,
     make_top_down_rotation,
@@ -42,10 +43,14 @@ class GraspEvaluator:
 
     def __init__(self, table_z: float = 0.0, ik_solver: Optional[IKSolver] = None):
         self.table_z = table_z
-        self.ik_solver = ik_solver if ik_solver is not None else IKSolver(dof=5)
-        self.pca_refiner = PCARefiner(max_gripper_width=0.08)
-        self.obb_refiner = OBBRefiner(max_gripper_width=0.08)
-        self.normal_refiner = SurfaceNormalRefiner(max_gripper_width=0.08)
+        self.ik_solver = ik_solver if ik_solver is not None else IKSolver(dof=6)
+        self.refiners = {
+            "pca": PCARefiner(max_gripper_width=0.08),
+            "obb": OBBRefiner(max_gripper_width=0.08),
+            "normals": SurfaceNormalRefiner(max_gripper_width=0.08),
+            "slice": CrossSectionSliceRefiner(max_gripper_width=0.08),
+            "primitive_ransac": PrimitiveRANSACRefiner(max_gripper_width=0.08),
+        }
 
     def run_geometric_pipeline(
         self,
@@ -54,6 +59,7 @@ class GraspEvaluator:
     ) -> Tuple[List[Dict[str, Any]], float]:
         """
         Executes pure geometric pipeline without deep learning.
+        Supported methods: 'pca', 'obb', 'normals', 'slice', 'primitive_ransac'.
         Returns: (grasp_list, latency_ms)
         """
         t0 = time.perf_counter()
@@ -67,10 +73,11 @@ class GraspEvaluator:
         if len(obj_points) < 10:
             obj_points = points  # fallback if coordinate frame differs
 
-        if method == "obb":
-            raw_grasps = self.obb_refiner.generate_heuristic_grasps(obj_points, table_z=self.table_z)
-        else:
-            raw_grasps = self.pca_refiner.generate_heuristic_grasps(obj_points, table_z=self.table_z)
+        refiner = self.refiners.get(method.lower(), self.refiners["pca"])
+        try:
+            raw_grasps = refiner.generate_heuristic_grasps(obj_points, table_z=self.table_z)
+        except Exception as e:
+            raw_grasps = self.refiners["pca"].generate_heuristic_grasps(obj_points, table_z=self.table_z)
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
 
@@ -149,59 +156,71 @@ class GraspEvaluator:
         self,
         points: np.ndarray,
         detector: Any,
+        method: str = "pca",
     ) -> Tuple[List[Dict[str, Any]], float]:
         """
         Executes Hybrid Architecture: AnyGrasp candidates filtered & refined
-        by Geometric constraints (table clearance, aperture limits, and IK).
+        by the specified Geometric Refiner ('pca', 'obb', 'normals', 'slice', 'primitive_ransac').
         """
         t0 = time.perf_counter()
-        ai_grasps, _ = self.run_anygrasp_pipeline(points, detector)
+        obj_mask = points[:, 2] > (self.table_z + 0.005)
+        obj_points = points[obj_mask]
+        if len(obj_points) < 10:
+            obj_points = points
+
+        ai_grasps, _ = self.run_anygrasp_pipeline(obj_points, detector)
+        if not ai_grasps and len(obj_points) != len(points):
+            ai_grasps, _ = self.run_anygrasp_pipeline(points, detector)
+
+        refiner = self.refiners.get(method.lower(), self.refiners["pca"])
+        try:
+            refined_tuples = refiner.refine(ai_grasps, obj_points, table_z=self.table_z)
+        except Exception:
+            refined_tuples = []
 
         valid_grasps = []
-        for g in ai_grasps:
-            pos = g["translation"].copy()
-            rot = g["rotation"].copy()
-            yaw = float(g["yaw"])
-            width = float(g["width"])
+        # If refiner returned candidates, convert and validate them
+        if refined_tuples:
+            for pos, score, rot, width, depth, yaw in refined_tuples:
+                pos = np.array(pos, dtype=np.float32)
+                rot = np.array(rot, dtype=np.float32)
+                yaw = float(yaw)
+                width = float(width)
 
-            # 1. Enforce minimum table clearance
-            # Finger tips must not collide with table
-            if pos[2] < (self.table_z + 0.025):
-                pos[2] = self.table_z + 0.030
+                # 1. Enforce minimum table clearance
+                if pos[2] < (self.table_z + 0.025):
+                    pos[2] = self.table_z + 0.030
+                if check_table_collision(pos, rot, table_z=self.table_z):
+                    pos[2] = self.table_z + 0.035
 
-            # 2. Re-check table collision
-            if check_table_collision(pos, rot, table_z=self.table_z):
-                pos[2] = self.table_z + 0.035
+                # 2. Gripper Aperture Compliance
+                if width > 0.08:
+                    width = 0.070
+                elif width < 0.01:
+                    width = 0.035
 
-            # 3. Gripper Aperture Compliance
-            if width > 0.08:
-                width = 0.070
-            elif width < 0.01:
-                width = 0.035
+                # 3. Kinematic Reachability Check (6-DOF Cartesian or 5-DOF top-down)
+                reachable, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver, rotation_matrix=rot)
+                if not reachable:
+                    alt_yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
+                    alt_reachable, _ = check_kinematic_feasibility(pos, alt_yaw, self.ik_solver, rotation_matrix=rot)
+                    if alt_reachable:
+                        yaw = alt_yaw
+                    else:
+                        continue
 
-            # 4. Kinematic Reachability Check
-            reachable, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver)
-            if not reachable:
-                # Try inverting yaw by 180 deg (symmetric parallel jaw)
-                alt_yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
-                alt_reachable, _ = check_kinematic_feasibility(pos, alt_yaw, self.ik_solver)
-                if alt_reachable:
-                    yaw = alt_yaw
-                else:
-                    continue
+                valid_grasps.append({
+                    "translation": pos,
+                    "rotation": rot,
+                    "score": float(score),
+                    "width": width,
+                    "depth": float(depth),
+                    "yaw": yaw,
+                })
 
-            valid_grasps.append({
-                "translation": pos,
-                "rotation": rot,
-                "score": g["score"] * 1.15,
-                "width": width,
-                "depth": g["depth"],
-                "yaw": yaw,
-            })
-
-        # Fallback to PCA geometric if no AI grasps survived geometric filtering
+        # Fallback to pure geometric if no hybrid candidates survived
         if not valid_grasps:
-            geo_grasps, _ = self.run_geometric_pipeline(points, method="pca")
+            geo_grasps, _ = self.run_geometric_pipeline(points, method=method)
             valid_grasps = geo_grasps
 
         total_latency_ms = (time.perf_counter() - t0) * 1000.0
@@ -241,7 +260,7 @@ class GraspEvaluator:
         table_col = check_table_collision(pos, rot, table_z=self.table_z)
 
         # 2. IK Feasibility
-        ik_feas, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver)
+        ik_feas, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver, rotation_matrix=rot)
 
         # 3. Aperture compliance
         aperture_ok = check_aperture_compliance(width, max_gripper_width=0.08)

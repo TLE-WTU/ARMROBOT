@@ -5,6 +5,7 @@ robot:
     link2_length: 0.25    # Upper arm
     link3_length: 0.20    # Forearm
     hand_length: 0.1534   # 5-DOF: link4(0.03) + link5(0.02) + Franka TCP(0.1034)
+    hand_length_6dof: 0.1734 # 6-DOF: link4(0.03) + link5(0.02) + link6(0.02) + Franka TCP(0.1034)
     hand_length_4dof: 0.1334 # 4-DOF: link4(0.03) + Franka TCP(0.1034)
     hand_length_3dof: 0.3034 # 3-DOF: link3(0.20) + Franka TCP(0.1034)
   table:

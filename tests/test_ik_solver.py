@@ -25,10 +25,17 @@ class TestIKSolverImport:
         solver = IKSolver(dof=5)
         assert solver.dof == 5
 
+    def test_create_solver_6dof(self):
+        from robot_arm.ik_solver import IKSolver
+        solver = IKSolver(dof=6)
+        assert solver.dof == 6
+
     def test_invalid_dof(self):
         from robot_arm.ik_solver import IKSolver
         with pytest.raises(ValueError):
             IKSolver(dof=2)
+        with pytest.raises(ValueError):
+            IKSolver(dof=7)
 
 
 class TestForwardKinematics:
@@ -55,6 +62,12 @@ class TestForwardKinematics:
         result = solver.forward_kinematics(0.0, 0.5, 0.5)
         assert len(result) == 4  # Still returns (x, y, z, yaw)
 
+    def test_fk_6dof(self):
+        from robot_arm.ik_solver import IKSolver
+        solver = IKSolver(dof=6)
+        result = solver.forward_kinematics(0.0, 0.2, 1.0, 0.5, 0.0, 0.0)
+        assert len(result) == 4  # (x, y, z, yaw)
+
 
 class TestInverseKinematics:
     """Test inverse kinematics computation."""
@@ -65,6 +78,43 @@ class TestInverseKinematics:
         result = solver.inverse_kinematics(0.25, 0.0, 0.25, yaw=0.0)
         assert result is not None
         assert len(result) == 5
+
+    def test_ik_reachable_target_6dof(self):
+        from robot_arm.ik_solver import IKSolver
+        solver = IKSolver(dof=6)
+        result = solver.inverse_kinematics(0.25, 0.0, 0.25, yaw=0.0)
+        assert result is not None
+        assert len(result) == 6
+
+    def test_fk_ik_roundtrip_6dof(self):
+        from robot_arm.ik_solver import IKSolver
+        solver = IKSolver(dof=6)
+        targets = [
+            (0.25, 0.0, 0.25, 0.0),
+            (0.30, 0.1, 0.26, math.pi / 4),
+            (0.20, -0.12, 0.30, -math.pi / 3),
+        ]
+        for x, y, z, yaw in targets:
+            joints = solver.inverse_kinematics(x, y, z, yaw)
+            assert joints is not None, f"Target unreachable: {x}, {y}, {z}"
+            fx, fy, fz, fyaw = solver.forward_kinematics(*joints)
+            err = math.sqrt((x - fx) ** 2 + (y - fy) ** 2 + (z - fz) ** 2)
+            assert err < 0.005, f"6-DOF roundtrip error {err*1000:.2f}mm > 5mm"
+            yaw_diff = abs((yaw - fyaw + math.pi) % (2 * math.pi) - math.pi)
+            assert yaw_diff < 0.01, f"Yaw difference {yaw_diff} too large"
+
+    def test_ik_with_rotation_matrix_6dof(self):
+        from robot_arm.ik_solver import IKSolver
+        from robot_arm.geometric_refinement import make_top_down_rotation
+        solver = IKSolver(dof=6)
+        yaw = 0.35
+        rot = make_top_down_rotation(yaw)
+        joints = solver.inverse_kinematics(0.28, 0.05, 0.25, yaw=yaw, rotation_matrix=rot)
+        assert joints is not None
+        assert len(joints) == 6
+        fx, fy, fz, fyaw = solver.forward_kinematics(*joints)
+        err = math.sqrt((0.28 - fx) ** 2 + (0.05 - fy) ** 2 + (0.25 - fz) ** 2)
+        assert err < 0.005
 
     def test_ik_unreachable_target(self):
         from robot_arm.ik_solver import IKSolver

@@ -44,8 +44,8 @@ def generate_launch_description():
     # ── Launch arguments ──
     dof_arg = DeclareLaunchArgument(
         "dof",
-        default_value="5",
-        description="Degrees of freedom of the arm (3, 4, or 5)",
+        default_value="6",
+        description="Degrees of freedom of the arm (3, 4, 5, or 6)",
     )
     
     world_arg = DeclareLaunchArgument(
@@ -100,7 +100,7 @@ def generate_launch_description():
         output="screen",
     )
 
-    # ros_gz_bridge for camera topics
+    # ros_gz_bridge for camera topics (Static overhead + Dual dynamic cameras)
     gz_bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
@@ -109,6 +109,10 @@ def generate_launch_description():
             "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
+            "/camera_wrist/image@sensor_msgs/msg/Image@gz.msgs.Image",
+            "/camera_wrist/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
+            "/camera_arm/image@sensor_msgs/msg/Image@gz.msgs.Image",
+            "/camera_arm/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
         ],
         output="screen",

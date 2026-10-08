@@ -96,3 +96,23 @@ def test_evaluator_analytical_pipeline():
     assert metrics["valid_grasp_found"] is True
     assert isinstance(metrics["ik_feasible"], bool)
     assert isinstance(metrics["table_collision"], bool)
+
+
+@pytest.mark.parametrize("method", ["pca", "obb", "normals", "slice", "primitive_ransac"])
+def test_evaluator_all_geometric_methods(method: str):
+    """GraspEvaluator must support all 5 geometric methods without error."""
+    solver = IKSolver(dof=5)
+    evaluator = GraspEvaluator(table_z=0.225, ik_solver=solver)
+
+    rng = np.random.default_rng(123)
+    pts = rng.uniform([0.28, -0.02, 0.25], [0.32, 0.02, 0.28], (200, 3))
+
+    grasps, latency = evaluator.run_geometric_pipeline(pts, method=method)
+    assert len(grasps) > 0
+    assert latency >= 0.0
+
+    metrics = evaluator.evaluate_analytical(grasps, pts)
+    assert metrics["valid_grasp_found"] is True
+    assert "force_closure_08" in metrics
+    assert "ik_feasible" in metrics
+

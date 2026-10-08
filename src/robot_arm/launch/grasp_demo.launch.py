@@ -138,8 +138,8 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     dof_arg = DeclareLaunchArgument(
         "dof",
-        default_value="5",
-        description="Degrees of freedom of the arm (3, 4, or 5)",
+        default_value="6",
+        description="Degrees of freedom of the arm (3, 4, 5, or 6)",
     )
 
     grasp_mode_arg = DeclareLaunchArgument(

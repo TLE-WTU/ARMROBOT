@@ -49,12 +49,34 @@
       </joint>
     </xacro:if>
 
-    <xacro:if value="${$(arg dof) >= 5}">
+    <xacro:if value="${$(arg dof) == 5}">
       <!-- Joint 5 - Wrist Roll (5th DOF) -->
       <joint name="joint5">
         <command_interface name="position">
           <param name="min">-1.5708</param>
           <param name="max">1.5708</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+    </xacro:if>
+
+    <xacro:if value="${$(arg dof) >= 6}">
+      <!-- Joint 5 - Wrist Pitch/Yaw (5th DOF) -->
+      <joint name="joint5">
+        <command_interface name="position">
+          <param name="min">-2.5</param>
+          <param name="max">2.5</param>
+        </command_interface>
+        <state_interface name="position"/>
+        <state_interface name="velocity"/>
+      </joint>
+
+      <!-- Joint 6 - Tool Flange Roll (6th DOF) -->
+      <joint name="joint6">
+        <command_interface name="position">
+          <param name="min">-3.14159</param>
+          <param name="max">3.14159</param>
         </command_interface>
         <state_interface name="position"/>
         <state_interface name="velocity"/>

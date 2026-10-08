@@ -50,10 +50,10 @@ class BaseGeometricRefiner(ABC):
 
 
 def make_top_down_rotation(yaw: float) -> np.ndarray:
-    """Create a top-down grasp rotation matrix from yaw angle."""
-    col0 = np.array([0.0, 0.0, -1.0])  # Approach along -Z
-    col1 = np.array([math.cos(yaw), math.sin(yaw), 0.0])  # Closing axis along Y'
-    col2 = np.cross(col0, col1)  # Binormal axis
+    """Create a top-down grasp rotation matrix from yaw angle (Z-approach, Y-closing)."""
+    col2 = np.array([0.0, 0.0, -1.0])  # Approach along -Z (tool +Z axis)
+    col1 = np.array([math.cos(yaw), math.sin(yaw), 0.0])  # Closing axis along Y' (tool +Y axis)
+    col0 = np.cross(col1, col2)  # Binormal axis (tool +X axis)
     return np.column_stack([col0, col1, col2])
 
 

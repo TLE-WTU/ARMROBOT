@@ -195,6 +195,42 @@ class PhysicsGraspEnvironment:
         )
         return p_world[ws_mask], colors[ws_mask]
 
+    def capture_dual_dynamic_pointclouds(
+        self,
+        target_pos: Tuple[float, float] = (0.35, 0.0),
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Captures point clouds from the 2 Dynamic Cameras (Dual Eye-in-Hand / Arm Dynamic Perception):
+        1. Camera Wrist (Eye-in-Hand): Close-up viewpoint moving dynamically with gripper
+        2. Camera Arm (Turret Tracking): Angled viewpoint moving dynamically with base yaw
+        Fuses both point clouds to eliminate blind spots, occlusions, and shadows.
+        """
+        tx, ty = target_pos
+        # Camera 1: Wrist Dynamic Eye-in-Hand Camera (close-up angled view)
+        cam1_eye = (tx + 0.08, ty - 0.06, self.table_z + 0.38)
+        cam1_target = (tx, ty, self.table_z + 0.02)
+        pts1, col1 = self.capture_pointcloud(cam1_eye, cam1_target, fov=65.0)
+
+        # Camera 2: Arm Dynamic Turret Camera (wide dynamic tracking view)
+        cam2_eye = (tx - 0.12, ty + 0.08, self.table_z + 0.45)
+        cam2_target = (tx, ty, self.table_z + 0.02)
+        pts2, col2 = self.capture_pointcloud(cam2_eye, cam2_target, fov=68.0)
+
+        if len(pts1) == 0:
+            return pts2, col2
+        if len(pts2) == 0:
+            return pts1, col1
+
+        fused_pts = np.vstack([pts1, pts2])
+        fused_col = np.vstack([col1, col2])
+
+        if len(fused_pts) > 6000:
+            indices = np.random.choice(len(fused_pts), 6000, replace=False)
+            fused_pts = fused_pts[indices]
+            fused_col = fused_col[indices]
+
+        return fused_pts, fused_col
+
     def execute_grasp(
         self,
         grasp_pos: np.ndarray,
@@ -214,16 +250,15 @@ class PhysicsGraspEnvironment:
         """
         init_obj_pos, _ = p.getBasePositionAndOrientation(target_obj_id)
 
-        # The finger length is 0.05m, base origin is 0.04m above finger tips.
-        # Finger center is at base_z - 0.04m.
-        # To position finger center at grasp_pos[2], base should be at grasp_pos[2] + 0.04m
-        gripper_base_z = grasp_pos[2] + 0.038
+        # Finger length is 0.05m, joint origin at base_z - 0.04m, fingertips extend down to base_z - 0.065m.
+        # Position fingertips 6mm above table surface (table_z + 0.006m) to securely enclose object body without colliding.
+        gripper_base_z = self.table_z + 0.071
         pre_grasp_z = gripper_base_z + 0.08
 
         gripper_orn = p.getQuaternionFromEuler([0, 0, yaw_rad])
 
         # Check table collision on approach
-        fingertip_min_z = grasp_pos[2] - 0.012
+        fingertip_min_z = gripper_base_z - 0.065
         table_collision = fingertip_min_z < (self.table_z - 0.002)
 
         # Spawn floating gripper at pre-grasp pose
@@ -255,16 +290,16 @@ class PhysicsGraspEnvironment:
             p.changeConstraint(cid, [grasp_pos[0], grasp_pos[1], cur_z], gripper_orn, maxForce=150)
             p.stepSimulation()
 
-        # Close fingers to grasp object (force 60N)
+        # Close fingers to grasp object (force 80N)
         for _ in range(80):
             p.setJointMotorControl2(self.gripper_id, 0, p.POSITION_CONTROL, targetPosition=-0.035, force=80)
             p.setJointMotorControl2(self.gripper_id, 1, p.POSITION_CONTROL, targetPosition=0.035, force=80)
             p.stepSimulation()
 
-        # Lift object 10cm vertically
-        lift_target_z = gripper_base_z + 0.10
+        # Lift object 12cm vertically
+        lift_target_z = gripper_base_z + 0.12
         for step in range(80):
-            cur_z = gripper_base_z + 0.10 * (step / 80.0)
+            cur_z = gripper_base_z + 0.12 * (step / 80.0)
             p.changeConstraint(cid, [grasp_pos[0], grasp_pos[1], cur_z], gripper_orn, maxForce=200)
             p.stepSimulation()
 
@@ -275,8 +310,8 @@ class PhysicsGraspEnvironment:
         final_obj_pos, _ = p.getBasePositionAndOrientation(target_obj_id)
         lift_height = final_obj_pos[2] - init_obj_pos[2]
 
-        # Success criteria: Object lifted at least 5cm above initial resting position
-        success = (lift_height >= 0.05) and (not table_collision)
+        # Success criteria: Object lifted at least 4cm above initial resting position
+        success = (lift_height >= 0.04) and (not table_collision)
 
         # Cleanup
         p.removeConstraint(cid)

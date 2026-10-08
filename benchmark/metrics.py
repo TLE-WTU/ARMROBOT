@@ -114,6 +114,7 @@ def check_kinematic_feasibility(
     pos: np.ndarray,
     yaw: float,
     ik_solver: Any,
+    rotation_matrix: Optional[np.ndarray] = None,
 ) -> Tuple[bool, Optional[List[float]]]:
     """
     Evaluates whether the grasp pose is reachable within robot arm kinematic limits.
@@ -124,7 +125,12 @@ def check_kinematic_feasibility(
     if ik_solver is None:
         return True, None
     try:
-        angles = ik_solver.inverse_kinematics(float(pos[0]), float(pos[1]), float(pos[2]), yaw=float(yaw))
+        if getattr(ik_solver, "dof", 5) == 6 and rotation_matrix is not None:
+            angles = ik_solver.inverse_kinematics(
+                float(pos[0]), float(pos[1]), float(pos[2]), yaw=float(yaw), rotation_matrix=rotation_matrix
+            )
+        else:
+            angles = ik_solver.inverse_kinematics(float(pos[0]), float(pos[1]), float(pos[2]), yaw=float(yaw))
         return (angles is not None), angles
     except Exception:
         return False, None
