@@ -1,6 +1,6 @@
-# 🚀 Run Guide — ARMROBOT v3.0 (6-DoF & Dual Dynamic Cameras)
+# Operation Guide: ARMROBOT 6-DOF Manipulation & Perception Pipeline
 
-Comprehensive operation and execution manual for the **6-DoF Articulated Robotic Arm** with **Dual Dynamic Cameras** (Eye-in-Hand + Turret Tracking) and **AI/Geometric Grasp Synthesis Pipeline**.
+Operational and execution manual for the 6-DOF robotic arm with dual active cameras (Eye-in-Hand + Turret Tracking) and grasp synthesis pipeline.
 
 ---
 
