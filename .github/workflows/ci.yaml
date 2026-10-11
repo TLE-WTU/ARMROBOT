@@ -48,9 +48,7 @@ jobs:
 
       - name: Run unit tests
         run: |
-          cd src/robot_arm && python -m pytest ../../tests/ -v --tb=short
-        env:
-          PYTHONPATH: src/robot_arm
+          PYTHONPATH=src/robot_arm:. pytest tests/ -v --tb=short
 
   build:
     name: ROS 2 Build Check
