@@ -8,11 +8,41 @@ Implements standard academic grasp evaluation metrics accepted in robotics liter
 3. Geometric Collision Detection (Gripper envelope vs table and workspace bounds)
 4. Kinematic Feasibility (Analytical IK reachability & joint limit constraints)
 5. Gripper Aperture Compliance (Parallel-jaw stroke constraints)
+6. GraspNet-Style Average Precision (AP_0.4, AP_0.8, AP_seen, AP_novel)
+   Fang et al. "GraspNet-1Billion: A Large-Scale Benchmark." CVPR 2020.
 """
 
 import math
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Sequence, Tuple, Any
 import numpy as np
+
+
+# Public re-export: callers can do `from benchmark.metrics import compute_ap_score`
+# without directly importing eval_ap.
+def compute_ap_score(
+    candidates: "Sequence",
+    mu_values: Tuple[float, float] = (0.4, 0.8),
+) -> "APResult":  # type: ignore[name-defined]
+    """
+    Compute GraspNet-style Average Precision for a sequence of GraspCandidate objects.
+
+    Delegates to ``benchmark.eval_ap.compute_ap``.
+
+    Parameters
+    ----------
+    candidates : sequence of benchmark.eval_ap.GraspCandidate
+    mu_values : (float, float)
+        Friction thresholds. Default: (0.4, 0.8).
+
+    Returns
+    -------
+    benchmark.eval_ap.APResult
+        Full AP result with ``ap``, ``ap_04``, ``ap_08``, ``ap_seen``, ``ap_novel``.
+    """
+    from benchmark.eval_ap import compute_ap
+    return compute_ap(candidates, mu_values=mu_values)
+
+
 
 
 def compute_antipodal_force_closure(

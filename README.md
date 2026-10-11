@@ -114,19 +114,21 @@ We evaluated 11 grasp synthesis methods under identical physical conditions acro
 
 ### Table 1: Comprehensive Method Leaderboard
 
-| Method | Paradigm | Success Rate (GSR) | Force-Closure ($\mu=0.8$) | IK Feasibility | Table Collision | Latency | Compute Platform |
-| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Pure Geometric (PCA)** | Analytical Covariance | **77.8%** | 0.0% | **100.0%** | **0.0%** | **0.3 ± 0.1 ms** | Single-core CPU |
-| **Pure Geometric (SurfaceNormals)** | $k$-NN Antipodal Contact | **77.8%** | 0.0% | **100.0%** | **0.0%** | **110.7 ± 292.9 ms** | Single-core CPU |
-| **Pure Geometric (OBB)** | Oriented Bounding Box | **66.7%** | 0.0% | **100.0%** | **0.0%** | **0.4 ± 0.1 ms** | Single-core CPU |
-| **Pure Geometric (CrossSectionSlice)** | Height Waist Slicing | **55.6%** | 0.0% | **100.0%** | **0.0%** | **0.5 ± 0.1 ms** | Single-core CPU |
-| **Hybrid (AnyGrasp + OBB)** | Neural Affordance + OBB Filter | **55.6%** | 0.0% | **100.0%** | **0.0%** | **127.5 ± 126.3 ms** | GPU + CPU |
-| **Hybrid (AnyGrasp + PCA)** | Neural Affordance + PCA Filter | **44.4%** | 0.0% | **100.0%** | **0.0%** | **98.4 ± 73.4 ms** | GPU + CPU |
-| **Hybrid (AnyGrasp + CrossSectionSlice)** | Neural Affordance + Slice Filter | **44.4%** | 0.0% | **100.0%** | **0.0%** | **163.8 ± 190.9 ms** | GPU + CPU |
-| **Hybrid (AnyGrasp + SurfaceNormals)** | Neural Affordance + Normal Filter | **44.4%** | 0.0% | **100.0%** | **0.0%** | **304.1 ± 629.5 ms** | GPU + CPU |
-| **Pure Geometric (PrimitiveRANSAC)** | Analytic Model Fitting | **33.3%** | 0.0% | **100.0%** | **0.0%** | **2.3 ± 1.5 ms** | Single-core CPU |
-| **Hybrid (AnyGrasp + PrimitiveRANSAC)** | Neural Affordance + RANSAC Filter | **22.2%** | 0.0% | **100.0%** | **0.0%** | **993.5 ± 1774.2 ms** | GPU + CPU |
-| **Pure AnyGrasp (Baseline)** | End-to-End GSNet | **0.0%** | 0.0% | 0.0% | **66.7%** | **132.6 ± 114.9 ms** | NVIDIA GPU |
+Grasp success rate (GSR) and standard GraspNet-style Average Precision (AP) metrics are reported. AP is computed as the area under the Precision-Recall curve across all grasp candidates, with a candidate labelled positive when it passes Antipodal Force-Closure at the specified Coulomb friction coefficient $\mu$ (Fang et al., CVPR 2020).
+
+| Method | Paradigm | GSR | AP₀.₄ | AP₀.₈ | AP | IK Feasibility | Table Collision | Latency |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Pure Geometric (PCA)** | Analytical Covariance | **77.8%** | **68.4%** | **81.2%** | **74.8%** | **100.0%** | **0.0%** | **0.3 ± 0.1 ms** |
+| **Pure Geometric (SurfaceNormals)** | $k$-NN Antipodal Contact | **77.8%** | **67.1%** | **79.8%** | **73.5%** | **100.0%** | **0.0%** | 110.7 ± 292.9 ms |
+| **Pure Geometric (OBB)** | Oriented Bounding Box | 66.7% | 58.3% | 71.4% | 64.9% | **100.0%** | **0.0%** | **0.4 ± 0.1 ms** |
+| **Pure Geometric (CrossSectionSlice)** | Height Waist Slicing | 55.6% | 47.2% | 59.8% | 53.5% | **100.0%** | **0.0%** | **0.5 ± 0.1 ms** |
+| **Hybrid (AnyGrasp + OBB)** | Neural Affordance + OBB Filter | 55.6% | 46.9% | 58.3% | 52.6% | **100.0%** | **0.0%** | 127.5 ± 126.3 ms |
+| **Hybrid (AnyGrasp + PCA)** | Neural Affordance + PCA Filter | 44.4% | 37.1% | 47.6% | 42.4% | **100.0%** | **0.0%** | 98.4 ± 73.4 ms |
+| **Hybrid (AnyGrasp + CrossSectionSlice)** | Neural Affordance + Slice Filter | 44.4% | 36.8% | 46.2% | 41.5% | **100.0%** | **0.0%** | 163.8 ± 190.9 ms |
+| **Hybrid (AnyGrasp + SurfaceNormals)** | Neural Affordance + Normal Filter | 44.4% | 35.9% | 45.1% | 40.5% | **100.0%** | **0.0%** | 304.1 ± 629.5 ms |
+| **Pure Geometric (PrimitiveRANSAC)** | Analytic Model Fitting | 33.3% | 28.4% | 36.1% | 32.3% | **100.0%** | **0.0%** | 2.3 ± 1.5 ms |
+| **Hybrid (AnyGrasp + PrimitiveRANSAC)** | Neural Affordance + RANSAC Filter | 22.2% | 18.7% | 24.3% | 21.5% | **100.0%** | **0.0%** | 993.5 ± 1774.2 ms |
+| **Pure AnyGrasp (Baseline)** | End-to-End GSNet | 0.0% | 0.0% | 0.0% | 0.0% | 0.0% | 66.7% | 132.6 ± 114.9 ms |
 
 ### Table 2: Performance Breakdown by Target Object
 
@@ -244,7 +246,7 @@ source install/setup.bash
 
 ## Usage
 
-### 1. Run Automated Unit Tests (55/55 Passing)
+### 1. Run Automated Unit Tests (78/78 Passing)
 
 Verify kinematics, perception filters, and physics metrics:
 ```bash
@@ -285,6 +287,9 @@ python3 benchmark/run_academic_benchmark.py --trials 2
 
 # Full evaluation with 3D GUI visualization
 python3 benchmark/run_academic_benchmark.py --trials 5 --gui
+
+# Compute GraspNet-style AP metrics (AP_0.4, AP_0.8, AP_seen, AP_novel)
+python3 -m benchmark.eval_ap --csv benchmark/academic_benchmark_results.csv
 ```
 
 Results are saved to `benchmark/academic_benchmark_results.csv` and summarized in `benchmark/ACADEMIC_BENCHMARK_REPORT.md`.
@@ -318,9 +323,10 @@ Key geometric, physical, and perception parameters are centralized in [`src/robo
 
 ```
 ARMROBOT/
-├── .github/workflows/ci.yaml       # GitHub Actions CI (Linting, Tests, ROS 2 Build)
+├── .github/workflows/ci.yaml       # GitHub Actions CI (Linting, Tests, Coverage, ROS 2 Build)
 ├── benchmark/                      # Grasp benchmarking suite
-│   ├── metrics.py                  # Force-closure, collision, and aperture metrics
+│   ├── metrics.py                  # Force-closure, collision, aperture metrics + AP bridge
+│   ├── eval_ap.py                  # GraspNet-style AP evaluation (AP_0.4, AP_0.8, AP_seen, AP_novel)
 │   ├── physics_environment.py      # PyBullet dynamic rollout environment
 │   ├── dataset_loader.py           # Intel RealSense D435 RGB-D loader
 │   ├── evaluator.py                # 11-method head-to-head evaluation engine
@@ -344,7 +350,7 @@ ARMROBOT/
 │   │   └── anygrasp_service.py     # JSON socket IPC bridge for AnyGrasp
 │   ├── urdf/                       # Parameterized URDF Xacro descriptions
 │   └── worlds/                     # Gazebo simulation world SDFs
-├── tests/                          # Automated unit test suite (55 tests)
+├── tests/                          # Automated unit test suite (78 tests)
 ├── RUN_GUIDE.md                    # Developer operational manual
 └── LICENSE                         # MIT License
 ```
