@@ -1,7 +1,7 @@
 # ARMROBOT: 6-DOF Robotic Manipulation Framework with Active Dual-Camera Perception and Geometric Grasp Synthesis
 
 [![CI](https://github.com/TLE-WTU/ARMROBOT/actions/workflows/ci.yaml/badge.svg)](https://github.com/TLE-WTU/ARMROBOT/actions/workflows/ci.yaml)
-[![Tests](https://img.shields.io/badge/tests-55%20passed-success?logo=pytest)](https://github.com/TLE-WTU/ARMROBOT)
+[![Coverage](https://codecov.io/gh/TLE-WTU/ARMROBOT/branch/main/graph/badge.svg)](https://codecov.io/gh/TLE-WTU/ARMROBOT)
 [![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy-blue?logo=ros)](https://docs.ros.org/en/jazzy/)
 [![Gazebo](https://img.shields.io/badge/Gazebo-Harmonic-orange?logo=gazebo)](https://gazebosim.org/)
 [![Python](https://img.shields.io/badge/python-3.10%20%7C%203.12-3776AB?logo=python)](https://www.python.org/)

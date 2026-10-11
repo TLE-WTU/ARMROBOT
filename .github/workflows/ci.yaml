@@ -28,7 +28,7 @@ jobs:
         run: black --check --line-length 120 src/robot_arm/robot_arm/
 
   test:
-    name: Unit Tests
+    name: Unit Tests & Coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,15 +40,28 @@ jobs:
 
       - name: Install test dependencies
         run: |
-          pip install pytest numpy scipy
+          pip install pytest pytest-cov numpy scipy
 
       - name: Install package in development mode
         run: |
           pip install -e src/robot_arm/ 2>/dev/null || true
 
-      - name: Run unit tests
+      - name: Run unit tests with coverage
         run: |
-          PYTHONPATH=src/robot_arm:. pytest tests/ -v --tb=short
+          PYTHONPATH=src/robot_arm:. pytest tests/ -v --tb=short \
+            --cov=src/robot_arm/robot_arm \
+            --cov-report=xml:coverage.xml \
+            --cov-report=term-missing
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: coverage.xml
+          flags: unittests
+          name: armrobot-coverage
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   build:
     name: ROS 2 Build Check
