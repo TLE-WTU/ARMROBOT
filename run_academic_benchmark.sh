@@ -1,22 +1,15 @@
 #!/usr/bin/env bash
-# ==============================================================================
-# Script chạy Bộ Đánh Giá Thực Nghiệm Chuẩn Quốc Tế Cho Tay Gắp Robot
-# (Peer-Reviewed Academic Benchmark: Geometric vs Deep Learning AnyGrasp)
-# ==============================================================================
+# Benchmark execution wrapper for physical grasp evaluation
 
-set -e
+set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PYTHON_EXEC="/home/tienle/miniconda3/envs/robot_env/bin/python"
+export PYTHONPATH="${SCRIPT_DIR}:${SCRIPT_DIR}/src/robot_arm:${PYTHONPATH:-}"
 
-if [ ! -f "$PYTHON_EXEC" ]; then
-    echo "❌ Không tìm thấy Python môi trường robot_env tại $PYTHON_EXEC"
-    exit 1
-fi
+PYTHON_EXEC="${PYTHON_EXEC:-python3}"
 
-echo "========================================================================"
-echo "🚀 KHỞI ĐỘNG BỘ ĐÁNH GIÁ CHUẨN QUỐC TẾ (ACADEMIC GRASP BENCHMARK)"
-echo "   Môi trường: Conda robot_env (Python 3.10 + PyBullet + AnyGrasp + PyTorch)"
-echo "========================================================================"
+echo "Starting grasp evaluation benchmark..."
+echo "Python: $PYTHON_EXEC"
+echo "Working directory: $SCRIPT_DIR"
 
 "$PYTHON_EXEC" "$SCRIPT_DIR/benchmark/run_academic_benchmark.py" "$@"

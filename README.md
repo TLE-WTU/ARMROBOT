@@ -1,272 +1,282 @@
-# 🦾 High-Precision 4-DOF Robotic Manipulator: Analytical Kinematics, Franka Hand & Geometric Grasp Synthesis
+# ARMROBOT
 
 [![CI](https://github.com/TLE-WTU/ARMROBOT/actions/workflows/ci.yaml/badge.svg)](https://github.com/TLE-WTU/ARMROBOT/actions/workflows/ci.yaml)
-[![ROS 2](https://img.shields.io/badge/ROS_2-Jazzy_Jalisco-blue.svg)](https://docs.ros.org/en/jazzy/)
-[![Simulator](https://img.shields.io/badge/Simulator-Gazebo_Harmonic_%2F_PyBullet-orange.svg)](https://gazebosim.org)
-[![Python](https://img.shields.io/badge/Python-3.12-green.svg)](https://www.python.org/)
-[![Tests](https://img.shields.io/badge/Tests-66%2F66_Passing-brightgreen.svg)](tests/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+ROS 2 package for a 4-DOF articulated robotic manipulator featuring analytical inverse kinematics, Franka Hand parallel-jaw gripper integration, and a hybrid grasp synthesis pipeline combining planar RANSAC segmentation with geometric refiners and deep affordance prediction.
 
 ---
 
-## 📌 1. Project Overview
+## Overview
 
-**ARMROBOT** is a standardized, production-ready, open-source research platform for **4-Degree-of-Freedom (4-DOF) Robotic Manipulation**. Designed with engineering rigor and peer-reviewed robotics benchmarks, it bridges high-speed real-time control, analytical kinematics, and hybrid perception (Deep Learning Affordance + Geometric Optimization).
+ARMROBOT provides a modular, resource-efficient manipulation framework built on ROS 2 Jazzy and Gazebo Harmonic. It is targeted at tabletop pick-and-place tasks with structured top-down approach geometries.
 
-```
-                            ┌─────────────────────────────────────────┐
-                            │      RGB-D Camera (Point Cloud)         │
-                            └────────────────────┬────────────────────┘
-                                                 │
-                                                 ▼
-                            ┌─────────────────────────────────────────┐
-                            │    RANSAC Table Plane Segmentation      │
-                            │    & Adaptive Voxel Density Filter      │
-                            └────────────────────┬────────────────────┘
-                                                 │
-                   ┌─────────────────────────────┴─────────────────────────────┐
-                   ▼                                                           ▼
-    ┌──────────────────────────────┐                            ┌──────────────────────────────┐
-    │     Deep AnyGrasp AI         │                            │  5x Pure Geometric Refiners  │
-    │  (Contact Affordance Tensor) │                            │  (PCA / OBB / Normals / ...) │
-    └──────────────┬───────────────┘                            └──────────────┬───────────────┘
-                   │                                                           │
-                   └─────────────────────────────┬─────────────────────────────┘
-                                                 │
-                                                 ▼
-                            ┌─────────────────────────────────────────┐
-                            │     Hybrid Ensemble & Virtual Floor     │
-                            │        Safety Collision Filter          │
-                            └────────────────────┬────────────────────┘
-                                                 │  Target Grasp (x, y, z, yaw)
-                                                 ▼
-                            ┌─────────────────────────────────────────┐
-                            │      Closed-Form Analytical 4-DOF IK    │
-                            │      (Sub-Millimeter Reaching, <10µs)   │
-                            └────────────────────┬────────────────────┘
-                                                 │
-                                                 ▼
-                            ┌─────────────────────────────────────────┐
-                            │    ROS 2 ros2_control / FollowJoint     │
-                            │     Trajectory Controller Exec FSM      │
-                            └─────────────────────────────────────────┘
-```
-
-### Key Engineering Highlights:
-- **Optimal Resource Footprint**: Eliminates the 16–32 GB VRAM prerequisite of monolithic graphics engines (e.g., Isaac Sim) while retaining high-fidelity contact physics through **Gazebo Harmonic** and **PyBullet Direct Mode** running at **>100 FPS**.
-- **Deterministic Closed-Form Kinematics**: $O(1)$ analytical Inverse Kinematics solver running in under **$10\ \mu\text{s}$** with $0.000\ \text{mm}$ numerical FK-IK round-trip error.
-- **Top-Down Orthogonal Approach Strategy**: Actively compensates wrist pitch angle ($\theta_4$) relative to shoulder and elbow angles ($\theta_2, \theta_3$) to guarantee vertical parallel-jaw descent across the entire workspace.
-- **Franka Hand Integration**: Industrial-grade parallel-jaw gripper ($70\ \text{mm}$ max aperture, $50\ \text{N}$ grasp effort).
-- **Comprehensive Academic Benchmark**: Includes force-closure analysis (Coulomb friction cone $\mu=0.8$, Ferrari & Canny 1992), GraspNet-style Average Precision ($AP_{0.4}, AP_{0.8}$), and physical rollout testing across standard geometries.
+### Features
+- **Analytical Kinematics**: Closed-form forward and inverse kinematics solvers with sub-millimeter precision, running in under 10 microseconds without numerical convergence issues.
+- **Top-Down Grasp Alignment**: Automatic wrist pitch compensation maintains the end-effector perpendicular to the support surface throughout the reachable workspace.
+- **Franka Hand Gripper**: Prismatic parallel-jaw configuration with 70 mm maximum aperture and compliant contact dynamics.
+- **Hybrid Grasp Synthesis**: Integrates 5 geometric refinement algorithms (PCA, OBB, Surface Normals, Cross-Section Slicing, Primitive RANSAC) with optional AnyGrasp deep-learning affordance.
+- **Simulation and Benchmarking**: Full dynamics in Gazebo Harmonic with ros2_control, plus headless PyBullet rollouts for batch evaluation.
 
 ---
 
-## 📐 2. Kinematics & Manipulator Geometry
+## System Architecture
 
-### 2.1 Joint Hierarchy & Degrees of Freedom
+```
+                    +------------------------------------+
+                    |        RGB-D Point Cloud           |
+                    +-----------------+------------------+
+                                      |
+                                      v
+                    +------------------------------------+
+                    |   RANSAC Table Plane Segmentation  |
+                    |   & Workspace Voxel Downsampling   |
+                    +-----------------+------------------+
+                                      |
+                   +------------------+------------------+
+                   |                                     |
+                   v                                     v
+       +-----------------------+             +-----------------------+
+       |   AnyGrasp Model      |             |  Geometric Refiners   |
+       |  (PyTorch / IPC)      |             |  (PCA, OBB, Normals)  |
+       +-----------+-----------+             +-----------+-----------+
+                   |                                     |
+                   +------------------+------------------+
+                                      |
+                                      v
+                    +------------------------------------+
+                    |   Virtual Safety Floor & Ensemble  |
+                    +-----------------+------------------+
+                                      | Target Pose (x, y, z, yaw)
+                                      v
+                    +------------------------------------+
+                    |    Analytical 4-DOF IK Solver      |
+                    +-----------------+------------------+
+                                      | Joint Trajectory
+                                      v
+                    +------------------------------------+
+                    |    ros2_control Joint Controller   |
+                    +------------------------------------+
+```
 
-| Joint | Type | Axis | Physical Function | Motion Range |
+---
+
+## Kinematics Specification
+
+### Manipulator Parameters
+
+| Joint | Type | Axis | Description | Range |
 | :--- | :--- | :---: | :--- | :---: |
-| **`joint1`** | Revolute | $Z$ | Waist Turret (Base Yaw) | $[-\pi, +\pi]$ rad |
-| **`joint2`** | Revolute | $Y$ | Shoulder Joint (Main Elevation) | $[-2.5, +2.5]$ rad |
-| **`joint3`** | Revolute | $Y$ | Elbow Joint (Forearm Flexion) | $[-2.5, +2.5]$ rad |
-| **`joint4`** | Revolute | $Y$ | Wrist Pitch (Approach Orientation) | $[-\pi, +\pi]$ rad |
-| **`gripper_left_joint`** | Prismatic | $Y$ | Franka Left Finger Stroke | $[0.0, 0.035]$ m |
-| **`gripper_right_joint`** | Prismatic | $Y$ | Franka Right Finger (Mimic) | $[0.0, 0.035]$ m |
+| `joint1` | Revolute | $Z$ | Base rotation (Yaw) | $[-\pi, +\pi]$ rad |
+| `joint2` | Revolute | $Y$ | Shoulder pitch | $[-2.5, +2.5]$ rad |
+| `joint3` | Revolute | $Y$ | Elbow pitch | $[-2.5, +2.5]$ rad |
+| `joint4` | Revolute | $Y$ | Wrist pitch (approach angle) | $[-\pi, +\pi]$ rad |
+| `gripper_left_joint` | Prismatic | $Y$ | Franka left finger | $[0.0, 0.035]$ m |
+| `gripper_right_joint` | Prismatic | $Y$ | Franka right finger (mimic) | $[0.0, 0.035]$ m |
 
-### 2.2 Link Dimensions & Parameters
-* Base Origin to Shoulder Joint (`base_height`): $h_{\text{base}} = 0.175\ \text{m}$
-* Upper Arm Length (`l1`): $L_1 = 0.250\ \text{m}$
-* Forearm Length (`l2`): $L_2 = 0.200\ \text{m}$
-* Wrist-to-Grasp Center Length (`l_hand`): $L_{\text{hand}} = 0.1334\ \text{m}$ ($0.030\ \text{m}$ wrist collar + $0.1034\ \text{m}$ Franka TCP)
-* **Reachable Workspace Bounds**:
-  $$X \in [0.10, 0.50]\ \text{m}, \quad Y \in [-0.20, 0.20]\ \text{m}, \quad Z \in [0.22, 0.45]\ \text{m}$$
+### Link Dimensions
+- Base height ($h_{\text{base}}$): $0.175\ \text{m}$ (from `base_link` origin to `joint2` shoulder axis)
+- Upper arm length ($L_1$): $0.250\ \text{m}$ (`joint2` to `joint3`)
+- Forearm length ($L_2$): $0.200\ \text{m}$ (`joint3` to `joint4`)
+- Tool center point offset ($L_{\text{hand}}$): $0.1334\ \text{m}$ (`joint4` to grasp midpoint)
+- **Reachable Workspace**: $X \in [0.10, 0.50]\ \text{m}$, $Y \in [-0.20, 0.20]\ \text{m}$, $Z \in [0.22, 0.45]\ \text{m}$
 
-### 2.3 Closed-Form Analytical Inverse Kinematics
+### Inverse Kinematics Formulation
 
-Given target grasp coordinates $\mathbf{p}^* = (x^*, y^*, z^*)^T$:
+Given target Cartesian coordinates $\mathbf{p}^* = (x^*, y^*, z^*)^T$:
 
-1. **Base Yaw ($\theta_1$):**
+1. **Base Yaw ($\theta_1$)**:
    $$\theta_1 = \text{atan2}(y^*, x^*)$$
 
-2. **Decoupled Wrist Position:**
-   Because 4-DOF manipulation employs a vertical top-down grasp constraint ($\sum_{i=2}^4 \theta_i = \pi$), the wrist position $(r_{\text{wrist}}, z_{\text{wrist}})$ is projected backward along the tool approach vector:
+2. **Wrist Position**:
+   Enforcing the vertical descent condition ($\sum_{i=2}^4 \theta_i = \pi$), the wrist center is projected:
    $$r_{\text{wrist}} = \sqrt{(x^*)^2 + (y^*)^2}$$
    $$z_{\text{wrist}} = z^* + L_{\text{hand}}$$
 
-3. **Shoulder & Elbow Solution (Law of Cosines):**
-   Let $\Delta z = z_{\text{wrist}} - h_{\text{base}}$ and $D^2 = r_{\text{wrist}}^2 + \Delta z^2$. The arm is kinematically feasible if and only if:
-   $$|L_1 - L_2| \le D \le L_1 + L_2$$
+3. **Shoulder ($\theta_2$) and Elbow ($\theta_3$) Angles**:
+   Let $\Delta z = z_{\text{wrist}} - h_{\text{base}}$ and $D = \sqrt{r_{\text{wrist}}^2 + \Delta z^2}$.
+   A solution exists if $|L_1 - L_2| \le D \le L_1 + L_2$.
    $$\cos\theta_3 = \frac{D^2 - L_1^2 - L_2^2}{2 L_1 L_2} \implies \theta_3 = \arccos(\text{clip}(\cos\theta_3, -1, 1))$$
    $$\alpha = \text{atan2}(r_{\text{wrist}}, \Delta z), \quad \beta = \text{atan2}(L_2 \sin\theta_3, L_1 + L_2 \cos\theta_3)$$
    $$\theta_2 = \alpha - \beta$$
 
-4. **Wrist Pitch Compensation ($\theta_4$):**
+4. **Wrist Pitch Compensation ($\theta_4$)**:
    $$\theta_4 = \pi - (\theta_2 + \theta_3)$$
 
 ---
 
-## 🔬 3. Perception & Geometric Refinement Suite
+## Perception and Grasp Synthesis
 
-In unstructured tabletop environments, sensor noise, optical translucency, and clutter frequently degrade raw neural grasp predictions. ARMROBOT embeds **5 Geometric Refinement Algorithms**:
+The perception node processes raw `sensor_msgs/PointCloud2` input through the following stages:
 
-| Refiner | Mathematical Foundation | Best Suited Object Types | Typical CPU Latency |
-| :--- | :--- | :--- | :---: |
-| **PCA** | Covariance Eigendecomposition ($\mathbf{C} = \frac{1}{N}\sum (\mathbf{p}_i - \bar{\mathbf{p}})(\mathbf{p}_i - \bar{\mathbf{p}})^T$) | Elongated, symmetric tools, cutlery | $\mathbf{0.3\ \text{ms}}$ |
-| **OBB** | Rotating Calipers & Minimum Area Bounding Box | Rectangular packages, cartons, blocks | $\mathbf{0.4\ \text{ms}}$ |
-| **SurfaceNormals** | $k\text{-NN}$ Antipodal contact verification ($\mathbf{n}_1 \cdot \mathbf{n}_2 \le -\cos\alpha$) | Curvature-rich objects, spheres | $\mathbf{110.0\ \text{ms}}$ |
-| **CrossSectionSlice** | Horizontal slicing & minimum waist diameter isolation | Bottles, mugs, hourglass shapes | $\mathbf{0.5\ \text{ms}}$ |
-| **PrimitiveRANSAC** | 2D/3D Circle and Cylinder algebraic fitting | Beverage cans, pipes, shafts | $\mathbf{2.3\ \text{ms}}$ |
+1. **Table Plane Segmentation**: RANSAC plane fitting isolates the dominant horizontal support surface and estimates table height $z_{\text{table}}$.
+2. **Cluster Extraction & Geometric Refinement**:
+   - **PCA**: Decomposes spatial covariance to align gripper orientation with the object's minimum inertia axis.
+   - **OBB**: Computes minimum bounding box to determine required finger stroke.
+   - **Surface Normals**: Estimates antipodal contact pairs using $k$-nearest neighbors normal estimation.
+   - **Cross-Section Slicing**: Evaluates horizontal slices to locate narrow grip regions (e.g., bottle necks).
+   - **Primitive RANSAC**: Fits cylinders and bounding boxes to regular geometric primitives.
+3. **Safety Verification**: Grasp candidates with fingertip penetration into the table surface are rejected or elevated via the virtual safety floor module.
 
 ---
 
-## 📊 4. Academic Benchmark Results
+## Benchmark Results
 
-Evaluated across **99 standardized physical trials** on 7 test objects (Mug, Bottle, Duck, Torus, Disc, Box, Clutter) in physics simulation:
+Empirical performance measured across 99 physical trials on standardized benchmark objects (Mug, Bottle, Duck, Torus, Disc, Box, Clutter) in simulation:
 
-| Algorithm / Pipeline | Architecture | Grasp Success Rate (GSR) | IK Feasibility | Table Collisions | Mean Latency |
+| Method | Architecture | Success Rate | IK Feasible | Table Collisions | Mean Latency |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| 🥇 **Pure Geometric (PCA)** | 100% CPU Algebraic | **77.8%** | **100.0%** | **0.0%** | **0.3 ms** |
-| 🥈 **Pure Geometric (Normals)** | 100% CPU Algebraic | **77.8%** | **100.0%** | **0.0%** | **110.7 ms** |
-| 🥉 **Pure Geometric (OBB)** | 100% CPU Algebraic | **66.7%** | **100.0%** | **0.0%** | **0.4 ms** |
-| `4` **Hybrid (AnyGrasp + OBB)** | GPU AI + CPU Geometry | **55.6%** | **100.0%** | **0.0%** | **127.5 ms** |
-| `5` **Hybrid (AnyGrasp + PCA)** | GPU AI + CPU Geometry | **44.4%** | **100.0%** | **0.0%** | **98.4 ms** |
-| `6` **Pure AnyGrasp (Baseline)** | Deep Network Only | 0.0% *(Penetration)* | 0.0% | 66.7% | 132.6 ms |
+| **Pure Geometric (PCA)** | CPU Algebraic | **77.8%** | 100.0% | 0.0% | 0.3 ms |
+| **Pure Geometric (Normals)** | CPU Algebraic | **77.8%** | 100.0% | 0.0% | 110.7 ms |
+| **Pure Geometric (OBB)** | CPU Algebraic | **66.7%** | 100.0% | 0.0% | 0.4 ms |
+| **Pure Geometric (Slice)** | CPU Algebraic | **55.6%** | 100.0% | 0.0% | 0.5 ms |
+| **Hybrid (AnyGrasp + OBB)** | GPU AI + CPU Geometry | **55.6%** | 100.0% | 0.0% | 127.5 ms |
+| **Hybrid (AnyGrasp + PCA)** | GPU AI + CPU Geometry | **44.4%** | 100.0% | 0.0% | 98.4 ms |
+| **Pure AnyGrasp (Baseline)** | Deep Network Only | 0.0% | 0.0% | 66.7% | 132.6 ms |
 
-> **Key Finding**: Pure deep learning models often predict grasps that collide with supporting surfaces. Adding **Geometric Virtual Floor Refinement** completely eliminates table collisions ($66.7\% \to 0.0\%$) and guarantees $100\%$ IK reachability.
+For detailed breakdowns, see [ACADEMIC_BENCHMARK_REPORT.md](benchmark/ACADEMIC_BENCHMARK_REPORT.md).
 
 ---
 
-## 🚀 5. Quick Start Guide
+## Installation
 
-### 5.1 Prerequisites & Installation
+### Dependencies
+- Ubuntu 24.04 LTS
+- ROS 2 Jazzy Jalisco
+- Gazebo Harmonic
 
+Install ROS 2 dependencies:
 ```bash
-# 1. System packages (Ubuntu 24.04 / ROS 2 Jazzy)
 sudo apt update && sudo apt install -y \
+  ros-jazzy-desktop \
   ros-jazzy-ros-gz-sim \
   ros-jazzy-ros-gz-bridge \
   ros-jazzy-controller-manager \
   ros-jazzy-joint-trajectory-controller \
   ros-jazzy-joint-state-broadcaster \
   ros-jazzy-position-controllers \
+  ros-jazzy-robot-state-publisher \
+  ros-jazzy-xacro \
   python3-colcon-common-extensions \
   python3-pytest
-
-# 2. Python scientific dependencies
-pip install numpy scipy pybullet
 ```
 
-### 5.2 Build the Workspace
-
+Install Python requirements:
 ```bash
-cd ARMROBOT
+pip install -r requirements.txt
+```
+
+### Build Workspace
+```bash
+cd ~/ARMROBOT
 source /opt/ros/jazzy/setup.bash
-colcon build --symlink-install --packages-select robot_arm
+colcon build --symlink-install --packages-select robot_arm --cmake-args -DPython3_EXECUTABLE=/usr/bin/python3
 source install/setup.bash
 ```
 
-### 5.3 Launch Gazebo Simulation (4-DOF)
+---
 
+## Usage
+
+### 1. Launch Simulation Environment
+Starts Gazebo Harmonic with the 4-DOF arm and ros2_control interface:
 ```bash
-# Launch Gazebo Harmonic with ros2_control and overhead RGB-D sensor
 ros2 launch robot_arm gazebo.launch.py
 ```
 
-### 5.4 Execute Autonomous Pick-and-Place Demo
-
+### 2. Run Autonomous Pick-and-Place
 ```bash
-# Terminal 2: Full grasp pipeline (Heuristic mode — No GPU required)
+# Heuristic mode (CPU only)
 ros2 launch robot_arm grasp_demo.launch.py use_anygrasp:=false grasp_mode:=heuristic
 
-# Terminal 2 (Alternative): Hybrid AI + Geometric ensemble
+# Hybrid mode (AI + Geometric refinement)
 ros2 launch robot_arm grasp_demo.launch.py use_anygrasp:=true grasp_mode:=hybrid
+```
 
-# Test specific tabletop challenges:
+Specific test scenarios:
+```bash
 ros2 launch robot_arm grasp_demo.launch.py test_scenario:=transparent_bottle
 ros2 launch robot_arm grasp_demo.launch.py test_scenario:=dense_clutter
 ros2 launch robot_arm grasp_demo.launch.py test_scenario:=flat_object
 ```
 
-### 5.5 Run Automated Academic Benchmark Suite
-
+### 3. Run Benchmark Suite
 ```bash
-# Run headless physical grasp evaluation suite (PyBullet physics engine)
+# Headless physical grasp evaluation in PyBullet
 python3 benchmark/run_academic_benchmark.py --headless --output_dir ./benchmark
 
-# Run geometric comparison benchmark script
+# Geometric refiner comparison
 python3 scripts/run_geometric_benchmark.py
 ```
 
-### 5.6 Run Verification Test Suite
+---
 
+## Testing
+
+Run unit tests and benchmark evaluation tests:
 ```bash
 PYTHONPATH=./:src/robot_arm pytest -v tests/
-# Output: 66 passed in ~0.20s
 ```
+
+Test coverage includes:
+- Analytical forward and inverse kinematics consistency
+- Trajectory pre-validation and workspace limits
+- Planar RANSAC and geometric refiner operations
+- GraspNet Average Precision ($AP_{0.4}$, $AP_{0.8}$) metrics
+- Coulomb friction cone and force-closure criteria
 
 ---
 
-## 📂 6. Repository Structure
+## Repository Structure
 
 ```
 ARMROBOT/
-├── .github/
-│   └── workflows/
-│       └── ci.yaml                  # Automated CI (Linting, 66 Pytests, ROS 2 Colcon Build)
-├── benchmark/                       # Peer-Reviewed Grasp Evaluation Suite
-│   ├── ACADEMIC_BENCHMARK_REPORT.md # Comprehensive experimental findings
-│   ├── dataset_loader.py            # CAD mesh & point cloud loaders
-│   ├── eval_ap.py                   # GraspNet Average Precision (AP_0.4, AP_0.8)
-│   ├── evaluator.py                 # Multi-method evaluation harness
-│   ├── metrics.py                   # Force-closure & friction cone verification
-│   ├── physics_environment.py       # PyBullet dynamic rollout environment
-│   └── run_academic_benchmark.py    # Headless benchmark execution engine
+├── .github/workflows/ci.yaml       # Continuous integration workflow
+├── benchmark/                      # Grasp evaluation metrics and rollout harness
+│   ├── ACADEMIC_BENCHMARK_REPORT.md
+│   ├── dataset_loader.py
+│   ├── eval_ap.py
+│   ├── evaluator.py
+│   ├── metrics.py
+│   ├── physics_environment.py
+│   └── run_academic_benchmark.py
 ├── scripts/
-│   └── run_geometric_benchmark.py   # Analytical benchmark runner
-├── src/
-│   └── robot_arm/                   # Main ROS 2 Jazzy Package
-│       ├── CMakeLists.txt           # Build configuration
-│       ├── package.xml              # Package dependencies
-│       ├── config/
-│       │   ├── anygrasp_params.yaml # Perception hyper-parameters
-│       │   ├── controllers_4dof.yaml# ros2_control joint trajectory controllers
-│       │   └── robot_params.yaml    # Physical dimensions, workspace bounds
-│       ├── launch/
-│       │   ├── gazebo.launch.py     # Gazebo Harmonic environment launcher
-│       │   └── grasp_demo.launch.py # Full autonomous pipeline orchestrator
-│       ├── meshes/                  # High-detail STL/DAE visual and collision meshes
-│       ├── robot_arm/               # Python Nodes
-│       │   ├── anygrasp_service.py  # IPC bridge for neural model inference
-│       │   ├── benchmark_dataset.py # Synthetic point cloud generation
-│       │   ├── geometric_refinement.py # 5 Geometric refiner implementations
-│       │   ├── grasp_detection_node.py # Perception & grasp synthesis node
-│       │   ├── ik_solver.py         # Analytical 4-DOF Inverse Kinematics
-│       │   └── pick_place_node.py   # State machine trajectory orchestrator
-│       ├── rviz/                    # Visualization configs
-│       ├── urdf/                    # Modernized 4-DOF Xacro models
-│       │   ├── robot_arm.urdf.xacro
-│       │   ├── robot_arm_gazebo.xacro
-│       │   └── robot_arm_ros2_control.xacro
-│       └── worlds/                  # Gazebo SDF worlds with test objects
-└── tests/                           # Complete Test Suite (66 Tests)
-    ├── test_benchmark_suite.py      # Force-closure & aperture tests
-    ├── test_eval_ap.py              # Average Precision unit tests
-    ├── test_geometric_refinement.py # PCA/OBB/RANSAC refiner tests
-    ├── test_grasp_detection.py      # Perception node tests
-    └── test_ik_solver.py            # 4-DOF Analytical IK unit tests
+│   └── run_geometric_benchmark.py  # Standalone benchmark runner
+├── src/robot_arm/                  # ROS 2 package
+│   ├── CMakeLists.txt
+│   ├── package.xml
+│   ├── config/                     # Controller and parameter definitions
+│   │   ├── anygrasp_params.yaml
+│   │   ├── controllers_4dof.yaml
+│   │   └── robot_params.yaml
+│   ├── launch/                     # Launch scripts
+│   │   ├── gazebo.launch.py
+│   │   └── grasp_demo.launch.py
+│   ├── meshes/                     # Arm and object STL/DAE models
+│   ├── robot_arm/                  # Python node implementations
+│   │   ├── anygrasp_service.py
+│   │   ├── benchmark_dataset.py
+│   │   ├── geometric_refinement.py
+│   │   ├── grasp_detection_node.py
+│   │   ├── ik_solver.py
+│   │   └── pick_place_node.py
+│   ├── urdf/                       # URDF and ros2_control Xacro definitions
+│   └── worlds/                     # Gazebo simulation worlds
+├── tests/                          # Automated unit test suite
+├── requirements.txt
+└── RUN_GUIDE.md
 ```
 
 ---
 
-## 📜 7. References
+## References
 
 1. **Ferrari, C., & Canny, J.** (1992). *Planning optimal grasps*. IEEE International Conference on Robotics and Automation (ICRA).
 2. **Nguyen, V.-D.** (1988). *Constructing force-closure grasps*. The International Journal of Robotics Research, 7(3), 3–16.
 3. **Fang, H.-S., et al.** (2020). *GraspNet-1Billion: A Large-Scale Benchmark for General Object Grasping*. IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR).
-4. **Mousavian, A., et al.** (2019). *6-DOF GraspNet: Variational grasp generation for object manipulation*. IEEE/CVF International Conference on Computer Vision (ICCV).
 
 ---
 
-## 📄 License
+## License
+
 This project is licensed under the [MIT License](LICENSE).

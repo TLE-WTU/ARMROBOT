@@ -3,8 +3,9 @@
 <package format="3">
   <name>robot_arm</name>
   <version>2.0.0</version>
-  <description>High-Precision 4-DOF Robotic Manipulator with Analytical Kinematics, Franka Hand, and AI Geometric Grasp Synthesis Pipeline</description>
-  <maintainer email="tle@todo.todo">TLE-WTU</maintainer>
+  <description>ROS 2 package for a 4-DOF articulated manipulator with analytical kinematics and grasp detection</description>
+  <maintainer email="144985646+TLE-WTU@users.noreply.github.com">Lê Mạnh Tiến</maintainer>
+  <author email="144985646+TLE-WTU@users.noreply.github.com">Lê Mạnh Tiến</author>
   <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
