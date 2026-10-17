@@ -213,7 +213,10 @@ def _area_under_pr(
     p = np.concatenate([[1.0], p])
     r = np.concatenate([[0.0], r])
 
-    ap = float(np.trapz(p, r)) * 100.0  # scale to percentage
+    try:
+        ap = float(np.trapezoid(p, r)) * 100.0  # NumPy >= 2.0.0
+    except AttributeError:
+        ap = float(np.trapz(p, r)) * 100.0  # NumPy < 2.0.0 fallback
     return float(np.clip(ap, 0.0, 100.0))
 
 

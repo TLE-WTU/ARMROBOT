@@ -221,6 +221,7 @@ def run_benchmark(
                     target_pos=target_pos,
                     depth_noise_sigma=depth_noise_sigma,
                     dropout_ratio=dropout_ratio,
+                    rng=rng,
                 )
 
                 if len(points) == 0:

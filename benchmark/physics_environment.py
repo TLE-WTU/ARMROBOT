@@ -160,8 +160,10 @@ class PhysicsGraspEnvironment:
             obj_id = p.loadURDF(ycb_urdf, [x, y, drop_z], orn)
             p.changeDynamics(obj_id, -1, lateralFriction=1.0, restitution=0.0)
         else:
-            obj_id = p.loadURDF("block.urdf", [x, y, drop_z], orn)
-            p.changeDynamics(obj_id, -1, mass=0.15, lateralFriction=1.0)
+            raise FileNotFoundError(
+                f"Canonical YCB asset not found: '{ycb_urdf}'. "
+                f"Please ensure YCB models are available in {self.YCB_DIR}."
+            )
 
         for _ in range(80):
             p.stepSimulation()
@@ -178,12 +180,16 @@ class PhysicsGraspEnvironment:
         fov: float = 60.0,
         depth_noise_sigma: float = 0.002,
         dropout_ratio: float = 0.10,
+        rng: Optional[np.random.Generator] = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Renders synthetic RGB-D from top-down / angled view and transforms into base coordinates.
         Injects realistic depth noise (Gaussian sigma) and random dropout (reflection artifacts).
         Returns: (points_base, colors)
         """
+        if rng is None:
+            rng = np.random.default_rng()
+
         cam_up = [0, 1, 0]
         view_matrix = p.computeViewMatrix(list(cam_eye), list(cam_target), cam_up)
         proj_matrix = p.computeProjectionMatrixFOV(fov, float(width) / height, 0.1, 2.5)
@@ -216,11 +222,11 @@ class PhysicsGraspEnvironment:
         colors = rgb[mask].astype(np.float32)
 
         if depth_noise_sigma > 0 and len(p_world) > 0:
-            noise = np.random.normal(0.0, depth_noise_sigma, size=p_world.shape).astype(np.float32)
+            noise = rng.normal(0.0, depth_noise_sigma, size=p_world.shape).astype(np.float32)
             p_world = p_world + noise
 
         if dropout_ratio > 0 and len(p_world) > 0:
-            keep_mask = np.random.rand(len(p_world)) >= dropout_ratio
+            keep_mask = rng.random(len(p_world)) >= dropout_ratio
             p_world = p_world[keep_mask]
             colors = colors[keep_mask]
 
@@ -236,19 +242,23 @@ class PhysicsGraspEnvironment:
         target_pos: Tuple[float, float] = (0.35, 0.0),
         depth_noise_sigma: float = 0.002,
         dropout_ratio: float = 0.10,
+        rng: Optional[np.random.Generator] = None,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """Captures and fuses point clouds from 2 camera viewpoints."""
+        if rng is None:
+            rng = np.random.default_rng()
+
         tx, ty = target_pos
         cam1_eye = (tx + 0.10, ty - 0.08, self.table_z + 0.40)
         cam1_target = (tx, ty, self.table_z + 0.05)
         pts1, col1 = self.capture_pointcloud(
-            cam1_eye, cam1_target, fov=65.0, depth_noise_sigma=depth_noise_sigma, dropout_ratio=dropout_ratio
+            cam1_eye, cam1_target, fov=65.0, depth_noise_sigma=depth_noise_sigma, dropout_ratio=dropout_ratio, rng=rng
         )
 
         cam2_eye = (tx - 0.12, ty + 0.10, self.table_z + 0.45)
         cam2_target = (tx, ty, self.table_z + 0.05)
         pts2, col2 = self.capture_pointcloud(
-            cam2_eye, cam2_target, fov=65.0, depth_noise_sigma=depth_noise_sigma, dropout_ratio=dropout_ratio
+            cam2_eye, cam2_target, fov=65.0, depth_noise_sigma=depth_noise_sigma, dropout_ratio=dropout_ratio, rng=rng
         )
 
         if len(pts1) == 0:
@@ -260,7 +270,7 @@ class PhysicsGraspEnvironment:
         fused_col = np.vstack([col1, col2])
 
         if len(fused_pts) > 6000:
-            indices = np.random.choice(len(fused_pts), 6000, replace=False)
+            indices = rng.choice(len(fused_pts), 6000, replace=False)
             fused_pts = fused_pts[indices]
             fused_col = fused_col[indices]
 
