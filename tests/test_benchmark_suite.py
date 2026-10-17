@@ -116,3 +116,59 @@ def test_evaluator_all_geometric_methods(method: str):
     assert "force_closure_08" in metrics
     assert "ik_feasible" in metrics
 
+
+def test_wilson_ci_computation():
+    """Verify Wilson score confidence interval computation and boundary coverage."""
+    from benchmark.metrics import compute_wilson_ci
+
+    # 7/9 trial: Wilson 95% CI should be approximately [45.3%, 93.7%]
+    p, low, high = compute_wilson_ci(7, 9)
+    assert abs(p - 7.0 / 9.0) < 1e-4
+    assert 0.40 <= low <= 0.50
+    assert 0.90 <= high <= 0.96
+
+    # 0/10 trial
+    p0, low0, high0 = compute_wilson_ci(0, 10)
+    assert p0 == 0.0
+    assert low0 == 0.0
+    assert high0 > 0.0  # rule of three / non-zero upper bound
+
+    # 10/10 trial
+    p10, low10, high10 = compute_wilson_ci(10, 10)
+    assert p10 == 1.0
+    assert low10 < 1.0
+    assert high10 == 1.0
+
+
+def test_mcnemar_statistic():
+    """Verify paired comparison statistic for significance testing."""
+    from benchmark.metrics import compute_mcnemar_statistic
+
+    # Equal discordant pairs -> no significant difference
+    chi2, p_val = compute_mcnemar_statistic(b=5, c=5)
+    assert chi2 == 0.0
+    assert p_val == 1.0
+
+    # Highly asymmetrical discordant pairs -> significant difference
+    chi2_sig, p_val_sig = compute_mcnemar_statistic(b=20, c=1)
+    assert chi2_sig > 10.0
+    assert p_val_sig < 0.005
+
+
+def test_4dof_orientability_evaluation():
+    """Verify 4-DOF orientability check under coupled base rotation."""
+    from benchmark.metrics import evaluate_4dof_orientability
+
+    # Grasp at (0.30, 0.0) -> arm closing axis is tangential (90 deg)
+    is_ok, div_deg, score = evaluate_4dof_orientability(0.30, 0.0, target_yaw=math.pi / 2.0)
+    assert is_ok is True
+    assert div_deg < 1.0
+    assert score > 0.99
+
+    # Radial target yaw (0 deg) -> 90 deg divergence
+    is_fail, div_fail, score_fail = evaluate_4dof_orientability(0.30, 0.0, target_yaw=0.0)
+    assert is_fail is False
+    assert abs(div_fail - 90.0) < 1.0
+    assert score_fail < 0.01
+
+

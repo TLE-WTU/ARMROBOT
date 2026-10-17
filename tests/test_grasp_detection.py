@@ -155,6 +155,21 @@ class TestDropZoneAndWorkspace:
         assert filtered.shape[0] == 1
         assert np.allclose(filtered[0], [0.30, 0.0, 0.30])
 
+    def test_filter_curvilinear_workspace(self):
+        from robot_arm.perception_pipeline import filter_curvilinear_workspace
+
+        points = np.array([
+            [0.30, 0.0, 0.25],    # Reachable: r=0.30, z=0.25 -> r_max=0.399 -> inside
+            [0.50, 0.0, 0.225],   # Unreachable: r=0.50 > r_max(0.225)=0.411 -> rejected
+            [0.30, 0.0, 0.45],    # Unreachable: r=0.30 > r_max(0.45)=0.189 -> rejected
+            [0.10, 0.0, 0.45],    # Reachable: r=0.10 < r_max(0.45)=0.189 -> inside
+            [0.30, 0.0, 0.15],    # Below table (z < 0.225) -> rejected
+        ])
+        filtered = filter_curvilinear_workspace(points)
+        assert filtered.shape[0] == 2
+        assert np.allclose(filtered[0], [0.30, 0.0, 0.25])
+        assert np.allclose(filtered[1], [0.10, 0.0, 0.45])
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

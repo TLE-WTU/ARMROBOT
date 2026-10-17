@@ -28,6 +28,8 @@ from robot_arm.geometric_refinement import (
     PrimitiveRANSACRefiner,
     SurfaceNormalRefiner,
     make_top_down_rotation,
+    compute_4dof_closing_yaw,
+    evaluate_orientability_penalty,
 )
 from robot_arm.ik_solver import IKSolver
 from benchmark.metrics import (
@@ -35,6 +37,7 @@ from benchmark.metrics import (
     check_table_collision,
     check_aperture_compliance,
     check_kinematic_feasibility,
+    evaluate_4dof_orientability,
 )
 
 
@@ -152,6 +155,67 @@ class GraspEvaluator:
 
         return grasps, latency_ms
 
+    def run_anygrasp_adapted_4dof_pipeline(
+        self,
+        points: np.ndarray,
+        detector: Any,
+    ) -> Tuple[List[Dict[str, Any]], float]:
+        """
+        Fair AI Baseline: AnyGrasp with 4-DOF kinematic adaptation:
+        1. Top-down approach steering
+        2. Virtual safety floor / table clearance elevation
+        3. Curvilinear reachable workspace filtering
+        4. 4-DOF closing yaw alignment: psi = atan2(y, x) + pi/2
+        5. Orientability penalty for asymmetric objects
+        """
+        t0 = time.perf_counter()
+        raw_grasps, _ = self.run_anygrasp_pipeline(points, detector)
+        valid_grasps = []
+        for g in raw_grasps:
+            pos = g["translation"].copy()
+            rot = g["rotation"].copy()
+            width = float(g["width"])
+            depth = float(g["depth"])
+            score = float(g["score"])
+            target_yaw = float(g["yaw"])
+
+            # 1. Curvilinear reach check
+            r = math.hypot(pos[0], pos[1])
+            dz = pos[2] + 0.1334 - 0.175
+            d = math.hypot(r, dz)
+            if not (0.05 <= d <= 0.45):
+                continue
+
+            # 2. Safety floor table clearance
+            if pos[2] < (self.table_z + 0.025):
+                pos[2] = self.table_z + 0.030
+            if check_table_collision(pos, rot, table_z=self.table_z):
+                pos[2] = self.table_z + 0.035
+
+            # 3. 4-DOF yaw alignment & orientability penalty
+            feasible_yaw, div_deg, orient_mult = evaluate_orientability_penalty(
+                pos[0], pos[1], target_yaw, is_radial_symmetric=False
+            )
+            adapted_score = score * orient_mult
+            adapted_rot = make_top_down_rotation(feasible_yaw)
+
+            # 4. Kinematic reachability check
+            reachable, _ = check_kinematic_feasibility(pos, feasible_yaw, self.ik_solver, rotation_matrix=adapted_rot)
+            if not reachable:
+                continue
+
+            valid_grasps.append({
+                "translation": pos,
+                "rotation": adapted_rot,
+                "score": adapted_score,
+                "width": min(0.08, max(0.01, width)),
+                "depth": depth,
+                "yaw": feasible_yaw,
+            })
+
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+        return valid_grasps, latency_ms
+
     def run_hybrid_pipeline(
         self,
         points: np.ndarray,
@@ -179,7 +243,6 @@ class GraspEvaluator:
             refined_tuples = []
 
         valid_grasps = []
-        # If refiner returned candidates, convert and validate them
         if refined_tuples:
             for pos, score, rot, width, depth, yaw in refined_tuples:
                 pos = np.array(pos, dtype=np.float32)
@@ -199,7 +262,7 @@ class GraspEvaluator:
                 elif width < 0.01:
                     width = 0.035
 
-                # 3. Kinematic Reachability Check (6-DOF Cartesian or 5-DOF top-down)
+                # 3. Kinematic Reachability Check (dual-branch IK)
                 reachable, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver, rotation_matrix=rot)
                 if not reachable:
                     alt_yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
@@ -237,6 +300,7 @@ class GraspEvaluator:
         - Table collision rate
         - IK reachability rate
         - Aperture compliance rate
+        - 4-DOF Orientability rate
         """
         if not grasps:
             return {
@@ -246,6 +310,8 @@ class GraspEvaluator:
                 "table_collision": False,
                 "ik_feasible": False,
                 "aperture_valid": False,
+                "orientable_4dof": False,
+                "yaw_divergence_deg": 90.0,
                 "confidence_score": 0.0,
             }
 
@@ -266,19 +332,14 @@ class GraspEvaluator:
         aperture_ok = check_aperture_compliance(width, max_gripper_width=0.08)
 
         # 4. Surface normal & Force-Closure evaluation
-        # Estimate surface normals around contact points
         closing_axis = np.array([math.cos(yaw), math.sin(yaw), 0.0])
         half_w = min(width / 2.0, 0.035)
         p1 = pos - closing_axis * half_w
         p2 = pos + closing_axis * half_w
 
-        # Find closest point normals
         dists1 = np.linalg.norm(points - p1, axis=1)
         dists2 = np.linalg.norm(points - p2, axis=1)
-        idx1 = int(np.argmin(dists1))
-        idx2 = int(np.argmin(dists2))
 
-        # Local surface normals via local PCA
         k = min(20, len(points))
         knn1 = points[np.argsort(dists1)[:k]]
         knn2 = points[np.argsort(dists2)[:k]]
@@ -293,6 +354,9 @@ class GraspEvaluator:
         fc_04, _, _ = compute_antipodal_force_closure(p1, p2, n1, n2, friction_coeff=0.4)
         fc_08, _, _ = compute_antipodal_force_closure(p1, p2, n1, n2, friction_coeff=0.8)
 
+        # 5. 4-DOF Orientability check
+        is_orientable, div_deg, _ = evaluate_4dof_orientability(pos[0], pos[1], yaw, tolerance_deg=25.0)
+
         return {
             "valid_grasp_found": True,
             "force_closure_04": bool(fc_04),
@@ -300,5 +364,7 @@ class GraspEvaluator:
             "table_collision": bool(table_col),
             "ik_feasible": bool(ik_feas),
             "aperture_valid": bool(aperture_ok),
+            "orientable_4dof": bool(is_orientable),
+            "yaw_divergence_deg": round(float(div_deg), 2),
             "confidence_score": float(score),
         }

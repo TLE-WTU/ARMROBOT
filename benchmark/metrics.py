@@ -164,3 +164,69 @@ def check_kinematic_feasibility(
         return (angles is not None), angles
     except Exception:
         return False, None
+
+
+def compute_wilson_ci(k: int, n: int, confidence: float = 0.95) -> Tuple[float, float, float]:
+    """
+    Computes Wilson score confidence interval for binomial proportions.
+
+    Args:
+        k: number of successes
+        n: total number of trials
+        confidence: confidence level (default: 0.95, z = 1.95996)
+
+    Returns:
+        (p_hat, ci_lower, ci_upper)
+    """
+    if n <= 0:
+        return 0.0, 0.0, 0.0
+    p = float(k) / float(n)
+    z = 1.95996 if abs(confidence - 0.95) < 1e-4 else 2.57583  # 95% or 99%
+    denom = 1.0 + (z**2) / n
+    center = (p + (z**2) / (2.0 * n)) / denom
+    margin = (z / denom) * math.sqrt(p * (1.0 - p) / n + (z**2) / (4.0 * n**2))
+    return p, max(0.0, center - margin), min(1.0, center + margin)
+
+
+def compute_mcnemar_statistic(b: int, c: int) -> Tuple[float, float]:
+    """
+    Computes McNemar's paired test statistic with Edwards' continuity correction.
+
+    Args:
+        b: Method 1 succeeds, Method 2 fails (discordant pairs)
+        c: Method 1 fails, Method 2 succeeds (discordant pairs)
+
+    Returns:
+        (chi2_statistic, p_approx)
+    """
+    total_discordant = b + c
+    if total_discordant == 0:
+        return 0.0, 1.0
+    term = max(0.0, abs(b - c) - 1.0)
+    chi2 = (term**2) / float(total_discordant)
+    # 1-DOF chi-squared survival function approximation
+    # p = erfc(sqrt(chi2 / 2))
+    p_val = math.erfc(math.sqrt(max(0.0, chi2) / 2.0))
+    return float(chi2), float(p_val)
+
+
+def evaluate_4dof_orientability(
+    x: float, y: float, target_yaw: float, tolerance_deg: float = 25.0
+) -> Tuple[bool, float, float]:
+    """
+    Evaluates kinematic orientability for a 4-DOF manipulator.
+    Since joint1 is the only Z-rotation, end-effector closing angle is locked to:
+        psi_arm = atan2(y, x) + pi/2 (mod pi)
+
+    Returns:
+        (is_orientable, divergence_deg, alignment_score [0, 1])
+    """
+    th1 = math.atan2(y, x)
+    arm_yaw = th1 + math.pi / 2.0
+    diff = abs(target_yaw - arm_yaw) % math.pi
+    divergence = min(diff, math.pi - diff)
+    div_deg = math.degrees(divergence)
+    alignment_score = math.cos(divergence) ** 2
+    is_orientable = div_deg <= tolerance_deg
+    return is_orientable, div_deg, alignment_score
+

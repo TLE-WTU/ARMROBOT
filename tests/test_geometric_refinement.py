@@ -174,5 +174,39 @@ class TestRefinerFactory:
             get_geometric_refiner("invalid_method_xyz")
 
 
+class Test4DOFOrientability:
+    def test_closing_yaw_along_x_axis(self):
+        from robot_arm.geometric_refinement import compute_4dof_closing_yaw
+        # Point on +X axis: azimuth theta1 = 0 -> closing yaw = +pi/2
+        yaw = compute_4dof_closing_yaw(0.35, 0.0)
+        assert abs(yaw - math.pi / 2.0) < 1e-4
+
+    def test_closing_yaw_along_y_axis(self):
+        from robot_arm.geometric_refinement import compute_4dof_closing_yaw
+        # Point on +Y axis: azimuth theta1 = pi/2 -> closing yaw = pi (or -pi)
+        yaw = compute_4dof_closing_yaw(0.001, 0.35)
+        assert abs(abs(yaw) - math.pi) < 0.01
+
+    def test_orientability_penalty_elongated_aligned_vs_misaligned(self):
+        from robot_arm.geometric_refinement import evaluate_orientability_penalty
+        # Candidate at (0.35, 0.0): feasible closing yaw is pi/2
+        # Perfectly aligned target yaw = pi/2
+        yaw_f, div_deg, mult = evaluate_orientability_penalty(0.35, 0.0, math.pi / 2.0, is_radial_symmetric=False)
+        assert div_deg < 1e-3
+        assert abs(mult - 1.0) < 1e-3
+
+        # Orthogonally misaligned target yaw = 0.0 (error = 90 deg)
+        yaw_f, div_deg, mult = evaluate_orientability_penalty(0.35, 0.0, 0.0, is_radial_symmetric=False)
+        assert abs(div_deg - 90.0) < 1e-3
+        assert mult < 1e-4
+
+    def test_orientability_penalty_radial_symmetric(self):
+        from robot_arm.geometric_refinement import evaluate_orientability_penalty
+        # Any target yaw on a radial symmetric cylinder has full multiplier 1.0
+        yaw_f, div_deg, mult = evaluate_orientability_penalty(0.35, 0.0, 0.0, is_radial_symmetric=True)
+        assert div_deg == 0.0
+        assert mult == 1.0
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

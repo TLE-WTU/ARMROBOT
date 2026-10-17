@@ -17,12 +17,49 @@ from typing import Dict, List, Optional, Tuple, Any
 import numpy as np
 
 
+def compute_4dof_closing_yaw(x: float, y: float) -> float:
+    """
+    Computes the kinematically feasible parallel-jaw closing yaw on a 4-DOF manipulator.
+    Because theta1 = atan2(y, x) is the sole vertical rotation axis and the Franka Hand
+    fingers actuate along the local Y axis, closing is strictly tangential in base frame:
+        psi_closing = atan2(y, x) + pi/2 (mod pi)
+    """
+    th1 = math.atan2(y, x)
+    yaw = (th1 + math.pi / 2.0 + math.pi) % (2.0 * math.pi) - math.pi
+    return yaw
+
+
+def evaluate_orientability_penalty(
+    x: float,
+    y: float,
+    target_yaw: float,
+    is_radial_symmetric: bool = False,
+    tolerance_deg: float = 25.0,
+) -> Tuple[float, float, float]:
+    """
+    Evaluates kinematic orientability against the 4-DOF locked yaw constraint.
+
+    Returns:
+        (feasible_yaw, divergence_deg, score_multiplier [0.0, 1.0])
+    """
+    feasible_yaw = compute_4dof_closing_yaw(x, y)
+    if is_radial_symmetric:
+        return feasible_yaw, 0.0, 1.0
+
+    diff = abs(target_yaw - feasible_yaw) % math.pi
+    divergence = min(diff, math.pi - diff)
+    div_deg = math.degrees(divergence)
+    multiplier = float(math.cos(divergence) ** 2)
+    return feasible_yaw, div_deg, multiplier
+
+
 class BaseGeometricRefiner(ABC):
     """Abstract base class for geometric grasp refiners."""
 
-    def __init__(self, name: str, max_gripper_width: float = 0.07):
+    def __init__(self, name: str, max_gripper_width: float = 0.07, align_4dof: bool = True):
         self.name = name
         self.max_gripper_width = max_gripper_width
+        self.align_4dof = align_4dof
 
     @abstractmethod
     def refine(
@@ -65,8 +102,8 @@ class PCARefiner(BaseGeometricRefiner):
     and blends the grasp position toward the cluster centroid.
     """
 
-    def __init__(self, max_gripper_width: float = 0.07, centroid_blend: float = 0.25):
-        super().__init__("PCA", max_gripper_width)
+    def __init__(self, max_gripper_width: float = 0.07, centroid_blend: float = 0.25, align_4dof: bool = True):
+        super().__init__("PCA", max_gripper_width, align_4dof=align_4dof)
         self.centroid_blend = centroid_blend
 
     def compute_pca_yaw(self, points: np.ndarray) -> float:
@@ -125,7 +162,11 @@ class PCARefiner(BaseGeometricRefiner):
                             fused_yaw = pca_yaw if diff1 <= diff2 else (pca_yaw + math.pi)
                             agreement_bonus = 0.05
 
-            composite_score = min(1.0, score + agreement_bonus)
+            if self.align_4dof:
+                fused_yaw, _, mult = evaluate_orientability_penalty(fused_pos[0], fused_pos[1], fused_yaw)
+                composite_score = min(1.0, (score + agreement_bonus) * mult)
+            else:
+                composite_score = min(1.0, score + agreement_bonus)
             fused_rot = make_top_down_rotation(fused_yaw)
             fused.append((fused_pos, composite_score, fused_rot, width, depth, fused_yaw))
 
@@ -144,10 +185,23 @@ class PCARefiner(BaseGeometricRefiner):
             if cl.shape[0] < 5:
                 continue
             c = np.mean(cl, axis=0)
-            yaw = self.compute_pca_yaw(cl)
-            rot = make_top_down_rotation(yaw)
+            pca_yaw = self.compute_pca_yaw(cl)
             pos = np.array([c[0], c[1], max(c[2], table_z + 0.02)])
-            grasps.append((pos, 0.80, rot, 0.04, 0.04, yaw))
+
+            xy = cl[:, :2] - c[:2]
+            cov = np.cov(xy.T)
+            eigvals, _ = np.linalg.eigh(cov)
+            is_radial = bool(eigvals[0] > 1e-6 and (eigvals[1] / eigvals[0]) < 1.30)
+
+            if self.align_4dof:
+                yaw, div_deg, mult = evaluate_orientability_penalty(pos[0], pos[1], pca_yaw, is_radial_symmetric=is_radial)
+                score = 0.80 * mult
+            else:
+                yaw = pca_yaw
+                score = 0.80
+
+            rot = make_top_down_rotation(yaw)
+            grasps.append((pos, score, rot, 0.04, 0.04, yaw))
         return grasps
 
 
@@ -160,8 +214,8 @@ class OBBRefiner(BaseGeometricRefiner):
     aligns the jaw closure along the minimum bounding box dimension.
     """
 
-    def __init__(self, max_gripper_width: float = 0.07):
-        super().__init__("OBB", max_gripper_width)
+    def __init__(self, max_gripper_width: float = 0.07, align_4dof: bool = True):
+        super().__init__("OBB", max_gripper_width, align_4dof=align_4dof)
 
     def compute_obb_2d(self, points: np.ndarray) -> Tuple[np.ndarray, float, float, float]:
         """
@@ -221,7 +275,6 @@ class OBBRefiner(BaseGeometricRefiner):
                 cl = clusters[best_idx]
 
                 obb_center, obb_len, obb_w, obb_angle = self.compute_obb_2d(cl)
-                # OBB centers precisely on the box volume
                 fused_pos[:2] = 0.60 * pos[:2] + 0.40 * obb_center
                 fused_pos[2] = max(pos[2], np.mean(cl[:, 2]))
                 fused_yaw = obb_angle
@@ -233,7 +286,11 @@ class OBBRefiner(BaseGeometricRefiner):
                 else:
                     obb_bonus -= 0.30  # Object too wide for gripper
 
-            composite_score = min(1.0, max(0.1, score + obb_bonus))
+            if self.align_4dof:
+                fused_yaw, _, mult = evaluate_orientability_penalty(fused_pos[0], fused_pos[1], fused_yaw)
+                composite_score = min(1.0, max(0.1, (score + obb_bonus) * mult))
+            else:
+                composite_score = min(1.0, max(0.1, score + obb_bonus))
             rot = make_top_down_rotation(fused_yaw)
             fused.append((fused_pos, composite_score, rot, width, depth, fused_yaw))
 
@@ -249,14 +306,20 @@ class OBBRefiner(BaseGeometricRefiner):
             clusters = [points]
         grasps = []
         for cl in clusters:
-            if cl.shape[0] < 5:
+            if cl.shape[0] < 4:
                 continue
             obb_center, obb_len, obb_w, obb_angle = self.compute_obb_2d(cl)
             z_mid = np.mean(cl[:, 2])
             pos = np.array([obb_center[0], obb_center[1], max(z_mid, table_z + 0.02)])
-            rot = make_top_down_rotation(obb_angle)
-            score = 0.85 if obb_w <= self.max_gripper_width else 0.40
-            grasps.append((pos, score, rot, min(self.max_gripper_width, obb_w + 0.01), 0.04, obb_angle))
+            is_radial = bool((obb_len / max(0.001, obb_w)) < 1.30)
+            if self.align_4dof:
+                yaw, div_deg, mult = evaluate_orientability_penalty(pos[0], pos[1], obb_angle, is_radial_symmetric=is_radial)
+                score = (0.85 if obb_w <= self.max_gripper_width else 0.40) * mult
+            else:
+                yaw = obb_angle
+                score = 0.85 if obb_w <= self.max_gripper_width else 0.40
+            rot = make_top_down_rotation(yaw)
+            grasps.append((pos, score, rot, min(self.max_gripper_width, obb_w + 0.01), 0.04, yaw))
         return grasps
 
 
@@ -268,8 +331,8 @@ class SurfaceNormalRefiner(BaseGeometricRefiner):
     with the inward surface normals to form a stable friction cone.
     """
 
-    def __init__(self, max_gripper_width: float = 0.07, k_neighbors: int = 15):
-        super().__init__("SurfaceNormals", max_gripper_width)
+    def __init__(self, max_gripper_width: float = 0.07, k_neighbors: int = 15, align_4dof: bool = True):
+        super().__init__("SurfaceNormals", max_gripper_width, align_4dof=align_4dof)
         self.k_neighbors = k_neighbors
 
     def estimate_normals(self, points: np.ndarray) -> np.ndarray:
@@ -304,7 +367,6 @@ class SurfaceNormalRefiner(BaseGeometricRefiner):
         Measures how well the gripper closing vector aligns with opposing surface normals.
         Antipodal contact: dot product with inward normals should be close to 1.
         """
-        # Find points near the two finger pads
         finger_offset = 0.025
         p_left = grasp_pos - finger_offset * closing_vector
         p_right = grasp_pos + finger_offset * closing_vector
@@ -354,8 +416,11 @@ class SurfaceNormalRefiner(BaseGeometricRefiner):
                     best_antipodal = anti_score
                     best_yaw = test_yaw
 
-            # Boost score based on antipodal friction alignment
-            fused_score = min(1.0, score * 0.7 + best_antipodal * 0.3)
+            if self.align_4dof:
+                best_yaw, _, mult = evaluate_orientability_penalty(pos[0], pos[1], best_yaw)
+                fused_score = min(1.0, (score * 0.7 + best_antipodal * 0.3) * mult)
+            else:
+                fused_score = min(1.0, score * 0.7 + best_antipodal * 0.3)
             fused_rot = make_top_down_rotation(best_yaw)
             fused.append((pos, fused_score, fused_rot, width, depth, best_yaw))
 
@@ -370,9 +435,15 @@ class SurfaceNormalRefiner(BaseGeometricRefiner):
         normals = self.estimate_normals(points)
         c = np.mean(points, axis=0)
 
-        best_yaw = 0.0
+        if self.align_4dof:
+            feasible_yaw = compute_4dof_closing_yaw(c[0], c[1])
+            test_yaws = [feasible_yaw, (feasible_yaw + math.pi) % (2.0 * math.pi) - math.pi]
+        else:
+            test_yaws = list(np.linspace(0, math.pi, 12))
+
+        best_yaw = float(test_yaws[0])
         best_score = 0.0
-        for yaw in np.linspace(0, math.pi, 12):
+        for yaw in test_yaws:
             closing_vec = np.array([math.cos(yaw), math.sin(yaw), 0.0])
             score = self.compute_antipodal_score(c, closing_vec, points, normals)
             if score > best_score:
@@ -392,8 +463,8 @@ class CrossSectionSliceRefiner(BaseGeometricRefiner):
     or narrow neck, such as a bottle neck or cup waist) which is easiest to grasp securely.
     """
 
-    def __init__(self, max_gripper_width: float = 0.07, n_slices: int = 8):
-        super().__init__("CrossSectionSlice", max_gripper_width)
+    def __init__(self, max_gripper_width: float = 0.07, n_slices: int = 8, align_4dof: bool = True):
+        super().__init__("CrossSectionSlice", max_gripper_width, align_4dof=align_4dof)
         self.n_slices = n_slices
 
     def find_optimal_slice(self, points: np.ndarray) -> Tuple[np.ndarray, float, float]:
@@ -467,7 +538,6 @@ class CrossSectionSliceRefiner(BaseGeometricRefiner):
                 cl = clusters[best_idx]
 
                 slice_c, slice_w, slice_yaw = self.find_optimal_slice(cl)
-                # Pull grasp position towards the optimal waist height Z
                 fused_pos[0] = 0.70 * pos[0] + 0.30 * slice_c[0]
                 fused_pos[1] = 0.70 * pos[1] + 0.30 * slice_c[1]
                 fused_pos[2] = 0.50 * pos[2] + 0.50 * slice_c[2]
@@ -475,8 +545,13 @@ class CrossSectionSliceRefiner(BaseGeometricRefiner):
                 width = slice_w
                 bonus = 0.15
 
+            if self.align_4dof:
+                fused_yaw, _, mult = evaluate_orientability_penalty(fused_pos[0], fused_pos[1], fused_yaw)
+                composite_score = min(1.0, (score + bonus) * mult)
+            else:
+                composite_score = min(1.0, score + bonus)
             fused_rot = make_top_down_rotation(fused_yaw)
-            fused.append((fused_pos, min(1.0, score + bonus), fused_rot, width, depth, fused_yaw))
+            fused.append((fused_pos, composite_score, fused_rot, width, depth, fused_yaw))
 
         return fused
 
@@ -493,8 +568,15 @@ class CrossSectionSliceRefiner(BaseGeometricRefiner):
             if cl.shape[0] < 5:
                 continue
             slice_c, slice_w, slice_yaw = self.find_optimal_slice(cl)
-            rot = make_top_down_rotation(slice_yaw)
-            grasps.append((slice_c, 0.85, rot, slice_w, 0.04, slice_yaw))
+            pos = np.array([slice_c[0], slice_c[1], max(slice_c[2], table_z + 0.02)])
+            if self.align_4dof:
+                yaw, _, mult = evaluate_orientability_penalty(pos[0], pos[1], slice_yaw)
+                score = 0.85 * mult
+            else:
+                yaw = slice_yaw
+                score = 0.85
+            rot = make_top_down_rotation(yaw)
+            grasps.append((pos, score, rot, slice_w, 0.04, yaw))
         return grasps
 
 
@@ -506,8 +588,8 @@ class PrimitiveRANSACRefiner(BaseGeometricRefiner):
     perpendicular to the cylinder surface and sets grasp width to the cylinder diameter.
     """
 
-    def __init__(self, max_gripper_width: float = 0.07, max_iters: int = 100, dist_thresh: float = 0.005):
-        super().__init__("PrimitiveRANSAC", max_gripper_width)
+    def __init__(self, max_gripper_width: float = 0.07, max_iters: int = 100, dist_thresh: float = 0.005, align_4dof: bool = True):
+        super().__init__("PrimitiveRANSAC", max_gripper_width, align_4dof=align_4dof)
         self.max_iters = max_iters
         self.dist_thresh = dist_thresh
 
@@ -544,7 +626,7 @@ class PrimitiveRANSACRefiner(BaseGeometricRefiner):
             r = math.sqrt(max(1e-6, (p1[0] - cx) ** 2 + (p1[1] - cy) ** 2))
 
             if r > 0.08 or r < 0.01:
-                continue  # Beyond realistic tabletop object radius
+                continue
 
             dists = np.abs(np.sqrt((xy[:, 0] - cx) ** 2 + (xy[:, 1] - cy) ** 2) - r)
             inliers = np.sum(dists < self.dist_thresh)
@@ -591,13 +673,14 @@ class PrimitiveRANSACRefiner(BaseGeometricRefiner):
                 cyl_result = self.fit_cylinder_ransac(cl)
                 if cyl_result:
                     cyl_center, cyl_r, inlier_ratio = cyl_result
-                    # Cylinder detected! Center grasp right on cylinder axis
                     fused_pos[0] = cyl_center[0]
                     fused_pos[1] = cyl_center[1]
                     fused_pos[2] = max(pos[2], np.mean(cl[:, 2]))
                     width = min(self.max_gripper_width, 2.0 * cyl_r + 0.01)
                     bonus = 0.20 * inlier_ratio
 
+            if self.align_4dof:
+                fused_yaw = compute_4dof_closing_yaw(fused_pos[0], fused_pos[1])
             fused_rot = make_top_down_rotation(fused_yaw)
             fused.append((fused_pos, min(1.0, score + bonus), fused_rot, width, depth, fused_yaw))
 
@@ -619,30 +702,32 @@ class PrimitiveRANSACRefiner(BaseGeometricRefiner):
             if cyl_result:
                 cyl_c, cyl_r, ratio = cyl_result
                 pos = np.array([cyl_c[0], cyl_c[1], max(np.mean(cl[:, 2]), table_z + 0.02)])
-                rot = make_top_down_rotation(0.0)
-                grasps.append((pos, 0.85, rot, min(self.max_gripper_width, 2.0 * cyl_r + 0.01), 0.04, 0.0))
+                yaw = compute_4dof_closing_yaw(pos[0], pos[1]) if self.align_4dof else 0.0
+                rot = make_top_down_rotation(yaw)
+                grasps.append((pos, 0.85, rot, min(self.max_gripper_width, 2.0 * cyl_r + 0.01), 0.04, yaw))
             else:
                 c = np.mean(cl, axis=0)
                 pos = np.array([c[0], c[1], max(c[2], table_z + 0.02)])
-                rot = make_top_down_rotation(0.0)
-                grasps.append((pos, 0.70, rot, 0.04, 0.04, 0.0))
+                yaw = compute_4dof_closing_yaw(pos[0], pos[1]) if self.align_4dof else 0.0
+                rot = make_top_down_rotation(yaw)
+                grasps.append((pos, 0.70, rot, 0.04, 0.04, yaw))
         return grasps
 
 
-def get_geometric_refiner(name: str, max_gripper_width: float = 0.07) -> BaseGeometricRefiner:
+def get_geometric_refiner(name: str, max_gripper_width: float = 0.07, align_4dof: bool = True) -> BaseGeometricRefiner:
     """Factory function to instantiate geometric refiner by name."""
     norm_name = name.strip().lower()
     if norm_name in ("pca", "principal_components"):
-        return PCARefiner(max_gripper_width=max_gripper_width)
+        return PCARefiner(max_gripper_width=max_gripper_width, align_4dof=align_4dof)
     elif norm_name in ("obb", "bounding_box"):
-        return OBBRefiner(max_gripper_width=max_gripper_width)
+        return OBBRefiner(max_gripper_width=max_gripper_width, align_4dof=align_4dof)
     elif norm_name in ("normals", "surface_normals", "antipodal"):
-        return SurfaceNormalRefiner(max_gripper_width=max_gripper_width)
+        return SurfaceNormalRefiner(max_gripper_width=max_gripper_width, align_4dof=align_4dof)
     elif norm_name in ("slice", "cross_section", "waist"):
-        return CrossSectionSliceRefiner(max_gripper_width=max_gripper_width)
+        return CrossSectionSliceRefiner(max_gripper_width=max_gripper_width, align_4dof=align_4dof)
     elif norm_name in ("ransac", "ransac_primitive", "primitive"):
-        return PrimitiveRANSACRefiner(max_gripper_width=max_gripper_width)
+        return PrimitiveRANSACRefiner(max_gripper_width=max_gripper_width, align_4dof=align_4dof)
     else:
         raise ValueError(
-            f"Unknown geometric refiner '{name}'. Valid choices: 'pca', 'obb', 'normals', 'slice', 'ransac_primitive'."
+            f"Unknown geometric refiner '{name}'. Valid choices: 'pca', 'obb', 'normals', 'slice', 'primitive_ransac'."
         )

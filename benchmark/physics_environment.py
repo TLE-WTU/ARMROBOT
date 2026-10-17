@@ -149,9 +149,12 @@ class PhysicsGraspEnvironment:
         width: int = 640,
         height: int = 480,
         fov: float = 60.0,
+        depth_noise_sigma: float = 0.002,
+        dropout_ratio: float = 0.10,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Renders synthetic RGB-D from top-down / angled view and transforms into world coordinates.
+        Injects realistic depth noise (Gaussian sigma) and random dropout (reflection artifacts).
         Returns: (points_world, colors)
         """
         cam_up = [0, 1, 0]
@@ -187,6 +190,16 @@ class PhysicsGraspEnvironment:
         p_world = (cam2world @ p_cam.T).T[:, :3].astype(np.float32)
         colors = rgb[mask].astype(np.float32)
 
+        # Realistic sensor noise injection (sigma ~ 2mm, dropout ~ 10%)
+        if depth_noise_sigma > 0 and len(p_world) > 0:
+            noise = np.random.normal(0.0, depth_noise_sigma, size=p_world.shape).astype(np.float32)
+            p_world = p_world + noise
+
+        if dropout_ratio > 0 and len(p_world) > 0:
+            keep_mask = np.random.rand(len(p_world)) >= dropout_ratio
+            p_world = p_world[keep_mask]
+            colors = colors[keep_mask]
+
         # Filter points to table workspace
         ws_mask = (
             (p_world[:, 0] > 0.15) & (p_world[:, 0] < 0.55) &
@@ -198,6 +211,8 @@ class PhysicsGraspEnvironment:
     def capture_dual_dynamic_pointclouds(
         self,
         target_pos: Tuple[float, float] = (0.35, 0.0),
+        depth_noise_sigma: float = 0.002,
+        dropout_ratio: float = 0.10,
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
         Captures point clouds from the 2 Dynamic Cameras (Dual Eye-in-Hand / Arm Dynamic Perception):
@@ -209,12 +224,16 @@ class PhysicsGraspEnvironment:
         # Camera 1: Wrist Dynamic Eye-in-Hand Camera (close-up angled view)
         cam1_eye = (tx + 0.08, ty - 0.06, self.table_z + 0.38)
         cam1_target = (tx, ty, self.table_z + 0.02)
-        pts1, col1 = self.capture_pointcloud(cam1_eye, cam1_target, fov=65.0)
+        pts1, col1 = self.capture_pointcloud(
+            cam1_eye, cam1_target, fov=65.0, depth_noise_sigma=depth_noise_sigma, dropout_ratio=dropout_ratio
+        )
 
         # Camera 2: Arm Dynamic Turret Camera (wide dynamic tracking view)
         cam2_eye = (tx - 0.12, ty + 0.08, self.table_z + 0.45)
         cam2_target = (tx, ty, self.table_z + 0.02)
-        pts2, col2 = self.capture_pointcloud(cam2_eye, cam2_target, fov=68.0)
+        pts2, col2 = self.capture_pointcloud(
+            cam2_eye, cam2_target, fov=68.0, depth_noise_sigma=depth_noise_sigma, dropout_ratio=dropout_ratio
+        )
 
         if len(pts1) == 0:
             return pts2, col2
@@ -237,25 +256,32 @@ class PhysicsGraspEnvironment:
         yaw_rad: float,
         target_obj_id: int,
         target_width: float = 0.04,
+        enforce_4dof_kinematics: bool = True,
     ) -> Dict[str, Any]:
         """
-        Executes physical approach, closing, and vertical lift.
-
-        Returns telemetry:
-        - success: bool (object lifted > 5cm above table and held)
-        - table_collision: bool
-        - initial_obj_z: float
-        - final_obj_z: float
-        - lift_height: float
+        Executes approach, closing, and vertical lift in simulation.
+        Enforces true 4-DOF physical arm kinematic orientation:
+        Because Franka Hand fingers move along local Y of the arm, closing yaw is
+        strictly locked to psi_executed = atan2(y, x) + pi/2.
         """
         init_obj_pos, _ = p.getBasePositionAndOrientation(target_obj_id)
 
-        # Finger length is 0.05m, joint origin at base_z - 0.04m, fingertips extend down to base_z - 0.065m.
-        # Position fingertips 6mm above table surface (table_z + 0.006m) to securely enclose object body without colliding.
+        # Determine true 4-DOF executed yaw
+        th1 = math.atan2(grasp_pos[1], grasp_pos[0])
+        feasible_yaw = (th1 + math.pi / 2.0 + math.pi) % (2.0 * math.pi) - math.pi
+
+        if enforce_4dof_kinematics:
+            executed_yaw = feasible_yaw
+        else:
+            executed_yaw = yaw_rad
+
+        diff = abs(yaw_rad - feasible_yaw) % math.pi
+        mismatch_deg = math.degrees(min(diff, math.pi - diff))
+
         gripper_base_z = self.table_z + 0.071
         pre_grasp_z = gripper_base_z + 0.08
 
-        gripper_orn = p.getQuaternionFromEuler([0, 0, yaw_rad])
+        gripper_orn = p.getQuaternionFromEuler([0, 0, executed_yaw])
 
         # Check table collision on approach
         fingertip_min_z = gripper_base_z - 0.065
@@ -323,4 +349,6 @@ class PhysicsGraspEnvironment:
             "initial_obj_z": float(init_obj_pos[2]),
             "final_obj_z": float(final_obj_pos[2]),
             "lift_height": float(lift_height),
+            "executed_yaw": float(executed_yaw),
+            "yaw_mismatch_deg": float(mismatch_deg),
         }

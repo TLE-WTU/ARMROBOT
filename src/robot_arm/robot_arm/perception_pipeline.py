@@ -163,3 +163,32 @@ def is_in_drop_zone(pos: np.ndarray, x_max: float = 0.24, y_max: float = -0.12) 
     """Returns True if position falls inside the designated placement drop zone."""
     return bool(pos[0] <= x_max and pos[1] <= y_max)
 
+
+def filter_curvilinear_workspace(
+    points: np.ndarray,
+    l1: float = 0.25,
+    l2: float = 0.20,
+    l_hand: float = 0.1334,
+    base_h: float = 0.175,
+    table_z: float = 0.225,
+) -> np.ndarray:
+    """
+    Filters point cloud according to true 4-DOF curvilinear reachable envelope.
+    Rejects points beyond max reach, inside singularity, or below table surface.
+    """
+    if points.shape[0] == 0:
+        return points
+    r = np.hypot(points[:, 0], points[:, 1])
+    dz = points[:, 2] + l_hand - base_h
+    d_sq = r**2 + dz**2
+    max_d_sq = (l1 + l2)**2
+    min_d_sq = (l1 - l2)**2
+    mask = (
+        (d_sq <= max_d_sq) &
+        (d_sq >= min_d_sq) &
+        (points[:, 2] >= table_z - 0.005) &
+        (points[:, 0] >= 0.05)
+    )
+    return points[mask]
+
+

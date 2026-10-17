@@ -54,7 +54,13 @@ try:
 except ImportError:
     KDTree = None
 
-from robot_arm.geometric_refinement import get_geometric_refiner, BaseGeometricRefiner
+from robot_arm.geometric_refinement import (
+    get_geometric_refiner,
+    BaseGeometricRefiner,
+    compute_4dof_closing_yaw,
+    evaluate_orientability_penalty,
+)
+from robot_arm.perception_pipeline import filter_curvilinear_workspace
 
 
 def encode_json(obj: Any) -> Any:
@@ -379,13 +385,14 @@ class GraspDetectionNode(Node):
     def _filter_workspace(self, points: np.ndarray) -> np.ndarray:
         if points.shape[0] == 0:
             return points
-        bounds = self.workspace_bounds
-        mask = (
-            (points[:, 0] >= bounds["x"][0]) & (points[:, 0] <= bounds["x"][1]) &
-            (points[:, 1] >= bounds["y"][0]) & (points[:, 1] <= bounds["y"][1]) &
-            (points[:, 2] >= bounds["z"][0]) & (points[:, 2] <= bounds["z"][1])
+        return filter_curvilinear_workspace(
+            points,
+            l1=0.25,
+            l2=0.20,
+            l_hand=0.1334,
+            base_h=0.175,
+            table_z=0.225,
         )
-        return points[mask]
 
     def _compute_grasp_yaw_pca(self, cluster_points: np.ndarray) -> float:
         if cluster_points.shape[0] < 5:
@@ -679,7 +686,7 @@ class GraspDetectionNode(Node):
             return points
         return points
 
-    def _diagnose_grasp(self, pos: np.ndarray, rot: np.ndarray, width: float, depth: float, score: float) -> dict:
+    def _diagnose_grasp(self, pos: np.ndarray, rot: np.ndarray, width: float, depth: float, score: float, yaw: float = 0.0) -> dict:
         u_x = rot[:, 0]
         norm_x = np.linalg.norm(u_x)
         u_x = u_x / norm_x if norm_x > 1e-4 else np.array([0.0, 0.0, -1.0])
@@ -690,21 +697,28 @@ class GraspDetectionNode(Node):
         if self.test_scenario == "transparent_bottle":
             dist_to_bottle = np.hypot(pos[0] - 0.28, pos[1] - 0.0)
             if dist_to_bottle > 0.035 and pos[1] < -0.03:
-                return {"status": "FAIL_GHOST_GRASP", "tag": "⚠️ [FAIL: GHOST GRASP]", "desc": "Ảo giác điểm ma do khúc xạ quang học (Refraction)", "is_failure": True, "color": (1.0, 0.0, 0.8, 0.95)}
+                return {"status": "FAIL_GHOST_GRASP", "tag": "[FAIL: GHOST GRASP]", "desc": "Optical refraction artifact (Ghost Point)", "is_failure": True, "color": (1.0, 0.0, 0.8, 0.95)}
 
         if self.test_scenario == "flat_object":
             if pos[2] <= table_surface_z + 0.010:
-                return {"status": "FAIL_FLAT_OBJECT", "tag": "⛔ [FAIL: FLAT OBJECT]", "desc": "Vật quá dẹt (2.5mm), thiếu khe hở luồn ngón kẹp (No Clearance)", "is_failure": True, "color": (1.0, 0.5, 0.0, 0.95)}
+                return {"status": "FAIL_FLAT_OBJECT", "tag": "[FAIL: FLAT OBJECT]", "desc": "Object too flat (thickness < 3mm, insufficient finger clearance)", "is_failure": True, "color": (1.0, 0.5, 0.0, 0.95)}
 
         if finger_tip_z < (table_surface_z - 0.002) or pos[2] < (table_surface_z + 0.004):
             penetration_mm = max(0.0, (table_surface_z - finger_tip_z) * 1000.0)
-            return {"status": "FAIL_TABLE_COLLISION", "tag": "💥 [FAIL: TABLE COLLISION]", "desc": f"Ngón kẹp đâm sâu xuống bàn ({penetration_mm:.1f}mm < 225mm)", "is_failure": True, "color": (1.0, 0.1, 0.1, 0.95)}
+            return {"status": "FAIL_TABLE_COLLISION", "tag": "[FAIL: TABLE COLLISION]", "desc": f"Fingertip table collision ({penetration_mm:.1f}mm penetration)", "is_failure": True, "color": (1.0, 0.1, 0.1, 0.95)}
 
         if self.test_scenario == "dense_clutter":
             if abs(pos[1]) < 0.03 and width > 0.035:
-                return {"status": "FAIL_CLUTTER_COLLISION", "tag": "⚡ [FAIL: CLUTTER COLLISION]", "desc": "Ngón kẹp va chạm vật lân cận (Semantic Blindness)", "is_failure": True, "color": (1.0, 0.2, 0.0, 0.95)}
+                return {"status": "FAIL_CLUTTER_COLLISION", "tag": "[FAIL: CLUTTER COLLISION]", "desc": "Gripper envelope collides with adjacent cluster", "is_failure": True, "color": (1.0, 0.2, 0.0, 0.95)}
 
-        return {"status": "OPTIMAL", "tag": "✅ [OPTIMAL]", "desc": "Điểm gắp an toàn hợp lệ", "is_failure": False, "color": (0.1, 0.9, 0.2, 0.95)}
+        # 4-DOF orientability check: verify orientation alignment against kinematic closing axis
+        feasible_yaw = compute_4dof_closing_yaw(pos[0], pos[1])
+        diff = abs(yaw - feasible_yaw) % math.pi
+        div_deg = math.degrees(min(diff, math.pi - diff))
+        if div_deg > 25.0:
+            return {"status": "FAIL_4DOF_YAW_LOCK", "tag": "[FAIL: 4-DOF YAW LOCK]", "desc": f"Kinematically unorientable on 4-DOF arm (error {div_deg:.1f} deg > 25 deg)", "is_failure": True, "color": (0.9, 0.4, 0.0, 0.95)}
+
+        return {"status": "OPTIMAL", "tag": "[OPTIMAL]", "desc": "Feasible, collision-free grasp candidate", "is_failure": False, "color": (0.1, 0.9, 0.2, 0.95)}
 
     def _detect_callback(self):
         if self.latest_pc is None:
@@ -766,7 +780,7 @@ class GraspDetectionNode(Node):
         table_collision_flag = False
         for g in grasps:
             pos, score, rot, width, depth, yaw = g
-            diag = self._diagnose_grasp(pos, rot, width, depth, score)
+            diag = self._diagnose_grasp(pos, rot, width, depth, score, yaw=yaw)
             if diag["status"] == "FAIL_TABLE_COLLISION": table_collision_flag = True
             diagnosed_grasps.append((g, diag))
 
