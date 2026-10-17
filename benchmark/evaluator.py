@@ -4,7 +4,7 @@ Unified Evaluation Engine for Comparing Geometric, Deep AI, and Hybrid Grasping.
 Runs standardized evaluation across:
 1. Pure Geometric Method: RANSAC Table Extraction + Euclidean Clustering + PCA / OBB Refiner
 2. Pure Deep Learning Method: AnyGrasp (GSNet) End-to-End Prediction
-3. Hybrid Method: AnyGrasp Affordances + Geometric Constraint Filter (Table clearance + IK + PCA)
+3. Hybrid Method: AnyGrasp Affordances + Geometric Refinement (without silent fallback)
 """
 
 import math
@@ -44,8 +44,8 @@ from benchmark.metrics import (
 class GraspEvaluator:
     """Executes head-to-head benchmarking between Geometric, AI, and Hybrid pipelines."""
 
-    def __init__(self, table_z: float = 0.0, ik_solver: Optional[IKSolver] = None):
-        self.table_z = table_z
+    def __init__(self, table_z: float = 0.225, ik_solver: Optional[IKSolver] = None):
+        self.table_z = float(table_z)
         self.ik_solver = ik_solver if ik_solver is not None else IKSolver()
         self.refiners = {
             "pca": PCARefiner(max_gripper_width=0.08),
@@ -69,7 +69,7 @@ class GraspEvaluator:
         if len(points) < 15:
             return [], (time.perf_counter() - t0) * 1000.0
 
-        # RANSAC table removal: filter points above table surface
+        # RANSAC table removal: isolate object cluster above table surface
         obj_mask = points[:, 2] > (self.table_z + 0.005)
         obj_points = points[obj_mask]
 
@@ -79,7 +79,7 @@ class GraspEvaluator:
         refiner = self.refiners.get(method.lower(), self.refiners["pca"])
         try:
             raw_grasps = refiner.generate_heuristic_grasps(obj_points, table_z=self.table_z)
-        except Exception as e:
+        except Exception:
             raw_grasps = self.refiners["pca"].generate_heuristic_grasps(obj_points, table_z=self.table_z)
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
@@ -126,14 +126,12 @@ class GraspEvaluator:
         try:
             gg = detector.get_grasp(pts_down, optional_params)
         except Exception as e:
-            print(f"AnyGrasp exception: {e}")
             gg = None
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
 
         grasps = []
         if gg is not None and len(gg) > 0:
-            # Sort by score descending
             for g in gg:
                 rot = np.array(g.rotation_matrix, dtype=np.float32)
                 trans = np.array(g.translation, dtype=np.float32)
@@ -141,7 +139,6 @@ class GraspEvaluator:
                 width = float(g.width)
                 depth = float(g.depth)
 
-                # Calculate yaw from AnyGrasp rotation matrix (add 90 deg offset for gripper closing axis alignment)
                 yaw_raw = math.atan2(rot[1, 0], rot[0, 0]) + math.pi / 2.0
                 yaw = (yaw_raw + math.pi) % (2 * math.pi) - math.pi
                 grasps.append({
@@ -161,45 +158,31 @@ class GraspEvaluator:
         detector: Any,
     ) -> Tuple[List[Dict[str, Any]], float]:
         """
-        Fair AI Baseline: AnyGrasp with 4-DOF kinematic adaptation:
-        1. Top-down approach steering
-        2. Virtual safety floor / table clearance elevation
-        3. Curvilinear reachable workspace filtering
-        4. 4-DOF closing yaw alignment: psi = atan2(y, x) + pi/2
-        5. Orientability penalty for asymmetric objects
+        Executes Fair Baseline: AnyGrasp with 4-DOF Kinematic Projection.
+        Filters and adapts raw AnyGrasp proposals to respect top-down approach,
+        table clearance, and 4-DOF closing yaw lock.
+        Maintains genuine predicted z and width without arbitrary constant overwriting.
         """
         t0 = time.perf_counter()
         raw_grasps, _ = self.run_anygrasp_pipeline(points, detector)
         valid_grasps = []
+
         for g in raw_grasps:
             pos = g["translation"].copy()
             rot = g["rotation"].copy()
-            width = float(g["width"])
-            depth = float(g["depth"])
-            score = float(g["score"])
-            target_yaw = float(g["yaw"])
+            score = g["score"]
+            width = g["width"]
+            depth = g["depth"]
+            target_yaw = g["yaw"]
 
-            # 1. Curvilinear reach check
-            r = math.hypot(pos[0], pos[1])
-            dz = pos[2] + 0.1334 - 0.175
-            d = math.hypot(r, dz)
-            if not (0.05 <= d <= 0.45):
-                continue
-
-            # 2. Safety floor table clearance
-            if pos[2] < (self.table_z + 0.025):
-                pos[2] = self.table_z + 0.030
-            if check_table_collision(pos, rot, table_z=self.table_z):
-                pos[2] = self.table_z + 0.035
-
-            # 3. 4-DOF yaw alignment & orientability penalty
+            # 1. 4-DOF closing yaw projection & orientability penalty
             feasible_yaw, div_deg, orient_mult = evaluate_orientability_penalty(
                 pos[0], pos[1], target_yaw, is_radial_symmetric=False
             )
             adapted_score = score * orient_mult
             adapted_rot = make_top_down_rotation(feasible_yaw)
 
-            # 4. Kinematic reachability check
+            # 2. Kinematic reachability check (dual-branch IK)
             reachable, _ = check_kinematic_feasibility(pos, feasible_yaw, self.ik_solver, rotation_matrix=adapted_rot)
             if not reachable:
                 continue
@@ -208,7 +191,7 @@ class GraspEvaluator:
                 "translation": pos,
                 "rotation": adapted_rot,
                 "score": adapted_score,
-                "width": min(0.08, max(0.01, width)),
+                "width": width,
                 "depth": depth,
                 "yaw": feasible_yaw,
             })
@@ -223,8 +206,9 @@ class GraspEvaluator:
         method: str = "pca",
     ) -> Tuple[List[Dict[str, Any]], float]:
         """
-        Executes Hybrid Architecture: AnyGrasp candidates filtered & refined
-        by the specified Geometric Refiner ('pca', 'obb', 'normals', 'slice', 'primitive_ransac').
+        Executes Hybrid Architecture: AnyGrasp proposals refined by Geometric Refiner.
+        Maintains true predicted z and width without constant overwrites.
+        Does NOT silently fallback to pure geometric if AI fails!
         """
         t0 = time.perf_counter()
         obj_mask = points[:, 2] > (self.table_z + 0.005)
@@ -250,27 +234,10 @@ class GraspEvaluator:
                 yaw = float(yaw)
                 width = float(width)
 
-                # 1. Enforce minimum table clearance
-                if pos[2] < (self.table_z + 0.025):
-                    pos[2] = self.table_z + 0.030
-                if check_table_collision(pos, rot, table_z=self.table_z):
-                    pos[2] = self.table_z + 0.035
-
-                # 2. Gripper Aperture Compliance
-                if width > 0.08:
-                    width = 0.070
-                elif width < 0.01:
-                    width = 0.035
-
-                # 3. Kinematic Reachability Check (dual-branch IK)
+                # Kinematic Reachability Check (dual-branch IK)
                 reachable, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver, rotation_matrix=rot)
                 if not reachable:
-                    alt_yaw = (yaw + math.pi) % (2 * math.pi) - math.pi
-                    alt_reachable, _ = check_kinematic_feasibility(pos, alt_yaw, self.ik_solver, rotation_matrix=rot)
-                    if alt_reachable:
-                        yaw = alt_yaw
-                    else:
-                        continue
+                    continue
 
                 valid_grasps.append({
                     "translation": pos,
@@ -281,11 +248,7 @@ class GraspEvaluator:
                     "yaw": yaw,
                 })
 
-        # Fallback to pure geometric if no hybrid candidates survived
-        if not valid_grasps:
-            geo_grasps, _ = self.run_geometric_pipeline(points, method=method)
-            valid_grasps = geo_grasps
-
+        # No silent fallback! If no hybrid candidates survived, return empty
         total_latency_ms = (time.perf_counter() - t0) * 1000.0
         return valid_grasps, total_latency_ms
 

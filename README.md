@@ -186,47 +186,53 @@ Benchmarked over $100,000$ consecutive evaluations on an Intel Core i7 x86_64 CP
 
 ---
 
-## 6. Empirical Benchmark Results
+## 6. Empirical Benchmark Results: Dex-Net Protocol on Canonical YCB Models
 
-Evaluated across $N = 40$ simulated rollouts per method ($N_{\text{total}} = 480$ trials) in PyBullet with dynamic contact physics, simulated sensor degradation (Gaussian depth noise $\sigma = 2\ \text{mm}$, 10% point cloud dropout), and diverse object geometries (`duck`, `lego`, `block`, `dense_clutter`).
+Evaluated across $N = 30$ simulated rollouts per method ($N_{\text{total}} = 360$ trials) in PyBullet with dynamic contact physics, simulated sensor degradation (Gaussian depth noise $\sigma = 2\ \text{mm}$, 10% point cloud dropout), and canonical YCB benchmark models:
+- **Cylindrical:** `YcbTomatoSoupCan` (standard symmetric cylinder)
+- **Asymmetric Bottle with Neck:** `YcbMustardBottle` (waistline / handle challenge)
+- **Prismatic Box:** `YcbGelatinBox` (rectangular geometry)
+- **Curved Asymmetric:** `YcbBanana` (4-DOF yaw lock stress test)
+- **Large Block:** `YcbFoamBrick` (wide span aperture test)
 
-### Overall Performance Leaderboard ($N = 40$)
+### Overall Performance Leaderboard ($N = 30$ Trials per Method)
 
 All success rates report **Wilson 95% Confidence Intervals**:
 
 | Rank | Method | Architecture | Success Rate (95% Wilson CI) | IK Feasibility | Table Collision | Mean Latency (ms) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: |
-| 1 | **Pure Geometric (CrossSectionSlice)** | CPU Analytical | **45.0%** [30.7%, 60.2%] | 97.5% | 0.0% | **0.43 ± 0.07** |
-| 2 | **Pure Geometric (PrimitiveRANSAC)** | CPU Analytical | **37.5%** [24.2%, 53.0%] | 100.0% | 0.0% | **1.66 ± 0.27** |
-| 3 | **Pure Geometric (PCA)** | CPU Analytical | **30.0%** [18.1%, 45.4%] | 100.0% | 0.0% | **0.31 ± 0.03** |
-| 4 | **Pure Geometric (SurfaceNormals)** | CPU Analytical | **30.0%** [18.1%, 45.4%] | 100.0% | 0.0% | **7.91 ± 4.25** |
-| 5 | **Hybrid (AnyGrasp + CrossSectionSlice)** | GPU AI + CPU Geometry | **17.5%** [8.7%, 31.9%] | 100.0% | 0.0% | **297.48 ± 199.12** |
-| 6 | **Pure Geometric (OBB)** | CPU Analytical | **15.0%** [7.1%, 29.1%] | 100.0% | 0.0% | **0.29 ± 0.02** |
-| 7 | **Hybrid (AnyGrasp + PrimitiveRANSAC)** | GPU AI + CPU Geometry | **12.5%** [5.5%, 26.1%] | 100.0% | 0.0% | **1438.84 ± 1159.93** |
-| 8 | **Hybrid (AnyGrasp + PCA)** | GPU AI + CPU Geometry | **10.0%** [4.0%, 23.1%] | 100.0% | 0.0% | **108.64 ± 55.44** |
-| 9 | **Hybrid (AnyGrasp + SurfaceNormals)** | GPU AI + CPU Geometry | **10.0%** [4.0%, 23.1%] | 100.0% | 0.0% | **193.66 ± 112.24** |
-| 10 | **Hybrid (AnyGrasp + OBB)** | GPU AI + CPU Geometry | **7.5%** [2.6%, 19.9%] | 100.0% | 0.0% | **196.33 ± 125.42** |
-| 11 | **AnyGrasp (4-DOF Adapted Baseline)** | Deep Learning Baseline | **0.0%** [0.0%, 8.8%] | 75.0% | 0.0% | **77.16 ± 5.92** |
-| 12 | **AnyGrasp (Raw 6-DOF Baseline)** | Deep Learning Baseline | **0.0%** [0.0%, 8.8%] | 57.5% | 70.0% | **91.22 ± 51.73** |
+| 1 | **Pure Geometric (PrimitiveRANSAC)** | CPU Analytical | **86.7%** [70.3%, 94.7%] | 90.0% | 0.0% | **1.69 ± 0.25** |
+| 2 | **Pure Geometric (SurfaceNormals)** | CPU Analytical | **83.3%** [66.4%, 92.7%] | 90.0% | 0.0% | **11.81 ± 4.84** |
+| 3 | **Pure Geometric (PCA)** | CPU Analytical | **80.0%** [62.7%, 90.5%] | 90.0% | 0.0% | **0.33 ± 0.06** |
+| 4 | **Pure Geometric (CrossSectionSlice)** | CPU Analytical | **70.0%** [52.1%, 83.3%] | 73.3% | 0.0% | **0.49 ± 0.09** |
+| 5 | **Pure Geometric (OBB)** | CPU Analytical | **30.0%** [16.7%, 47.9%] | 93.3% | 0.0% | **0.31 ± 0.04** |
+| 6 | **AnyGrasp (Raw 6-DOF Baseline)** | Deep Learning Baseline (GPU) | **23.3%** [11.8%, 40.9%] | 30.0% | 6.7% | **92.01 ± 58.39** |
+| 7 | **Hybrid (AnyGrasp + OBB)** | GPU AI + CPU Geometry | **16.7%** [7.3%, 33.6%] | 73.3% | 0.0% | **134.68 ± 87.51** |
+| 8 | **Hybrid (AnyGrasp + PrimitiveRANSAC)** | GPU AI + CPU Geometry | **16.7%** [7.3%, 33.6%] | 76.7% | 3.3% | **1037.13 ± 1088.92** |
+| 9 | **AnyGrasp (4-DOF Adapted Baseline)** | Deep Learning Baseline (GPU) | **13.3%** [5.3%, 29.7%] | 43.3% | 3.3% | **84.80 ± 13.94** |
+| 10 | **Hybrid (AnyGrasp + PCA)** | GPU AI + CPU Geometry | **13.3%** [5.3%, 29.7%] | 76.7% | 3.3% | **98.82 ± 58.86** |
+| 11 | **Hybrid (AnyGrasp + CrossSectionSlice)** | GPU AI + CPU Geometry | **13.3%** [5.3%, 29.7%] | 76.7% | 0.0% | **229.01 ± 198.53** |
+| 12 | **Hybrid (AnyGrasp + SurfaceNormals)** | GPU AI + CPU Geometry | **10.0%** [3.5%, 25.6%] | 76.7% | 3.3% | **149.40 ± 94.63** |
 
 *For complete per-object breakdowns and raw rollout CSV logs, see [ACADEMIC_BENCHMARK_REPORT.md](benchmark/ACADEMIC_BENCHMARK_REPORT.md) and [academic_benchmark_trial_log.csv](benchmark/academic_benchmark_trial_log.csv).*
 
 ### Candidate Filtration Funnel
 To eliminate survivorship bias, candidate counts are audited across each filtering stage:
 
-| Method | Generated Candidates | Rejected (Workspace) | Rejected (Table) | Rejected (4-DOF Yaw) | Final Executed |
+| Method | Total Generated | Rejected (Workspace) | Rejected (Table) | Rejected (4-DOF Yaw) | Final Executed |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Pure Geometric (CrossSectionSlice)** | 40 | 1 | 0 | 0 | 39 |
-| **Pure Geometric (PrimitiveRANSAC)** | 40 | 0 | 0 | 0 | 40 |
-| **Pure Geometric (PCA)** | 40 | 0 | 0 | 0 | 40 |
-| **AnyGrasp (Raw 6-DOF Baseline)** | 1,620 | 17 | 28 | 33 | 31 |
-| **AnyGrasp (4-DOF Adapted Baseline)** | 1,498 | 10 | 0 | 10 | 30 |
+| **Pure Geometric (PrimitiveRANSAC)** | 30 | 3 | 0 | 0 | 30 |
+| **Pure Geometric (SurfaceNormals)** | 30 | 3 | 0 | 0 | 30 |
+| **Pure Geometric (PCA)** | 30 | 3 | 0 | 0 | 30 |
+| **Pure Geometric (CrossSectionSlice)** | 30 | 8 | 0 | 0 | 30 |
+| **Pure Geometric (OBB)** | 30 | 2 | 0 | 0 | 30 |
+| **AnyGrasp (Raw 6-DOF Baseline)** | 11,184 | 21 | 3 | 29 | 18 |
+| **AnyGrasp (4-DOF Adapted Baseline)** | 5,927 | 17 | 0 | 17 | 13 |
 
 ### Statistical Hypothesis Testing (McNemar's Paired Test)
-Tested on matched random seeds ($N = 40$) with Edwards' continuity correction:
-- **Pure PCA vs. AnyGrasp (4-DOF Adapted Baseline):** Discordant pairs $b/c = 12/0$, $\chi^2 = 10.083$, $p = 0.0015$ ($p < 0.05$). **Statistically significant superiority of geometric synthesis.**
-- **Pure CrossSectionSlice vs. AnyGrasp (4-DOF Adapted):** Discordant pairs $b/c = 18/0$, $\chi^2 = 16.056$, $p < 0.0001$. **Statistically significant.**
-- **Pure PCA vs. Pure OBB:** Discordant pairs $b/c = 10/4$, $\chi^2 = 1.786$, $p = 0.1814$ (no statistically significant difference).
+Tested on matched random seeds ($N = 30$) with Edwards' continuity correction:
+- **Pure PCA vs. Pure OBB:** Discordant pairs $b/c = 16/1$, $\chi^2 = 11.529$, $p = 0.0007$ ($p < 0.05$). **Statistically significant superiority of PCA covariance alignment.**
+- **Pure CrossSectionSlice vs. Pure OBB:** Discordant pairs $b/c = 14/2$, $\chi^2 = 7.562$, $p = 0.006$ ($p < 0.05$). **Statistically significant.**
 
 ---
 

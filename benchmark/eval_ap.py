@@ -327,25 +327,22 @@ def candidates_from_benchmark_csv(csv_path: str) -> List[GraspCandidate]:
     Loads GraspCandidate objects from the CSV produced by
     ``benchmark/run_academic_benchmark.py``.
 
-    The CSV is expected to contain at minimum the columns:
-        method, object_id, score, success (bool), width
+    The CSV is expected to contain columns:
+        method, object/object_id, confidence_score/score, physical_success/success, target_width/width, yaw_mismatch_deg
 
-    A synthetic pair of contact points is generated from the success flag:
-        - success=True  → near-perfectly antipodal contacts (FC passes)
-        - success=False → parallel contacts (FC fails at any mu)
-
-    This allows the graspnet-style AP metric to be computed retrospectively
-    from existing benchmark outputs without re-running the full physics
-    simulation.
+    Contact points and surface normals are constructed from the true geometric aperture
+    and the actual 4-DOF orientation mismatch (yaw_mismatch_deg). If the yaw mismatch
+    exceeds the friction cone angle arctan(mu), force-closure naturally fails based on
+    classical contact mechanics rather than a circular label.
 
     Parameters
     ----------
     csv_path : str
-        Path to ``academic_benchmark_results.csv``.
+        Path to benchmark CSV (e.g., academic_benchmark_trial_log.csv or academic_benchmark_results.csv).
 
     Returns
     -------
-    list[GraspCandidate] grouped by method (the caller must filter by method).
+    list[GraspCandidate]
     """
     import csv
     from pathlib import Path
@@ -358,23 +355,24 @@ def candidates_from_benchmark_csv(csv_path: str) -> List[GraspCandidate]:
     with path.open(newline="") as f:
         reader = csv.DictReader(f)
         for row in reader:
-            success = row.get("success", "False").strip().lower() in ("true", "1", "yes")
-            score = float(row.get("score", 0.5))
-            width = float(row.get("width", 0.04))
-            object_id = row.get("object_id", row.get("scenario", "unknown")).strip()
+            # Flexible column parsing
+            success_str = row.get("physical_success", row.get("success", "False")).strip().lower()
+            success = success_str in ("true", "1", "yes")
 
-            if success:
-                # Perfect antipodal geometry: contacts directly opposite
-                p1 = np.array([0.0, -width / 2.0, 0.0])
-                p2 = np.array([0.0,  width / 2.0, 0.0])
-                n1 = np.array([0.0,  1.0, 0.0])   # points toward p2
-                n2 = np.array([0.0, -1.0, 0.0])   # points toward p1
-            else:
-                # Parallel normals: force-closure cannot be satisfied
-                p1 = np.array([0.0, -width / 2.0, 0.0])
-                p2 = np.array([0.0,  width / 2.0, 0.0])
-                n1 = np.array([0.0, 0.0, 1.0])    # perpendicular to closing axis
-                n2 = np.array([0.0, 0.0, 1.0])
+            score = float(row.get("confidence_score", row.get("score", 0.5)))
+            width = float(row.get("target_width", row.get("width", 0.04)))
+            object_id = row.get("object", row.get("object_id", row.get("scenario", "unknown"))).strip()
+            method = row.get("method", "unknown").strip()
+            yaw_dev = float(row.get("yaw_mismatch_deg", 0.0))
+
+            # Model contact geometry using true 4-DOF yaw divergence angle
+            dev_rad = math.radians(yaw_dev)
+            p1 = np.array([0.0, -width / 2.0, 0.0])
+            p2 = np.array([0.0,  width / 2.0, 0.0])
+
+            # Inward pointing normals rotated by yaw divergence
+            n1 = np.array([math.sin(dev_rad),  math.cos(dev_rad), 0.0])
+            n2 = np.array([math.sin(dev_rad), -math.cos(dev_rad), 0.0])
 
             candidates.append(GraspCandidate(
                 p1=p1, p2=p2, n1=n1, n2=n2,
