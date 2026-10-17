@@ -13,9 +13,9 @@ robot:
     x_max: 0.24
     y_max: -0.12
   gripper:
-    max_width: 0.07       # Franka finger opening (2 * 0.035m)
+    max_width: 0.08       # Franka finger opening (2 * 0.040m = 80mm)
     finger_tip_offset: 0.020
-    open_position: 0.035
+    open_position: 0.040
     close_position: 0.005 # Safe close position for gripped objects
     max_effort: 50.0
   pick_place:

@@ -54,24 +54,31 @@ class PhysicsGraspEnvironment:
         "brick": "YcbFoamBrick",
     }
 
-    def __init__(self, gui: bool = False, table_z: float = 0.225):
+    def __init__(self, gui: bool = False, table_z: float = 0.225, gripper_aperture_m: float = 0.080):
         self.gui = gui
         self.table_z = float(table_z)
+        self.gripper_aperture_m = float(gripper_aperture_m)
+        self.gripper_half_stroke = self.gripper_aperture_m / 2.0 + 0.002
         self.client_id = -1
         self.table_id = -1
         self.plane_id = -1
         self.gripper_id = -1
         self.constraint_id = -1
-        self.gripper_urdf_path = "/tmp/benchmark_floating_gripper.urdf"
+        mm_tag = int(round(self.gripper_aperture_m * 1000))
+        self.gripper_urdf_path = f"/tmp/benchmark_floating_gripper_{mm_tag}mm.urdf"
         self._ensure_gripper_urdf()
 
     def _ensure_gripper_urdf(self):
-        """Creates a floating Franka-like parallel-jaw gripper URDF with 88mm aperture."""
-        urdf_text = """<?xml version="1.0"?>
+        """Creates a floating Franka-like parallel-jaw gripper URDF with parameterized aperture."""
+        origin_y = self.gripper_aperture_m / 2.0 + 0.004
+        base_width_y = round(2.0 * origin_y + 0.004, 3)
+        half_stroke = self.gripper_half_stroke
+
+        urdf_text = f"""<?xml version="1.0"?>
 <robot name="floating_gripper">
   <link name="base">
-    <visual><geometry><box size="0.04 0.10 0.04"/></geometry><material name="dark"><color rgba="0.2 0.2 0.2 1"/></material></visual>
-    <collision><geometry><box size="0.04 0.10 0.04"/></geometry></collision>
+    <visual><geometry><box size="0.04 {base_width_y:.3f} 0.04"/></geometry><material name="dark"><color rgba="0.2 0.2 0.2 1"/></material></visual>
+    <collision><geometry><box size="0.04 {base_width_y:.3f} 0.04"/></geometry></collision>
     <inertial><mass value="0.5"/><inertia ixx="0.001" iyy="0.001" izz="0.001"/></inertial>
   </link>
   <link name="left_finger">
@@ -81,9 +88,9 @@ class PhysicsGraspEnvironment:
   </link>
   <joint name="left_joint" type="prismatic">
     <parent link="base"/><child link="left_finger"/>
-    <origin xyz="0 0.048 -0.04" rpy="0 0 0"/>
+    <origin xyz="0 {origin_y:.4f} -0.04" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="-0.046" upper="0.0" effort="150" velocity="0.2"/>
+    <limit lower="-{half_stroke:.4f}" upper="0.0" effort="150" velocity="0.2"/>
   </joint>
   <link name="right_finger">
     <visual><geometry><box size="0.02 0.008 0.06"/></geometry><material name="white"><color rgba="0.9 0.9 0.9 1"/></material></visual>
@@ -92,9 +99,9 @@ class PhysicsGraspEnvironment:
   </link>
   <joint name="right_joint" type="prismatic">
     <parent link="base"/><child link="right_finger"/>
-    <origin xyz="0 -0.048 -0.04" rpy="0 0 0"/>
+    <origin xyz="0 -{origin_y:.4f} -0.04" rpy="0 0 0"/>
     <axis xyz="0 1 0"/>
-    <limit lower="0.0" upper="0.046" effort="150" velocity="0.2"/>
+    <limit lower="0.0" upper="{half_stroke:.4f}" effort="150" velocity="0.2"/>
   </joint>
 </robot>
 """
@@ -335,8 +342,8 @@ class PhysicsGraspEnvironment:
 
         # 7. Close fingers to grasp object with 100N contact force
         for _ in range(60):
-            p.setJointMotorControl2(self.gripper_id, 0, p.POSITION_CONTROL, targetPosition=-0.046, force=100)
-            p.setJointMotorControl2(self.gripper_id, 1, p.POSITION_CONTROL, targetPosition=0.046, force=100)
+            p.setJointMotorControl2(self.gripper_id, 0, p.POSITION_CONTROL, targetPosition=-self.gripper_half_stroke, force=100)
+            p.setJointMotorControl2(self.gripper_id, 1, p.POSITION_CONTROL, targetPosition=self.gripper_half_stroke, force=100)
             p.stepSimulation()
 
         # 8. Verify dual-finger physical contact on target object
@@ -349,8 +356,8 @@ class PhysicsGraspEnvironment:
         for step in range(60):
             cur_z = gripper_base_z + 0.08 * (step / 60.0)
             p.changeConstraint(cid, [grasp_pos[0], grasp_pos[1], cur_z], gripper_orn, maxForce=300)
-            p.setJointMotorControl2(self.gripper_id, 0, p.POSITION_CONTROL, targetPosition=-0.046, force=100)
-            p.setJointMotorControl2(self.gripper_id, 1, p.POSITION_CONTROL, targetPosition=0.046, force=100)
+            p.setJointMotorControl2(self.gripper_id, 0, p.POSITION_CONTROL, targetPosition=-self.gripper_half_stroke, force=100)
+            p.setJointMotorControl2(self.gripper_id, 1, p.POSITION_CONTROL, targetPosition=self.gripper_half_stroke, force=100)
             p.stepSimulation()
 
         # 10. Hold for 120 simulation steps to test dynamic stability

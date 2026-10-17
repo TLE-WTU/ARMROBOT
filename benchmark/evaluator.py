@@ -44,15 +44,16 @@ from benchmark.metrics import (
 class GraspEvaluator:
     """Executes head-to-head benchmarking between Geometric, AI, and Hybrid pipelines."""
 
-    def __init__(self, table_z: float = 0.225, ik_solver: Optional[IKSolver] = None):
+    def __init__(self, table_z: float = 0.225, ik_solver: Optional[IKSolver] = None, max_gripper_width: float = 0.08):
         self.table_z = float(table_z)
+        self.max_gripper_width = float(max_gripper_width)
         self.ik_solver = ik_solver if ik_solver is not None else IKSolver()
         self.refiners = {
-            "pca": PCARefiner(max_gripper_width=0.08),
-            "obb": OBBRefiner(max_gripper_width=0.08),
-            "normals": SurfaceNormalRefiner(max_gripper_width=0.08),
-            "slice": CrossSectionSliceRefiner(max_gripper_width=0.08),
-            "primitive_ransac": PrimitiveRANSACRefiner(max_gripper_width=0.08),
+            "pca": PCARefiner(max_gripper_width=self.max_gripper_width),
+            "obb": OBBRefiner(max_gripper_width=self.max_gripper_width),
+            "normals": SurfaceNormalRefiner(max_gripper_width=self.max_gripper_width),
+            "slice": CrossSectionSliceRefiner(max_gripper_width=self.max_gripper_width),
+            "primitive_ransac": PrimitiveRANSACRefiner(max_gripper_width=self.max_gripper_width),
         }
 
     def run_geometric_pipeline(
@@ -292,11 +293,11 @@ class GraspEvaluator:
         ik_feas, _ = check_kinematic_feasibility(pos, yaw, self.ik_solver, rotation_matrix=rot)
 
         # 3. Aperture compliance
-        aperture_ok = check_aperture_compliance(width, max_gripper_width=0.08)
+        aperture_ok = check_aperture_compliance(width, max_gripper_width=self.max_gripper_width)
 
         # 4. Surface normal & Force-Closure evaluation
         closing_axis = np.array([math.cos(yaw), math.sin(yaw), 0.0])
-        half_w = min(width / 2.0, 0.035)
+        half_w = min(width / 2.0, self.max_gripper_width / 2.0)
         p1 = pos - closing_axis * half_w
         p2 = pos + closing_axis * half_w
 

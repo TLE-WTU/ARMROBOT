@@ -107,6 +107,8 @@ def run_benchmark(
     gui: bool = False,
     depth_noise_sigma: float = 0.002,
     dropout_ratio: float = 0.10,
+    gripper_mm: float = 80.0,
+    csv_suffix: str = "",
 ):
     if objects is None:
         objects = [
@@ -118,14 +120,16 @@ def run_benchmark(
         ]
 
     os.makedirs(output_dir, exist_ok=True)
-    csv_path = os.path.join(output_dir, "academic_benchmark_results.csv")
-    trial_log_path = os.path.join(output_dir, "academic_benchmark_trial_log.csv")
-    report_path = os.path.join(output_dir, "ACADEMIC_BENCHMARK_REPORT.md")
+    suffix = f"_{csv_suffix}" if csv_suffix else ""
+    csv_path = os.path.join(output_dir, f"academic_benchmark_results{suffix}.csv")
+    trial_log_path = os.path.join(output_dir, f"academic_benchmark_trial_log{suffix}.csv")
+    report_path = os.path.join(output_dir, f"ACADEMIC_BENCHMARK_REPORT{suffix}.md")
 
     table_z = 0.225
-    detector = init_anygrasp_detector(checkpoint_path)
-    env = PhysicsGraspEnvironment(gui=gui, table_z=table_z)
-    evaluator = GraspEvaluator(table_z=table_z, ik_solver=IKSolver())
+    gripper_aperture_m = float(gripper_mm) / 1000.0
+    detector = init_anygrasp_detector(checkpoint_path, max_gripper_width=gripper_aperture_m)
+    env = PhysicsGraspEnvironment(gui=gui, table_z=table_z, gripper_aperture_m=gripper_aperture_m)
+    evaluator = GraspEvaluator(table_z=table_z, ik_solver=IKSolver(), max_gripper_width=gripper_aperture_m)
 
     # Define the benchmarking configurations
     methods = [
@@ -177,6 +181,7 @@ def run_benchmark(
     print("\n" + "=" * 78)
     print("STARTING SCIENTIFIC YCB + DEX-NET BENCHMARK FOR 4-DOF MANIPULATOR")
     print(f"Manipulator Architecture: 4-DOF Serial (L1=0.25m, L2=0.20m, Lh=0.1334m, h0=0.175m)")
+    print(f"Gripper Opening Aperture: {gripper_mm:.1f} mm ({gripper_aperture_m:.4f} m)")
     print(f"Table Surface Height: z = {table_z:.3f} m")
     print(f"Canonical YCB Objects: {', '.join(objects)}")
     print(f"Sample Size: N = {total_trials_per_method} trials per method ({num_trials} per object)")
@@ -523,6 +528,8 @@ if __name__ == "__main__":
     parser.add_argument("--gui", action="store_true", help="Launch PyBullet GUI")
     parser.add_argument("--output_dir", default=SCRIPT_DIR, help="Directory to save CSV and report")
     parser.add_argument("--checkpoint", default=os.path.expanduser("~/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar"), help="AnyGrasp checkpoint")
+    parser.add_argument("--gripper_mm", type=float, default=80.0, help="Gripper opening aperture in mm (default: 80.0)")
+    parser.add_argument("--csv_suffix", default="", help="Suffix for output CSV and report files (e.g. 70mm, 80mm)")
     args = parser.parse_args()
 
     run_benchmark(
@@ -530,4 +537,6 @@ if __name__ == "__main__":
         checkpoint_path=args.checkpoint,
         output_dir=args.output_dir,
         gui=args.gui,
+        gripper_mm=args.gripper_mm,
+        csv_suffix=args.csv_suffix,
     )
