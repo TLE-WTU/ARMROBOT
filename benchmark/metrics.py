@@ -230,3 +230,42 @@ def evaluate_4dof_orientability(
     is_orientable = div_deg <= tolerance_deg
     return is_orientable, div_deg, alignment_score
 
+
+def compute_holm_bonferroni(
+    comparisons: List[Dict[str, Any]], alpha: float = 0.05
+) -> List[Dict[str, Any]]:
+    """
+    Applies the Holm-Bonferroni step-down procedure to control Family-Wise Error Rate (FWER).
+
+    Args:
+        comparisons: List of comparison dicts containing at least 'p_value'.
+        alpha: Overall significance level (default: 0.05).
+
+    Returns:
+        List of comparisons enriched with 'rank', 'holm_alpha', 'p_adj', 'significant_holm'.
+    """
+    m = len(comparisons)
+    if m == 0:
+        return []
+
+    # Sort by raw p-value ascending
+    sorted_items = sorted(comparisons, key=lambda x: x["p_value"])
+
+    cum_max = 0.0
+    for idx, item in enumerate(sorted_items):
+        rank = idx + 1
+        holm_alpha = alpha / float(m - rank + 1)
+        raw_p = item["p_value"]
+        # Adjusted p-value: max_{j <= i} ( (m - j + 1) * p_j ) capped at 1.0
+        val = raw_p * float(m - rank + 1)
+        cum_max = max(cum_max, val)
+        p_adj = min(1.0, cum_max)
+
+        item["rank"] = rank
+        item["holm_alpha"] = round(holm_alpha, 5)
+        item["p_adj"] = round(p_adj, 4)
+        item["significant_holm"] = bool(p_adj < alpha)
+
+    return sorted_items
+
+

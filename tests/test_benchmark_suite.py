@@ -155,6 +155,26 @@ def test_mcnemar_statistic():
     assert p_val_sig < 0.005
 
 
+def test_holm_bonferroni():
+    """Verify Holm-Bonferroni correction controls FWER properly."""
+    from benchmark.metrics import compute_holm_bonferroni
+
+    comps = [
+        {"name": "test1", "p_value": 0.001},
+        {"name": "test2", "p_value": 0.015},
+        {"name": "test3", "p_value": 0.040},
+        {"name": "test4", "p_value": 0.200},
+    ]
+    res = compute_holm_bonferroni(comps, alpha=0.05)
+    assert len(res) == 4
+    # First item should be lowest p-value
+    assert res[0]["name"] == "test1"
+    assert res[0]["rank"] == 1
+    assert res[0]["significant_holm"] is True
+    # Last item should not be significant
+    assert res[3]["significant_holm"] is False
+
+
 def test_4dof_orientability_evaluation():
     """Verify 4-DOF orientability check under coupled base rotation."""
     from benchmark.metrics import evaluate_4dof_orientability

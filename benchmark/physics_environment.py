@@ -370,8 +370,8 @@ class PhysicsGraspEnvironment:
             p.setJointMotorControl2(self.gripper_id, 1, p.POSITION_CONTROL, targetPosition=self.gripper_half_stroke, force=100)
             p.stepSimulation()
 
-        # 10. Hold for 120 simulation steps to test dynamic stability
-        for _ in range(120):
+        # 10. Hold for 240 simulation steps (1.0 second at 240 Hz) to test dynamic stability
+        for _ in range(240):
             p.stepSimulation()
 
         final_obj_pos, _ = p.getBasePositionAndOrientation(target_obj_id)

@@ -1,16 +1,18 @@
 # ACADEMIC BENCHMARK REPORT: KINEMATICALLY CONSTRAINED 4-DOF MANIPULATOR GRASP SYNTHESIS
-## Dex-Net Planar Grasping Protocol on Canonical YCB Object Benchmark
+## Benchmark Evaluation on YCB Object Subset (5 Canonical Objects)
 
-- **Date of Experiment:** 2026-10-17 21:04:50
+- **Date of Experiment:** 2026-10-17 21:15:15
 - **Author / Investigator:** Lê Mạnh Tiến
 - **Manipulator Kinematics:** 4-DOF Planar-Vertical Serial Manipulator ($L_1 = 0.25$ m, $L_2 = 0.20$ m, $L_h = 0.1334$ m, $h_0 = 0.175$ m)
 - **End-Effector:** Franka Hand Parallel-Jaw Gripper (stroke $w_{\max} = 0.08$ m)
 - **Kinematic Constraint:** Tangential closing axis locked to base azimuth $\psi_{\text{closing}} \equiv \text{atan2}(y, x) + \pi/2 \pmod{\pi}$
 - **Reachable Workspace Envelope:** Curvilinear volume $r_{\max}(z) = \sqrt{0.45^2 - (z + 0.1334 - 0.175)^2}$
-- **Benchmark Objects:** Canonical YCB Dataset (YcbTomatoSoupCan, YcbMustardBottle, YcbGelatinBox, YcbBanana, YcbFoamBrick)
+- **Benchmark Dataset:** Canonical YCB Object Subset (YcbTomatoSoupCan, YcbMustardBottle, YcbGelatinBox, YcbBanana, YcbFoamBrick)
+- **Reference Standard:** Yale-CMU-Berkeley (YCB) Object and Model Set (Calli et al., *IEEE RAM* 2015).
+- **Physical Asset Provenance:** High-fidelity meshes and collision URDFs from `eleramp/pybullet-object-models`.
 - **Perception System:** Dual Dynamic Cameras with simulated depth sensor noise (Gaussian $\sigma = 2.0$ mm, dropout = $10\%$)
 - **Sample Size:** $N = 30$ trials per method ($N_{\text{total}} = 360$ simulated rollouts)
-- **Physical Evaluation Criteria:** Dual-finger physical contact, dynamic lift $\Delta z \ge 4$ cm, hold for $1.0$ second, and table collision check via `p.getContactPoints()`.
+- **Physical Evaluation Criteria:** Dual-finger physical contact, dynamic lift $\Delta z \ge 4$ cm, hold for $1.0$ second (240 steps at 240 Hz), and table collision check via `p.getContactPoints()`.
 
 ---
 
@@ -31,18 +33,18 @@ All success rates are reported with **Wilson 95% Confidence Intervals (CI)**.
 
 | Rank | Method | Architecture Class | Grasp Success Rate (95% Wilson CI) | Force-Closure ($\mu=0.8$) | IK Feasibility | Table Collision | Mean Latency (ms) |
 | :---: | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| 1 | **Pure Geometric (PCA)** | Pure Geometric (CPU) | **80.0%** [62.7%, 90.5%] | 3.3% [0.6%, 16.7%] | 86.7% | 0.0% | **0.33 ± 0.04** |
-| 2 | **Pure Geometric (PrimitiveRANSAC)** | Pure Geometric (CPU) | **80.0%** [62.7%, 90.5%] | 10.0% [3.5%, 25.6%] | 86.7% | 0.0% | **1.75 ± 0.25** |
-| 3 | **Pure Geometric (SurfaceNormals)** | Pure Geometric (CPU) | **80.0%** [62.7%, 90.5%] | 10.0% [3.5%, 25.6%] | 86.7% | 0.0% | **11.20 ± 2.77** |
-| 4 | **Pure Geometric (CrossSectionSlice)** | Pure Geometric (CPU) | **56.7%** [39.2%, 72.6%] | 0.0% [0.0%, 11.4%] | 73.3% | 0.0% | **0.51 ± 0.10** |
-| 5 | **Pure Geometric (OBB)** | Pure Geometric (CPU) | **36.7%** [21.9%, 54.5%] | 0.0% [0.0%, 11.4%] | 86.7% | 0.0% | **0.33 ± 0.04** |
-| 6 | **AnyGrasp (Raw 6-DOF Baseline)** | Deep Learning Baseline (GPU) | **20.0%** [9.5%, 37.3%] | 0.0% [0.0%, 11.4%] | 26.7% | 6.7% | **91.90 ± 62.15** |
-| 7 | **Hybrid (AnyGrasp + PrimitiveRANSAC)** | Hybrid AI + Geometric (GPU+CPU) | **16.7%** [7.3%, 33.6%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **984.66 ± 1332.11** |
-| 8 | **Hybrid (AnyGrasp + OBB)** | Hybrid AI + Geometric (GPU+CPU) | **13.3%** [5.3%, 29.7%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **140.66 ± 122.53** |
-| 9 | **Hybrid (AnyGrasp + CrossSectionSlice)** | Hybrid AI + Geometric (GPU+CPU) | **13.3%** [5.3%, 29.7%] | 0.0% [0.0%, 11.4%] | 60.0% | 0.0% | **217.55 ± 236.37** |
-| 10 | **Hybrid (AnyGrasp + PCA)** | Hybrid AI + Geometric (GPU+CPU) | **6.7%** [1.8%, 21.3%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **101.86 ± 52.54** |
-| 11 | **Hybrid (AnyGrasp + SurfaceNormals)** | Hybrid AI + Geometric (GPU+CPU) | **6.7%** [1.8%, 21.3%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **153.31 ± 129.78** |
-| 12 | **AnyGrasp (4-DOF Adapted Baseline)** | Deep Learning Baseline (GPU) | **3.3%** [0.6%, 16.7%] | 0.0% [0.0%, 11.4%] | 26.7% | 0.0% | **82.80 ± 16.58** |
+| 1 | **Pure Geometric (PCA)** | Pure Geometric (CPU) | **80.0%** [62.7%, 90.5%] | 3.3% [0.6%, 16.7%] | 86.7% | 0.0% | **0.32 ± 0.03** |
+| 2 | **Pure Geometric (PrimitiveRANSAC)** | Pure Geometric (CPU) | **80.0%** [62.7%, 90.5%] | 3.3% [0.6%, 16.7%] | 86.7% | 0.0% | **1.49 ± 0.17** |
+| 3 | **Pure Geometric (SurfaceNormals)** | Pure Geometric (CPU) | **80.0%** [62.7%, 90.5%] | 10.0% [3.5%, 25.6%] | 86.7% | 0.0% | **11.37 ± 3.24** |
+| 4 | **Pure Geometric (CrossSectionSlice)** | Pure Geometric (CPU) | **56.7%** [39.2%, 72.6%] | 0.0% [0.0%, 11.4%] | 73.3% | 0.0% | **0.46 ± 0.06** |
+| 5 | **Pure Geometric (OBB)** | Pure Geometric (CPU) | **36.7%** [21.9%, 54.5%] | 0.0% [0.0%, 11.4%] | 86.7% | 0.0% | **0.31 ± 0.03** |
+| 6 | **AnyGrasp (Raw 6-DOF Baseline)** | Deep Learning Baseline (GPU) | **20.0%** [9.5%, 37.3%] | 0.0% [0.0%, 11.4%] | 26.7% | 6.7% | **92.91 ± 58.00** |
+| 7 | **Hybrid (AnyGrasp + PrimitiveRANSAC)** | Hybrid AI + Geometric (GPU+CPU) | **16.7%** [7.3%, 33.6%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **916.00 ± 1235.05** |
+| 8 | **Hybrid (AnyGrasp + OBB)** | Hybrid AI + Geometric (GPU+CPU) | **13.3%** [5.3%, 29.7%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **138.41 ± 118.29** |
+| 9 | **Hybrid (AnyGrasp + CrossSectionSlice)** | Hybrid AI + Geometric (GPU+CPU) | **10.0%** [3.5%, 25.6%] | 0.0% [0.0%, 11.4%] | 60.0% | 0.0% | **218.17 ± 229.96** |
+| 10 | **Hybrid (AnyGrasp + PCA)** | Hybrid AI + Geometric (GPU+CPU) | **6.7%** [1.8%, 21.3%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **100.47 ± 50.22** |
+| 11 | **Hybrid (AnyGrasp + SurfaceNormals)** | Hybrid AI + Geometric (GPU+CPU) | **6.7%** [1.8%, 21.3%] | 0.0% [0.0%, 11.4%] | 56.7% | 0.0% | **152.56 ± 123.58** |
+| 12 | **AnyGrasp (4-DOF Adapted Baseline)** | Deep Learning Baseline (GPU) | **3.3%** [0.6%, 16.7%] | 0.0% [0.0%, 11.4%] | 26.7% | 0.0% | **84.56 ± 15.94** |
 
 ---
 
@@ -52,29 +54,32 @@ To eliminate survivorship bias, candidate counts are audited across each filteri
 
 | Method | Total Generated | Rejected (Workspace) | Rejected (Table) | Rejected (4-DOF Yaw) | Final Valid Candidates | Rejection Rate (%) |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Pure Geometric (PCA)** | 30 | 4 | 0 | 0 | 30 | 0.0% |
-| **Pure Geometric (PrimitiveRANSAC)** | 30 | 4 | 0 | 0 | 30 | 0.0% |
-| **Pure Geometric (SurfaceNormals)** | 30 | 4 | 0 | 0 | 30 | 0.0% |
-| **Pure Geometric (CrossSectionSlice)** | 30 | 8 | 0 | 0 | 30 | 0.0% |
-| **Pure Geometric (OBB)** | 30 | 4 | 0 | 0 | 30 | 0.0% |
-| **AnyGrasp (Raw 6-DOF Baseline)** | 6161 | 22 | 5 | 30 | 15 | 99.8% |
-| **Hybrid (AnyGrasp + PrimitiveRANSAC)** | 18547 | 13 | 0 | 13 | 17 | 99.9% |
-| **Hybrid (AnyGrasp + OBB)** | 18097 | 13 | 0 | 13 | 17 | 99.9% |
-| **Hybrid (AnyGrasp + CrossSectionSlice)** | 18300 | 12 | 0 | 12 | 18 | 99.9% |
-| **Hybrid (AnyGrasp + PCA)** | 18200 | 13 | 0 | 13 | 17 | 99.9% |
-| **Hybrid (AnyGrasp + SurfaceNormals)** | 18097 | 13 | 0 | 13 | 17 | 99.9% |
-| **AnyGrasp (4-DOF Adapted Baseline)** | 3295 | 22 | 0 | 22 | 8 | 99.8% |
+| **Pure Geometric (PCA)** | 30 | 4 | 0 | 0 | 26 | 13.3% |
+| **Pure Geometric (PrimitiveRANSAC)** | 30 | 4 | 0 | 0 | 26 | 13.3% |
+| **Pure Geometric (SurfaceNormals)** | 30 | 4 | 0 | 0 | 26 | 13.3% |
+| **Pure Geometric (CrossSectionSlice)** | 30 | 8 | 0 | 0 | 22 | 26.7% |
+| **Pure Geometric (OBB)** | 30 | 4 | 0 | 0 | 26 | 13.3% |
+| **AnyGrasp (Raw 6-DOF Baseline)** | 30 | 22 | 3 | 5 | 0 | 100.0% |
+| **Hybrid (AnyGrasp + PrimitiveRANSAC)** | 30 | 13 | 0 | 0 | 17 | 43.3% |
+| **Hybrid (AnyGrasp + OBB)** | 30 | 13 | 0 | 0 | 17 | 43.3% |
+| **Hybrid (AnyGrasp + CrossSectionSlice)** | 30 | 12 | 0 | 0 | 18 | 40.0% |
+| **Hybrid (AnyGrasp + PCA)** | 30 | 13 | 0 | 0 | 17 | 43.3% |
+| **Hybrid (AnyGrasp + SurfaceNormals)** | 30 | 13 | 0 | 0 | 17 | 43.3% |
+| **AnyGrasp (4-DOF Adapted Baseline)** | 30 | 22 | 0 | 0 | 8 | 73.3% |
 
 ---
 
-## 4. Statistical Hypothesis Testing (McNemar's Paired Test)
+## 4. Statistical Hypothesis Testing (McNemar's Paired Test with Holm-Bonferroni Correction)
 
-For matched pairs on identical scene seeds ($N = 30$), McNemar's test with Edwards' continuity correction was applied:
+For matched pairs on identical scene seeds ($N = 30$), McNemar's test with Edwards' continuity correction was applied, and Family-Wise Error Rate (FWER) was controlled at $\alpha = 0.05$ using the Holm-Bonferroni step-down procedure:
 
-| Comparison Pair | Discordant Pairs ($b / c$) | $\chi^2$ Statistic | $p$-value | Significance ($\alpha = 0.05$) | Conclusion |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **Pure CrossSectionSlice vs Pure OBB** | 8 / 2 | 2.5 | 0.1138 | p >= 0.05 (Not Significant) | Comparable performance |
-| **Pure PCA vs Pure OBB** | 13 / 0 | 11.077 | 0.0009 | p < 0.05 (Significant) | Significant superiority |
+| Comparison Pair | Discordant Pairs ($b / c$) | $\chi^2$ Statistic | Raw $p$-value | Holm Rank ($k$) | Holm Threshold | Adjusted $p$-value | Significance (FWER $\alpha=0.05$) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Pure Geometric (PCA) vs AnyGrasp (4-DOF Adapted)** | 23 / 0 | 21.043 | 0.0000 | 1 | 0.0100 | 0.0000 | **Significant (p_adj < 0.05)** |
+| **Pure Geometric (PCA) vs Hybrid (AnyGrasp + PrimitiveRANSAC)** | 19 / 0 | 17.053 | 0.0000 | 2 | 0.0125 | 0.0000 | **Significant (p_adj < 0.05)** |
+| **Pure Geometric (PCA) vs AnyGrasp (Raw 6-DOF)** | 18 / 0 | 16.056 | 0.0001 | 3 | 0.0167 | 0.0003 | **Significant (p_adj < 0.05)** |
+| **Pure PCA vs Pure OBB** | 13 / 0 | 11.077 | 0.0009 | 4 | 0.0250 | 0.0018 | **Significant (p_adj < 0.05)** |
+| **Pure CrossSectionSlice vs Pure OBB** | 8 / 2 | 2.500 | 0.1138 | 5 | 0.0500 | 0.1138 | Not Significant |
 
 ---
 
@@ -83,9 +88,9 @@ For matched pairs on identical scene seeds ($N = 30$), McNemar's test with Edwar
 1. **Impact of 4-DOF Kinematic Constraint:**
    The Franka Hand fingers move tangentially along $\psi_{\text{closing}} \equiv \theta_1 + \pi/2$. On asymmetric objects like the mustard bottle and banana, models that cannot rotate the wrist must align the grasp along the available closing direction.
 2. **Computational Efficiency:**
-   Analytical geometric synthesis (PCA, OBB, SurfaceNormals, CrossSectionSlice, PrimitiveRANSAC) achieves robust physical lift in **0.3 - 8.0 ms on CPU** compared to **~100 - 300 ms on GPU**, achieving over $50\times$ to $200\times$ speedup while eliminating dedicated GPU hardware requirements.
-3. **Sensor Noise Robustness:**
-   Under Gaussian depth noise ($\sigma = 2$ mm) and 10% point cloud dropout, PCA covariance decomposition and RANSAC primitives maintain stable spatial orientation.
+   Analytical geometric synthesis achieves robust physical lift in **0.3 - 11.4 ms on CPU** compared to **84.6 - 916.0 ms on GPU**, achieving over $7\times$ to $2955\times$ speedup while eliminating dedicated GPU hardware requirements.
+3. **Sensor Depth Uncertainty Handling:**
+   All experiments incorporate synthetic Gaussian sensor noise ($\sigma = 2.0$ mm) and 10% random dropout to emulate RealSense D435 characteristics. Volumetric PCA decomposition and primitive RANSAC maintain stable spatial orientation across the point cloud variations.
 
 ---
 
@@ -94,5 +99,5 @@ For matched pairs on identical scene seeds ($N = 30$), McNemar's test with Edwar
 ### Standalone Pure Geometric Mode (Zero-GPU, Embedded CPU)
 ```bash
 PYTHONPATH=./:src/robot_arm pytest -v tests/
-python3 benchmark/run_academic_benchmark.py --trials 6
+python3 benchmark/run_academic_benchmark.py --trials 6 --gripper_mm 80
 ```

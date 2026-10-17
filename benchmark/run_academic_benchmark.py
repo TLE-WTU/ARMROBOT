@@ -53,7 +53,12 @@ if os.path.exists(ANYGRASP_SDK_PATH):
 from benchmark.physics_environment import PhysicsGraspEnvironment
 from benchmark.evaluator import GraspEvaluator
 from robot_arm.ik_solver import IKSolver
-from benchmark.metrics import compute_wilson_ci, compute_mcnemar_statistic, evaluate_4dof_orientability
+from benchmark.metrics import (
+    compute_wilson_ci,
+    compute_mcnemar_statistic,
+    evaluate_4dof_orientability,
+    compute_holm_bonferroni,
+)
 
 
 def init_anygrasp_detector(checkpoint_path: str, max_gripper_width: float = 0.08):
@@ -244,16 +249,17 @@ def run_benchmark(
                     analytical = evaluator.evaluate_analytical(grasps, points)
 
                     # Update filtration tracking
-                    n_cand = len(grasps)
                     f_stats = filtration_records[method]
-                    f_stats["generated"] += max(1, n_cand)
-                    if not analytical["ik_feasible"]:
+                    f_stats["generated"] += 1
+                    if not grasps:
                         f_stats["rej_workspace"] += 1
-                    if analytical["table_collision"]:
+                    elif not analytical["ik_feasible"]:
+                        f_stats["rej_workspace"] += 1
+                    elif analytical["table_collision"]:
                         f_stats["rej_table"] += 1
-                    if not analytical.get("orientable_4dof", True):
+                    elif not analytical.get("orientable_4dof", True):
                         f_stats["rej_yaw"] += 1
-                    if grasps:
+                    else:
                         f_stats["valid"] += 1
 
                     # Physical rollout in PyBullet with true 4-DOF executed yaw
@@ -413,18 +419,70 @@ def generate_academic_report(
         reverse=True,
     )
 
-    # Compute McNemar's paired test statistics
-    pca_seq = method_success_dict.get("Pure Geometric (PCA)", [])
-    obb_seq = method_success_dict.get("Pure Geometric (OBB)", [])
-    slice_seq = method_success_dict.get("Pure Geometric (CrossSectionSlice)", [])
-    mcnemar_pca_vs_obb = compute_paired_mcnemar(pca_seq, obb_seq)
-    mcnemar_slice_vs_obb = compute_paired_mcnemar(slice_seq, obb_seq)
+    # Compute McNemar's paired test statistics with Holm-Bonferroni correction
+    geom_ranked = [m for m in ranked if summary[m]["category"] == "Pure Geometric (CPU)"]
+    best_geom = geom_ranked[0] if geom_ranked else "Pure Geometric (SurfaceNormals)"
+    hybrid_ranked = [m for m in ranked if summary[m]["category"] == "Hybrid AI + Geometric (GPU+CPU)"]
+    best_hybrid = hybrid_ranked[0] if hybrid_ranked else None
+
+    raw_comparisons = []
+    # 1. Best Pure Geometric vs AnyGrasp (Raw 6-DOF)
+    if "AnyGrasp (Raw 6-DOF Baseline)" in method_success_dict:
+        comp = compute_paired_mcnemar(
+            method_success_dict[best_geom], method_success_dict["AnyGrasp (Raw 6-DOF Baseline)"]
+        )
+        comp["name"] = f"**{best_geom} vs AnyGrasp (Raw 6-DOF)**"
+        raw_comparisons.append(comp)
+
+    # 2. Best Pure Geometric vs AnyGrasp (4-DOF Adapted)
+    if "AnyGrasp (4-DOF Adapted Baseline)" in method_success_dict:
+        comp = compute_paired_mcnemar(
+            method_success_dict[best_geom], method_success_dict["AnyGrasp (4-DOF Adapted Baseline)"]
+        )
+        comp["name"] = f"**{best_geom} vs AnyGrasp (4-DOF Adapted)**"
+        raw_comparisons.append(comp)
+
+    # 3. Best Hybrid vs Best Pure Geometric
+    if best_hybrid and best_hybrid in method_success_dict:
+        comp = compute_paired_mcnemar(
+            method_success_dict[best_geom], method_success_dict[best_hybrid]
+        )
+        comp["name"] = f"**{best_geom} vs {best_hybrid}**"
+        raw_comparisons.append(comp)
+
+    # 4. Pure CrossSectionSlice vs Pure OBB
+    if "Pure Geometric (CrossSectionSlice)" in method_success_dict and "Pure Geometric (OBB)" in method_success_dict:
+        comp = compute_paired_mcnemar(
+            method_success_dict["Pure Geometric (CrossSectionSlice)"], method_success_dict["Pure Geometric (OBB)"]
+        )
+        comp["name"] = "**Pure CrossSectionSlice vs Pure OBB**"
+        raw_comparisons.append(comp)
+
+    # 5. Pure PCA vs Pure OBB
+    if "Pure Geometric (PCA)" in method_success_dict and "Pure Geometric (OBB)" in method_success_dict:
+        comp = compute_paired_mcnemar(
+            method_success_dict["Pure Geometric (PCA)"], method_success_dict["Pure Geometric (OBB)"]
+        )
+        comp["name"] = "**Pure PCA vs Pure OBB**"
+        raw_comparisons.append(comp)
+
+    holm_results = compute_holm_bonferroni(raw_comparisons, alpha=0.05)
+
+    # Latency speedup bounds
+    geom_lats = [summary[m]["mean_lat"] for m in methods if summary[m]["category"] == "Pure Geometric (CPU)"]
+    gpu_lats = [summary[m]["mean_lat"] for m in methods if summary[m]["category"] != "Pure Geometric (CPU)"]
+    min_geom = min(geom_lats) if geom_lats else 0.3
+    max_geom = max(geom_lats) if geom_lats else 12.0
+    min_gpu = min(gpu_lats) if gpu_lats else 80.0
+    max_gpu = max(gpu_lats) if gpu_lats else 1500.0
+    min_speedup = max(1.0, min_gpu / max_geom if max_geom > 0 else 10.0)
+    max_speedup = max(1.0, max_gpu / min_geom if min_geom > 0 else 200.0)
 
     now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     n_sample = summary[methods[0]]["n"]
 
     report = f"""# ACADEMIC BENCHMARK REPORT: KINEMATICALLY CONSTRAINED 4-DOF MANIPULATOR GRASP SYNTHESIS
-## Dex-Net Planar Grasping Protocol on Canonical YCB Object Benchmark
+## Benchmark Evaluation on YCB Object Subset (5 Canonical Objects)
 
 - **Date of Experiment:** {now_str}
 - **Author / Investigator:** Lê Mạnh Tiến
@@ -432,10 +490,12 @@ def generate_academic_report(
 - **End-Effector:** Franka Hand Parallel-Jaw Gripper (stroke $w_{{\\max}} = 0.08$ m)
 - **Kinematic Constraint:** Tangential closing axis locked to base azimuth $\\psi_{{\\text{{closing}}}} \\equiv \\text{{atan2}}(y, x) + \\pi/2 \\pmod{{\\pi}}$
 - **Reachable Workspace Envelope:** Curvilinear volume $r_{{\\max}}(z) = \\sqrt{{0.45^2 - (z + 0.1334 - 0.175)^2}}$
-- **Benchmark Objects:** Canonical YCB Dataset ({', '.join(objects)})
+- **Benchmark Dataset:** Canonical YCB Object Subset ({', '.join(objects)})
+- **Reference Standard:** Yale-CMU-Berkeley (YCB) Object and Model Set (Calli et al., *IEEE RAM* 2015).
+- **Physical Asset Provenance:** High-fidelity meshes and collision URDFs from `eleramp/pybullet-object-models`.
 - **Perception System:** Dual Dynamic Cameras with simulated depth sensor noise (Gaussian $\\sigma = {depth_noise_sigma*1000:.1f}$ mm, dropout = ${dropout_ratio*100:.0f}\\%$)
 - **Sample Size:** $N = {n_sample}$ trials per method ($N_{{\\text{{total}}}} = {len(results)}$ simulated rollouts)
-- **Physical Evaluation Criteria:** Dual-finger physical contact, dynamic lift $\\Delta z \\ge 4$ cm, hold for $1.0$ second, and table collision check via `p.getContactPoints()`.
+- **Physical Evaluation Criteria:** Dual-finger physical contact, dynamic lift $\\Delta z \\ge 4$ cm, hold for $1.0$ second (240 steps at 240 Hz), and table collision check via `p.getContactPoints()`.
 
 ---
 
@@ -488,15 +548,21 @@ To eliminate survivorship bias, candidate counts are audited across each filteri
     report += f"""
 ---
 
-## 4. Statistical Hypothesis Testing (McNemar's Paired Test)
+## 4. Statistical Hypothesis Testing (McNemar's Paired Test with Holm-Bonferroni Correction)
 
-For matched pairs on identical scene seeds ($N = {n_sample}$), McNemar's test with Edwards' continuity correction was applied:
+For matched pairs on identical scene seeds ($N = {n_sample}$), McNemar's test with Edwards' continuity correction was applied, and Family-Wise Error Rate (FWER) was controlled at $\\alpha = 0.05$ using the Holm-Bonferroni step-down procedure:
 
-| Comparison Pair | Discordant Pairs ($b / c$) | $\\chi^2$ Statistic | $p$-value | Significance ($\\alpha = 0.05$) | Conclusion |
-| :--- | :---: | :---: | :---: | :---: | :--- |
-| **Pure CrossSectionSlice vs Pure OBB** | {mcnemar_slice_vs_obb['b']} / {mcnemar_slice_vs_obb['c']} | {mcnemar_slice_vs_obb['chi2']} | {mcnemar_slice_vs_obb['p_value']} | {'p < 0.05 (Significant)' if mcnemar_slice_vs_obb['significant'] else 'p >= 0.05 (Not Significant)'} | {'Significant performance difference' if mcnemar_slice_vs_obb['significant'] else 'Comparable performance'} |
-| **Pure PCA vs Pure OBB** | {mcnemar_pca_vs_obb['b']} / {mcnemar_pca_vs_obb['c']} | {mcnemar_pca_vs_obb['chi2']} | {mcnemar_pca_vs_obb['p_value']} | {'p < 0.05 (Significant)' if mcnemar_pca_vs_obb['significant'] else 'p >= 0.05 (Not Significant)'} | {'Significant superiority' if mcnemar_pca_vs_obb['significant'] else 'Comparable performance'} |
+| Comparison Pair | Discordant Pairs ($b / c$) | $\\chi^2$ Statistic | Raw $p$-value | Holm Rank ($k$) | Holm Threshold | Adjusted $p$-value | Significance (FWER $\\alpha=0.05$) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+"""
+    for h in holm_results:
+        sig_str = "**Significant (p_adj < 0.05)**" if h["significant_holm"] else "Not Significant"
+        report += (
+            f"| {h['name']} | {h['b']} / {h['c']} | {h['chi2']:.3f} | {h['p_value']:.4f} | "
+            f"{h['rank']} | {h['holm_alpha']:.4f} | {h['p_adj']:.4f} | {sig_str} |\n"
+        )
 
+    report += f"""
 ---
 
 ## 5. Ablation & Key Findings
@@ -504,9 +570,9 @@ For matched pairs on identical scene seeds ($N = {n_sample}$), McNemar's test wi
 1. **Impact of 4-DOF Kinematic Constraint:**
    The Franka Hand fingers move tangentially along $\\psi_{{\\text{{closing}}}} \\equiv \\theta_1 + \\pi/2$. On asymmetric objects like the mustard bottle and banana, models that cannot rotate the wrist must align the grasp along the available closing direction.
 2. **Computational Efficiency:**
-   Analytical geometric synthesis (PCA, OBB, SurfaceNormals, CrossSectionSlice, PrimitiveRANSAC) achieves robust physical lift in **0.3 - 8.0 ms on CPU** compared to **~100 - 300 ms on GPU**, achieving over $50\\times$ to $200\\times$ speedup while eliminating dedicated GPU hardware requirements.
-3. **Sensor Noise Robustness:**
-   Under Gaussian depth noise ($\\sigma = 2$ mm) and 10% point cloud dropout, PCA covariance decomposition and RANSAC primitives maintain stable spatial orientation.
+   Analytical geometric synthesis achieves robust physical lift in **{min_geom:.1f} - {max_geom:.1f} ms on CPU** compared to **{min_gpu:.1f} - {max_gpu:.1f} ms on GPU**, achieving over ${min_speedup:.0f}\\times$ to ${max_speedup:.0f}\\times$ speedup while eliminating dedicated GPU hardware requirements.
+3. **Sensor Depth Uncertainty Handling:**
+   All experiments incorporate synthetic Gaussian sensor noise ($\\sigma = {depth_noise_sigma*1000:.1f}$ mm) and {dropout_ratio*100:.0f}% random dropout to emulate RealSense D435 characteristics. Volumetric PCA decomposition and primitive RANSAC maintain stable spatial orientation across the point cloud variations.
 
 ---
 
@@ -515,7 +581,7 @@ For matched pairs on identical scene seeds ($N = {n_sample}$), McNemar's test wi
 ### Standalone Pure Geometric Mode (Zero-GPU, Embedded CPU)
 ```bash
 PYTHONPATH=./:src/robot_arm pytest -v tests/
-python3 benchmark/run_academic_benchmark.py --trials {n_sample // len(objects)}
+python3 benchmark/run_academic_benchmark.py --trials {n_sample // len(objects)} --gripper_mm 80
 ```
 """
 
