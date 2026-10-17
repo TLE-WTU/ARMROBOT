@@ -1,57 +1,38 @@
+# Build artifacts
+build/
+install/
+log/
+
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
 *.egg-info/
-*.egg
-dist/
-build/
-install/
-log/
+.pytest_cache/
+*.pyc
 
-# ROS 2 / Colcon
-build/
-install/
-log/
-.colcon/
+# ROS2
+*.bag
+*.db3
 
-# IDE
+# Editor
 .vscode/
 .idea/
 *.swp
-*.swo
 *~
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Generated data (benchmark outputs)
-benchmark_results.csv
-
-# Compiled URDF
-*.urdf
-
-# Conda / Virtual environments
-.conda/
-.venv/
-env/
-venv/
-
-# Large model weights and checkpoints (> 100MB)
+# AnyGrasp / Model checkpoints
 *.tar
-*.pt
 *.pth
-*.bin
-*.onnx
-*.weights
-*.ckpt
+*.pt
 
-# Private licenses and credentials
-*.lic
-*.signature
-*.key
-id_rsa*
-id_ed25519*
-*.pem
+# Benchmark outputs (keep .md reports, ignore raw CSVs)
+benchmark_results*.csv
+
+# Media
+media/*.png
+media/*.jpg
+media/*.mp4

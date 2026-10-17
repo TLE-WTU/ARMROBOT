@@ -43,7 +43,7 @@ class GraspEvaluator:
 
     def __init__(self, table_z: float = 0.0, ik_solver: Optional[IKSolver] = None):
         self.table_z = table_z
-        self.ik_solver = ik_solver if ik_solver is not None else IKSolver(dof=6)
+        self.ik_solver = ik_solver if ik_solver is not None else IKSolver()
         self.refiners = {
             "pca": PCARefiner(max_gripper_width=0.08),
             "obb": OBBRefiner(max_gripper_width=0.08),

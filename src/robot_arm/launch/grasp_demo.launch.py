@@ -1,12 +1,12 @@
 """
-Launch full grasp demo: Gazebo + AnyGrasp detection + Pick-and-Place (parameterized by DoF).
+Launch full grasp demo: Gazebo + AnyGrasp detection + Pick-and-Place (4-DOF).
 
 Usage:
-    # Default scenario (Mug, Duck, Torus) with 5 DoF:
-    ros2 launch robot_arm grasp_demo.launch.py dof:=5
+    # Default scenario (Mug, Duck, Torus) with 4 DoF:
+    ros2 launch robot_arm grasp_demo.launch.py
 
     # Benchmark failure scenarios:
-    ros2 launch robot_arm grasp_demo.launch.py test_scenario:=transparent_bottle dof:=4
+    ros2 launch robot_arm grasp_demo.launch.py test_scenario:=transparent_bottle
 """
 
 import os
@@ -108,8 +108,7 @@ def launch_setup(context, *args, **kwargs):
     )
 
     # AnyGrasp Deep Learning Inference Service
-    conda_python = LaunchConfiguration("conda_python").perform(context)
-    checkpoint_path = LaunchConfiguration("checkpoint_path").perform(context)
+    conda_python = "/home/tienle/miniconda3/envs/robot_env/bin/python"
     anygrasp_service_script = PathJoinSubstitution([
         FindPackagePrefix("robot_arm"), "lib", "robot_arm", "anygrasp_service.py"
     ])
@@ -117,7 +116,7 @@ def launch_setup(context, *args, **kwargs):
         cmd=[
             conda_python,
             anygrasp_service_script,
-            "--checkpoint_path", checkpoint_path,
+            "--checkpoint_path", "/home/tienle/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar",
             "--socket_path", "/tmp/anygrasp_ipc.sock",
             "--max_gripper_width", "0.07",
             "--gripper_height", "0.04",
@@ -138,19 +137,19 @@ def launch_setup(context, *args, **kwargs):
 def generate_launch_description():
     dof_arg = DeclareLaunchArgument(
         "dof",
-        default_value="6",
-        description="Degrees of freedom of the arm (3, 4, 5, or 6)",
+        default_value="4",
+        description="Degrees of freedom of the arm (fixed to 4)",
     )
 
     grasp_mode_arg = DeclareLaunchArgument(
         "grasp_mode",
-        default_value="heuristic",
-        description="Grasp synthesis mode: 'heuristic', 'hybrid' (AI + Geometric Ensemble), 'anygrasp'",
+        default_value="hybrid",
+        description="Grasp synthesis mode: 'hybrid' (AI + Geometric Ensemble), 'anygrasp', 'heuristic'",
     )
 
     use_anygrasp_arg = DeclareLaunchArgument(
         "use_anygrasp",
-        default_value="false",
+        default_value="true",
         description="Launch AnyGrasp background inference service",
     )
 
@@ -172,26 +171,6 @@ def generate_launch_description():
         description="Enable RANSAC plane segmentation and geometric reduction",
     )
 
-    default_conda_py = os.environ.get(
-        "CONDA_PYTHON",
-        os.path.expanduser("~/miniconda3/envs/robot_env/bin/python")
-    )
-    conda_python_arg = DeclareLaunchArgument(
-        "conda_python",
-        default_value=default_conda_py,
-        description="Path to Python interpreter in AnyGrasp conda environment",
-    )
-
-    default_ckpt = os.environ.get(
-        "ANYGRASP_CHECKPOINT",
-        os.path.expanduser("~/anygrasp_sdk/grasp_detection/log/checkpoint_detection.tar")
-    )
-    checkpoint_path_arg = DeclareLaunchArgument(
-        "checkpoint_path",
-        default_value=default_ckpt,
-        description="Path to AnyGrasp model checkpoint file",
-    )
-
     return LaunchDescription([
         dof_arg,
         grasp_mode_arg,
@@ -199,7 +178,5 @@ def generate_launch_description():
         use_rviz_arg,
         test_scenario_arg,
         enable_ransac_arg,
-        conda_python_arg,
-        checkpoint_path_arg,
         OpaqueFunction(function=launch_setup),
     ])

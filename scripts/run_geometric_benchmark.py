@@ -234,7 +234,7 @@ class GeometricBenchmarkRunner:
     def __init__(self, table_z: float = 0.225):
         self.table_z = table_z
         self.dataset = BenchmarkDataset(table_z=table_z)
-        self.ik_solver = IKSolver(dof=5)
+        self.ik_solver = IKSolver()
         self.anygrasp_client = AnyGraspClient()
 
         # Initialize refiners

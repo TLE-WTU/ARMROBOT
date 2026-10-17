@@ -1,18 +1,12 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
 """
-Unified Pick-and-Place Orchestrator Node.
+Pick-and-Place Orchestrator Node — 4-DOF Robot Arm.
 
-Supports 3, 4, and 5 DOF arms using a single configurable FSM and unified IK solver.
+Implements a finite-state machine (FSM) that:
+  1. Subscribes to /anygrasp/best_grasp for target poses.
+  2. Plans a collision-free trajectory via analytical 4-DOF IK.
+  3. Executes open → pre-grasp → grasp → close → lift → place → open → home.
 """
-
-import os
-import sys
-
-# Ensure execution under Python with ROS 2 support (Ubuntu 24.04 uses Python 3.12 for ROS 2 Jazzy)
-if sys.version_info >= (3, 13) and "conda" in sys.executable.lower():
-    for _sys_py in ("/usr/bin/python3.12", "/usr/bin/python3"):
-        if os.path.exists(_sys_py):
-            os.execv(_sys_py, [_sys_py] + sys.argv)
 
 import math
 import threading
@@ -33,6 +27,13 @@ from sensor_msgs.msg import JointState
 
 from robot_arm.ik_solver import IKSolver
 
+# ---------------------------------------------------------------------------
+# Constants – 4-DOF configuration
+# ---------------------------------------------------------------------------
+_DOF = 4
+_JOINT_NAMES = ['joint1', 'joint2', 'joint3', 'joint4']
+
+
 class State(Enum):
     IDLE = auto()
     INITIALIZING = auto()
@@ -43,13 +44,30 @@ class State(Enum):
     MOVING_TO_PLACE = auto()
     OPENING_GRIPPER = auto()
     RETREATING = auto()
-    ERROR_RECOVERY = auto()
+
 
 class PickPlaceNode(Node):
+    """
+    ROS 2 node that orchestrates pick-and-place operations for a 4-DOF robot arm.
+
+    Parameters (all declared via ROS 2 parameter server):
+        pre_grasp_offset_z     – vertical offset above grasp point for approach (m)
+        post_grasp_lift_z      – vertical distance to lift after grasping (m)
+        place_position.{x,y,z} – absolute place target in base_link frame (m)
+        gripper_open_position  – gripper finger gap when open (m)
+        gripper_close_position – gripper finger gap when closed (m)
+        move_duration_sec      – default trajectory execution time (s)
+        gripper_duration_sec   – gripper action timeout (s)
+        table_top_z            – height of the table surface (m)
+        min_grasp_z_margin     – minimum clearance above table_top_z for grasping (m)
+    """
+
     def __init__(self):
         super().__init__("pick_place_node")
 
-        self.declare_parameter("dof", 5)
+        # ------------------------------------------------------------------
+        # ROS parameters (no `dof` parameter — hardcoded to 4)
+        # ------------------------------------------------------------------
         self.declare_parameter("pre_grasp_offset_z", 0.060)
         self.declare_parameter("post_grasp_lift_z", 0.060)
         self.declare_parameter("place_position.x", 0.20)
@@ -59,12 +77,9 @@ class PickPlaceNode(Node):
         self.declare_parameter("gripper_close_position", 0.005)
         self.declare_parameter("move_duration_sec", 2.0)
         self.declare_parameter("gripper_duration_sec", 1.0)
-        
-        # New parameters for magic numbers
         self.declare_parameter("table_top_z", 0.225)
         self.declare_parameter("min_grasp_z_margin", 0.022)
 
-        self.dof = self.get_parameter("dof").value
         self.pre_grasp_offset = self.get_parameter("pre_grasp_offset_z").value
         self.lift_height = self.get_parameter("post_grasp_lift_z").value
         self.place_pos = (
@@ -79,14 +94,22 @@ class PickPlaceNode(Node):
         self.table_top_z = self.get_parameter("table_top_z").value
         self.min_grasp_z_margin = self.get_parameter("min_grasp_z_margin").value
 
-        self.ik_solver = IKSolver(dof=self.dof, logger=self.get_logger())
-        self.joint_names = [f"joint{i+1}" for i in range(self.dof)]
+        # ------------------------------------------------------------------
+        # 4-DOF IK solver and joint configuration
+        # ------------------------------------------------------------------
+        self.ik_solver = IKSolver(logger=self.get_logger())
+        self.joint_names = _JOINT_NAMES          # ['joint1', 'joint2', 'joint3', 'joint4']
 
+        # ------------------------------------------------------------------
+        # FSM state and joint tracking
+        # ------------------------------------------------------------------
         self.state = State.INITIALIZING
         self.lock = threading.Lock()
-        self.current_joints = [0.0] * self.dof
-        self.has_received_joint_states = False
+        self.current_joints = [0.0] * _DOF
 
+        # ------------------------------------------------------------------
+        # ROS 2 subscriptions and action clients
+        # ------------------------------------------------------------------
         self.cb_group = ReentrantCallbackGroup()
         self.grasp_sub = self.create_subscription(
             PoseStamped, "/anygrasp/best_grasp", self._grasp_callback, 10,
@@ -108,6 +131,10 @@ class PickPlaceNode(Node):
         init_thread = threading.Thread(target=self._init_system, daemon=True)
         init_thread.start()
 
+    # ------------------------------------------------------------------
+    # Initialisation
+    # ------------------------------------------------------------------
+
     def _init_system(self):
         self.get_logger().info("Waiting for controllers to be available...")
         while not self.trajectory_client.wait_for_server(timeout_sec=2.0):
@@ -115,36 +142,38 @@ class PickPlaceNode(Node):
         while not self.gripper_client.wait_for_server(timeout_sec=2.0):
             self.get_logger().info("Waiting for /gripper_controller...")
 
-        self.get_logger().info("✅ Action servers connected! Waiting for initial /joint_states message...")
-        while not self.has_received_joint_states:
-            time.sleep(0.1)
-
-        self.get_logger().info(f"✅ Joint states synchronized: {self.current_joints}")
-        time.sleep(0.5)
+        self.get_logger().info("✅ Action servers connected! Waiting for controller activation...")
+        time.sleep(1.0)
         for attempt in range(5):
             if self._move_to_home():
                 break
-            self.get_logger().info(f"Retrying home move (attempt {attempt+2}/5)...")
+            self.get_logger().info(f"Retrying home move (attempt {attempt + 2}/5)...")
             time.sleep(1.0)
 
         with self.lock:
             self.state = State.IDLE
-        self.get_logger().info(f"🤖 Pick-and-Place Node ({self.dof} DoF) ready! Waiting for grasp poses...")
+        self.get_logger().info("🤖 Pick-and-Place Node (4-DOF) ready! Waiting for grasp poses...")
+
+    # ------------------------------------------------------------------
+    # Callbacks
+    # ------------------------------------------------------------------
 
     def _joint_state_callback(self, msg: JointState):
+        """Update internal joint position cache from /joint_states."""
         for i, name in enumerate(msg.name):
             if name in self.joint_names:
                 idx = self.joint_names.index(name)
                 if i < len(msg.position):
                     self.current_joints[idx] = msg.position[i]
-        self.has_received_joint_states = True
 
     def _extract_yaw_from_quaternion(self, q) -> float:
+        """Extract yaw (rotation around Z) from a geometry_msgs/Quaternion."""
         siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
         cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
         return math.atan2(siny_cosp, cosy_cosp)
 
     def _grasp_callback(self, msg: PoseStamped):
+        """Handle a new grasp pose; ignored when the FSM is busy."""
         with self.lock:
             if self.state != State.IDLE:
                 return
@@ -162,48 +191,71 @@ class PickPlaceNode(Node):
         )
         worker.start()
 
+    # ------------------------------------------------------------------
+    # Pick-and-place FSM
+    # ------------------------------------------------------------------
+
     def _execute_pick_and_place(self, gx: float, gy: float, gz: float, yaw: float):
+        """
+        Execute the full pick-and-place sequence for the 4-DOF arm.
+
+        Steps:
+            1. Open gripper
+            2. Move to pre-grasp position
+            3. Lower to grasp position
+            4. Close gripper
+            5. Lift object
+            6. Move to pre-place position
+            7. Lower to place position
+            8. Open gripper
+            9. Rise from place
+            10. Return home
+        """
         try:
             min_grasp_z = self.table_top_z + self.min_grasp_z_margin
             l1 = self.ik_solver.config['l1']
-            l2 = self.ik_solver.config.get('l2', self.ik_solver.config.get('l2_3dof', 0.20))
-            if self.dof == 4:
-                l_hand = self.ik_solver.config.get('l_hand_4dof', self.ik_solver.config.get('l_hand', 0.0))
-            elif self.dof == 5:
-                l_hand = self.ik_solver.config.get('l_hand', 0.0)
-            else:
-                l_hand = 0.0
+            l2 = self.ik_solver.config['l2']
+            l_hand = self.ik_solver.config['l_hand_4dof']
             base_height = self.ik_solver.config['base_height'] + self.ik_solver.config.get('base_z_offset', 0)
-            
+
+            # ------------------------------------------------------------------
+            # Workspace bounds check
+            # ------------------------------------------------------------------
             r_target = math.sqrt(gx**2 + gy**2)
             max_reach = l1 + l2
             if r_target > max_reach:
                 self._abort(f"Target too far: r={r_target:.3f} > max={max_reach:.3f}")
                 return
-                
+
             dz_max = math.sqrt(max_reach**2 - r_target**2)
             z_wrist_max = base_height + dz_max
-            target_z_max = z_wrist_max - l_hand if self.dof > 3 else z_wrist_max
-            
+            target_z_max = z_wrist_max - l_hand
+
             max_grasp_z = min(0.350, target_z_max - 0.01)
             grasp_z = max(min_grasp_z, min(max_grasp_z, gz))
             pre_grasp_z = min(grasp_z + self.pre_grasp_offset, target_z_max)
             lift_z = min(grasp_z + self.lift_height, target_z_max)
-            
+
             px, py, pz = self.place_pos
             pre_place_z = pz + self.pre_grasp_offset
-            
-            j_pre = self.ik_solver.inverse_kinematics(gx, gy, pre_grasp_z, yaw=yaw)
-            j_grasp = self.ik_solver.inverse_kinematics(gx, gy, grasp_z, yaw=yaw)
-            j_lift = self.ik_solver.inverse_kinematics(gx, gy, lift_z, yaw=yaw)
+
+            # ------------------------------------------------------------------
+            # Pre-compute all waypoints (fail-fast before moving)
+            # ------------------------------------------------------------------
+            j_pre       = self.ik_solver.inverse_kinematics(gx, gy, pre_grasp_z, yaw=yaw)
+            j_grasp     = self.ik_solver.inverse_kinematics(gx, gy, grasp_z, yaw=yaw)
+            j_lift      = self.ik_solver.inverse_kinematics(gx, gy, lift_z, yaw=yaw)
             j_pre_place = self.ik_solver.inverse_kinematics(px, py, pre_place_z, yaw=0.0)
-            j_place = self.ik_solver.inverse_kinematics(px, py, pz, yaw=0.0)
-            
+            j_place     = self.ik_solver.inverse_kinematics(px, py, pz, yaw=0.0)
+
             if not all([j_pre, j_grasp, j_lift, j_pre_place, j_place]):
-                self.get_logger().error(f"❌ Trajectory Pre-check failed! Some points are unreachable.")
+                self.get_logger().error("❌ Trajectory Pre-check failed! Some points are unreachable.")
                 self._abort("Kinematic trajectory planning failed.")
                 return
 
+            # ------------------------------------------------------------------
+            # Execute sequence
+            # ------------------------------------------------------------------
             self.get_logger().info("[1/8] Opening gripper...")
             if not self._send_gripper(self.gripper_open):
                 self._abort("Failed to open gripper")
@@ -244,7 +296,7 @@ class PickPlaceNode(Node):
                 self._abort("Failed to release")
                 return
             time.sleep(0.5)
-            
+
             if not self._send_trajectory(j_pre_place):
                 self.get_logger().warn("Failed to rise after place, returning home anyway")
 
@@ -261,29 +313,44 @@ class PickPlaceNode(Node):
             self.get_logger().error(f"Exception during pick and place: {e}")
             self._abort(str(e))
 
+    # ------------------------------------------------------------------
+    # Motion primitives
+    # ------------------------------------------------------------------
+
     def _send_trajectory(self, joint_positions: list, duration: float = None) -> bool:
+        """
+        Send a smooth cosine-interpolated trajectory to the joint controller.
+
+        Args:
+            joint_positions: target angles for all 4 joints (rad)
+            duration: total motion time in seconds; auto-computed if None
+
+        Returns:
+            True on success, False on rejection or timeout.
+        """
         goal = FollowJointTrajectory.Goal()
         goal.trajectory = JointTrajectory()
         goal.trajectory.joint_names = self.joint_names
 
         start_positions = list(self.current_joints)
         if duration is None:
-            max_disp = max(abs(joint_positions[i] - start_positions[i]) for i in range(self.dof))
+            max_disp = max(abs(joint_positions[i] - start_positions[i]) for i in range(_DOF))
             duration = max(1.5, max_disp / 0.6)
 
         num_points = 20
-        deltas = [joint_positions[i] - start_positions[i] for i in range(self.dof)]
+        deltas = [joint_positions[i] - start_positions[i] for i in range(_DOF)]
 
         for k in range(1, num_points + 1):
             tau = k / float(num_points)
             t = tau * duration
+            # Cosine interpolation for smooth velocity profile
             s = 0.5 * (1.0 - math.cos(math.pi * tau))
             v_factor = (math.pi / (2.0 * duration)) * math.sin(math.pi * tau)
 
             point = JointTrajectoryPoint()
-            point.positions = [start_positions[i] + s * deltas[i] for i in range(self.dof)]
-            point.velocities = [v_factor * deltas[i] for i in range(self.dof)]
-            
+            point.positions = [start_positions[i] + s * deltas[i] for i in range(_DOF)]
+            point.velocities = [v_factor * deltas[i] for i in range(_DOF)]
+
             sec = int(t)
             nsec = int((t - sec) * 1e9)
             point.time_from_start = Duration(sec=sec, nanosec=nsec)
@@ -328,6 +395,15 @@ class PickPlaceNode(Node):
         return True
 
     def _send_gripper(self, position: float) -> bool:
+        """
+        Send a gripper command and wait for completion.
+
+        Args:
+            position: target finger gap (m)
+
+        Returns:
+            True on success, False on rejection or timeout.
+        """
         goal = GripperCommand.Goal()
         goal.command.position = position
         goal.command.max_effort = 50.0
@@ -370,29 +446,16 @@ class PickPlaceNode(Node):
         return True
 
     def _move_to_home(self) -> bool:
-        home_joints = [0.0] * self.dof
-        if self.dof >= 3:
-            home_joints[1] = 0.0
-            home_joints[2] = 0.5
-        if self.dof >= 4:
-            home_joints[3] = 0.5
+        """Move all 4 joints to the predefined home configuration."""
+        home_joints = [0.0, 0.0, 0.5, 0.5]  # [joint1, joint2, joint3, joint4]
         return self._send_trajectory(home_joints, duration=2.5)
 
     def _abort(self, reason: str):
-        self.get_logger().error(f"❌ ABORT: {reason}. Entering safe recovery...")
+        """Log the abort reason and reset the FSM to IDLE."""
+        self.get_logger().error(f"❌ ABORT: {reason}")
         with self.lock:
-            self.state = State.ERROR_RECOVERY
-        try:
-            # 1. Release gripper
-            self._send_gripper(self.gripper_open)
-            # 2. Return arm to home position
-            self._move_to_home()
-        except Exception as e:
-            self.get_logger().warn(f"Error during abort recovery: {e}")
-        finally:
-            with self.lock:
-                self.state = State.IDLE
-            self.get_logger().info("✅ Safe recovery completed; FSM returned to IDLE.")
+            self.state = State.IDLE
+
 
 def main(args=None):
     rclpy.init(args=args)
@@ -405,8 +468,8 @@ def main(args=None):
         pass
     finally:
         node.destroy_node()
-        if rclpy.ok():
-            rclpy.shutdown()
+        rclpy.shutdown()
+
 
 if __name__ == "__main__":
     main()

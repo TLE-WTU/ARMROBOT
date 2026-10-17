@@ -3,7 +3,7 @@
 <package format="3">
   <name>robot_arm</name>
   <version>2.0.0</version>
-  <description>Unified 3/4/5-DOF Robotic Arm with AI Grasp Synthesis &amp; Perception Pipeline</description>
+  <description>High-Precision 4-DOF Robotic Manipulator with Analytical Kinematics, Franka Hand, and AI Geometric Grasp Synthesis Pipeline</description>
   <maintainer email="tle@todo.todo">TLE-WTU</maintainer>
   <license>MIT</license>
 

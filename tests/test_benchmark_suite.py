@@ -64,7 +64,7 @@ def test_aperture_compliance():
 
 def test_kinematic_feasibility_with_ik():
     """Valid reachable pose should return feasible; out-of-reach should return infeasible."""
-    solver = IKSolver(dof=5)
+    solver = IKSolver()
 
     # Reachable pose within arm workspace
     reachable_pos = np.array([0.30, 0.0, 0.25])
@@ -81,7 +81,7 @@ def test_kinematic_feasibility_with_ik():
 
 def test_evaluator_analytical_pipeline():
     """GraspEvaluator should correctly compute analytical metrics for geometric grasps."""
-    solver = IKSolver(dof=5)
+    solver = IKSolver()
     evaluator = GraspEvaluator(table_z=0.225, ik_solver=solver)
 
     # Generate synthetic planar cluster
@@ -101,7 +101,7 @@ def test_evaluator_analytical_pipeline():
 @pytest.mark.parametrize("method", ["pca", "obb", "normals", "slice", "primitive_ransac"])
 def test_evaluator_all_geometric_methods(method: str):
     """GraspEvaluator must support all 5 geometric methods without error."""
-    solver = IKSolver(dof=5)
+    solver = IKSolver()
     evaluator = GraspEvaluator(table_z=0.225, ik_solver=solver)
 
     rng = np.random.default_rng(123)

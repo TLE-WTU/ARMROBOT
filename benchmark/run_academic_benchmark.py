@@ -97,7 +97,7 @@ def run_benchmark(
 
     detector = init_anygrasp_detector(checkpoint_path)
     env = PhysicsGraspEnvironment(gui=gui, table_z=0.0)
-    evaluator = GraspEvaluator(table_z=0.0, ik_solver=IKSolver(dof=6))
+    evaluator = GraspEvaluator(table_z=0.0, ik_solver=IKSolver())
 
     # Define the 11 benchmarking configurations
     methods = [

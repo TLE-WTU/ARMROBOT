@@ -1,9 +1,9 @@
 """
-Launch Gazebo Harmonic with generic N DoF robot, controllers, and camera bridge.
+Launch Gazebo Harmonic with 4-DOF robot arm, controllers, and camera bridge.
 
 Usage:
-    ros2 launch robot_arm gazebo.launch.py dof:=3
-    ros2 launch robot_arm gazebo.launch.py dof:=5 world:=empty
+    ros2 launch robot_arm gazebo.launch.py
+    ros2 launch robot_arm gazebo.launch.py world:=empty
 """
 
 import os
@@ -44,8 +44,8 @@ def generate_launch_description():
     # ── Launch arguments ──
     dof_arg = DeclareLaunchArgument(
         "dof",
-        default_value="6",
-        description="Degrees of freedom of the arm (3, 4, 5, or 6)",
+        default_value="4",
+        description="Degrees of freedom of the arm (fixed to 4)",
     )
     
     world_arg = DeclareLaunchArgument(
@@ -100,7 +100,7 @@ def generate_launch_description():
         output="screen",
     )
 
-    # ros_gz_bridge for camera topics (Static overhead + Dual dynamic cameras)
+    # ros_gz_bridge for camera topics
     gz_bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
@@ -109,10 +109,6 @@ def generate_launch_description():
             "/camera/depth_image@sensor_msgs/msg/Image@gz.msgs.Image",
             "/camera/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/camera/camera_info@sensor_msgs/msg/CameraInfo@gz.msgs.CameraInfo",
-            "/camera_wrist/image@sensor_msgs/msg/Image@gz.msgs.Image",
-            "/camera_wrist/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
-            "/camera_arm/image@sensor_msgs/msg/Image@gz.msgs.Image",
-            "/camera_arm/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked",
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
         ],
         output="screen",
