@@ -1,361 +1,361 @@
-trial_id,timestamp,object,trial,seed,method,physical_success,success,table_collision,has_dual_contact,lift_height_m,force_closure_mu04,force_closure_mu08,ik_feasible,aperture_valid,orientable_4dof,yaw_mismatch_deg,target_width,target_z,confidence_score,latency_ms
-1,2026-10-17 21:14:10,YcbTomatoSoupCan,1,1042,Pure Geometric (PCA),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.04,0.2948,0.231,0.34
-1,2026-10-17 21:14:10,YcbTomatoSoupCan,1,1042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.2948,0.136,0.27
-1,2026-10-17 21:14:10,YcbTomatoSoupCan,1,1042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0706,False,False,True,True,True,0.0,0.045,0.2948,0.928,13.09
-1,2026-10-17 21:14:10,YcbTomatoSoupCan,1,1042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0462,0.2734,0.56,0.41
-1,2026-10-17 21:14:10,YcbTomatoSoupCan,1,1042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0695,False,False,True,True,True,0.0,0.0734,0.2948,0.85,1.61
-1,2026-10-17 21:14:10,YcbTomatoSoupCan,1,1042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0,False,False,True,True,False,62.4,0.08,0.3196,0.017,393.57
-1,2026-10-17 21:14:11,YcbTomatoSoupCan,1,1042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3196,0.004,112.82
-1,2026-10-17 21:14:11,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3196,0.042,226.97
-1,2026-10-17 21:14:11,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0708,False,False,True,True,True,0.0,0.08,0.3196,0.1,273.51
-1,2026-10-17 21:14:11,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3196,0.043,294.77
-1,2026-10-17 21:14:12,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0462,0.2965,0.111,465.08
-1,2026-10-17 21:14:14,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.0741,0.3196,0.103,1933.45
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,Pure Geometric (PCA),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.04,0.2978,0.154,0.27
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,Pure Geometric (OBB),True,True,False,True,0.0715,False,False,True,True,True,0.0,0.08,0.2978,0.4,0.28
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.045,0.2978,0.918,8.82
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0434,False,False,True,True,True,0.0,0.0472,0.2487,0.175,0.4
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0706,False,False,True,True,True,0.0,0.0752,0.2978,0.85,1.5
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.99
-2,2026-10-17 21:14:14,YcbTomatoSoupCan,2,2042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,82.88
-2,2026-10-17 21:14:15,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.41
-2,2026-10-17 21:14:15,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,106.58
-2,2026-10-17 21:14:15,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,116.06
-2,2026-10-17 21:14:15,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,107.22
-2,2026-10-17 21:14:15,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,108.76
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,Pure Geometric (PCA),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.04,0.2983,0.064,0.27
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,Pure Geometric (OBB),False,False,False,False,-0.0137,False,False,True,True,True,0.0,0.08,0.2983,0.4,0.27
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.045,0.2983,0.787,8.48
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0714,False,False,True,True,True,0.0,0.0319,0.2979,0.756,0.4
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0695,False,False,True,True,True,0.0,0.0722,0.2983,0.85,1.45
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,48.05
-3,2026-10-17 21:14:15,YcbTomatoSoupCan,3,3042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,45.66
-3,2026-10-17 21:14:16,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.08,0.3191,0.006,53.01
-3,2026-10-17 21:14:16,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3191,0.1,63.95
-3,2026-10-17 21:14:16,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0704,False,False,True,True,True,0.0,0.08,0.3191,0.033,68.61
-3,2026-10-17 21:14:16,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0704,False,False,True,True,True,0.0,0.0319,0.3085,0.17,86.25
-3,2026-10-17 21:14:16,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.0733,0.3191,0.121,347.86
-4,2026-10-17 21:14:16,YcbTomatoSoupCan,4,4042,Pure Geometric (PCA),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.04,0.302,0.002,0.27
-4,2026-10-17 21:14:16,YcbTomatoSoupCan,4,4042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.302,0.008,0.25
-4,2026-10-17 21:14:16,YcbTomatoSoupCan,4,4042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.045,0.302,0.811,9.63
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.005,False,False,True,True,True,0.0,0.0403,0.2616,0.586,0.42
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0695,False,False,True,True,True,0.0,0.0719,0.302,0.85,1.59
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0701,False,False,True,True,False,63.36,0.08,0.321,0.052,43.56
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,AnyGrasp (4-DOF Adapted Baseline),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.08,0.321,0.01,55.29
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3236,0.063,121.45
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3236,0.1,160.34
-4,2026-10-17 21:14:17,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3236,0.028,188.35
-4,2026-10-17 21:14:18,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.0403,0.2926,0.187,303.05
-4,2026-10-17 21:14:19,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.07,0.3236,0.197,1624.9
-5,2026-10-17 21:14:19,YcbTomatoSoupCan,5,5042,Pure Geometric (PCA),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.04,0.2983,0.8,0.29
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.2983,0.4,0.29
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.045,0.2983,0.936,10.28
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0587,0.2983,0.849,0.38
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.04,0.2983,0.7,1.43
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0,False,False,True,True,False,63.05,0.08,0.301,0.015,49.31
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.301,0.003,62.72
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.301,0.003,110.08
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.301,0.1,153.31
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.301,0.191,166.07
-5,2026-10-17 21:14:20,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.0587,0.2996,0.167,229.8
-5,2026-10-17 21:14:22,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0696,False,False,True,True,True,0.0,0.0733,0.301,0.104,1352.68
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,Pure Geometric (PCA),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.04,0.297,0.218,0.3
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,False,True,True,0.0,0.08,0.297,0.4,0.3
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0701,False,True,True,True,True,0.0,0.045,0.297,0.93,13.07
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.044,0.2485,0.293,0.48
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.0683,0.297,0.85,1.47
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,40.41
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,40.27
-6,2026-10-17 21:14:22,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + PCA),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.08,0.3215,0.022,59.28
-6,2026-10-17 21:14:23,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0713,False,False,True,True,True,0.0,0.08,0.3212,0.1,73.45
-6,2026-10-17 21:14:23,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.3215,0.113,90.59
-6,2026-10-17 21:14:23,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0304,False,False,True,True,True,0.0,0.044,0.285,0.064,129.91
-6,2026-10-17 21:14:23,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.071,0.3215,0.125,581.03
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Pure Geometric (PCA),True,True,False,True,0.0542,False,False,False,True,True,0.0,0.04,0.3472,0.383,0.32
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Pure Geometric (OBB),False,False,False,False,0.0,False,False,False,True,True,0.0,0.08,0.3472,0.4,0.31
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0542,False,False,False,True,True,0.0,0.045,0.3472,0.867,14.99
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.075,False,False,False,True,True,0.0,0.0313,0.4049,0.258,0.46
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0542,False,False,False,True,True,0.0,0.04,0.3472,0.7,1.6
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.071,False,False,False,True,False,65.93,0.042,0.3953,0.0,92.63
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,111.39
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,76.92
-7,2026-10-17 21:14:24,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,101.43
-7,2026-10-17 21:14:25,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,125.23
-7,2026-10-17 21:14:25,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,195.72
-7,2026-10-17 21:14:26,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,898.19
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Pure Geometric (PCA),True,True,False,True,0.0568,False,False,True,True,True,0.0,0.04,0.3499,0.002,0.34
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Pure Geometric (OBB),True,True,False,True,0.0498,False,False,True,True,True,0.0,0.08,0.3499,0.4,0.33
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0568,False,False,True,True,True,0.0,0.045,0.3499,0.895,18.61
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.0307,0.4071,0.631,0.46
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0568,False,False,True,True,True,0.0,0.04,0.3499,0.7,1.64
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0758,False,False,False,True,False,66.89,0.0411,0.4095,0.001,91.54
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,93.55
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,32.96
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,33.1
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,47.76
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,38.27
-8,2026-10-17 21:14:26,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,71.19
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Pure Geometric (PCA),True,True,False,True,0.0521,False,False,False,True,True,0.0,0.04,0.3452,0.8,0.33
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.3452,0.4,0.34
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0519,False,False,False,True,True,0.0,0.045,0.3452,0.95,16.65
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.029,0.4059,0.08,0.49
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0521,False,False,False,True,True,0.0,0.04,0.3452,0.7,1.56
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.076,False,False,False,True,False,67.86,0.0215,0.4171,0.001,95.09
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.56
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,108.34
-9,2026-10-17 21:14:27,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,137.12
-9,2026-10-17 21:14:28,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,176.13
-9,2026-10-17 21:14:28,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,289.73
-9,2026-10-17 21:14:29,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,1354.15
-10,2026-10-17 21:14:29,YcbMustardBottle,4,4179,Pure Geometric (PCA),True,True,False,True,0.0498,False,False,False,True,True,0.0,0.04,0.3433,0.192,0.33
-10,2026-10-17 21:14:29,YcbMustardBottle,4,4179,Pure Geometric (OBB),True,True,False,True,0.0498,False,False,False,True,True,0.0,0.08,0.3433,0.4,0.34
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0499,False,False,False,True,True,0.0,0.045,0.3433,0.898,13.97
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0754,False,False,False,True,True,0.0,0.028,0.4064,0.037,0.45
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0499,False,False,False,True,True,0.0,0.04,0.3433,0.7,2.08
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.073,False,False,False,True,False,67.33,0.0494,0.3936,0.001,98.71
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,95.55
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,37.34
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,41.13
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,53.05
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,58.8
-10,2026-10-17 21:14:30,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,184.34
-11,2026-10-17 21:14:30,YcbMustardBottle,5,5179,Pure Geometric (PCA),True,True,False,True,0.0429,False,False,True,True,True,0.0,0.04,0.3361,0.314,0.33
-11,2026-10-17 21:14:30,YcbMustardBottle,5,5179,Pure Geometric (OBB),False,False,False,True,0.0305,False,False,True,True,True,0.0,0.08,0.3361,0.4,0.36
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Pure Geometric (SurfaceNormals),True,True,False,True,0.043,False,False,True,True,True,0.0,0.045,0.3361,0.949,17.54
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.0281,0.4074,0.214,0.49
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.043,False,False,True,True,True,0.0,0.04,0.3361,0.7,1.63
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0738,False,False,False,True,False,67.12,0.0337,0.3972,0.001,92.86
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,98.49
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,66.36
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,82.71
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,111.6
-11,2026-10-17 21:14:31,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,160.74
-11,2026-10-17 21:14:32,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,710.71
-12,2026-10-17 21:14:32,YcbMustardBottle,6,6179,Pure Geometric (PCA),True,True,False,True,0.0496,False,True,False,True,True,0.0,0.04,0.3439,0.075,0.34
-12,2026-10-17 21:14:32,YcbMustardBottle,6,6179,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.3439,0.4,0.34
-12,2026-10-17 21:14:32,YcbMustardBottle,6,6179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0496,False,False,False,True,True,0.0,0.045,0.3439,0.899,17.23
-12,2026-10-17 21:14:32,YcbMustardBottle,6,6179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.031,0.4068,0.113,0.48
-12,2026-10-17 21:14:32,YcbMustardBottle,6,6179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0497,False,True,False,True,True,0.0,0.04,0.3439,0.7,1.65
-12,2026-10-17 21:14:32,YcbMustardBottle,6,6179,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,91.78
-12,2026-10-17 21:14:33,YcbMustardBottle,6,6179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,91.7
-12,2026-10-17 21:14:33,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.015,0.2303,0.0,60.3
-12,2026-10-17 21:14:33,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.015,0.3439,0.1,120.81
-12,2026-10-17 21:14:33,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.015,0.2303,0.0,147.03
-12,2026-10-17 21:14:33,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.031,0.3186,0.006,239.81
-12,2026-10-17 21:14:34,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.015,0.2303,0.0,1063.9
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Pure Geometric (PCA),True,True,False,True,0.0708,False,False,True,True,True,0.0,0.04,0.279,0.001,0.33
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Pure Geometric (OBB),True,True,False,True,0.071,False,False,True,True,True,0.0,0.08,0.279,0.001,0.32
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0709,False,False,True,True,True,0.0,0.045,0.279,0.875,9.02
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Pure Geometric (CrossSectionSlice),False,False,False,True,-0.0257,False,False,True,True,True,0.0,0.0313,0.3122,0.452,0.59
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0713,False,False,True,True,True,0.0,0.04,0.279,0.7,1.38
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,True,True,False,54.29,0.015,0.2276,0.007,97.78
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,True,True,0.0,0.015,0.2276,0.002,93.98
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,36.89
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,38.26
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,44.04
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,52.59
-13,2026-10-17 21:14:35,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,139.87
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Pure Geometric (PCA),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.04,0.2795,0.155,0.32
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Pure Geometric (OBB),False,False,False,True,-0.0,False,False,False,True,True,0.0,0.08,0.2795,0.057,0.3
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Pure Geometric (SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.045,0.2795,0.934,8.19
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0051,False,False,True,True,True,0.0,0.0346,0.2464,0.042,0.47
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Pure Geometric (PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.04,0.2795,0.7,1.43
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,AnyGrasp (Raw 6-DOF Baseline),False,False,True,False,0.0,False,False,False,True,False,35.51,0.0228,0.2267,0.003,91.04
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,97.62
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,137.36
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,161.69
-14,2026-10-17 21:14:36,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,162.9
-14,2026-10-17 21:14:37,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0346,0.2792,0.015,212.46
-14,2026-10-17 21:14:37,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,536.57
-15,2026-10-17 21:14:37,YcbGelatinBox,3,3316,Pure Geometric (PCA),True,True,False,True,0.074,False,False,True,True,True,0.0,0.04,0.2824,0.02,0.31
-15,2026-10-17 21:14:37,YcbGelatinBox,3,3316,Pure Geometric (OBB),True,True,False,True,0.0723,False,False,True,True,True,0.0,0.08,0.2824,0.4,0.32
-15,2026-10-17 21:14:37,YcbGelatinBox,3,3316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0743,False,False,True,True,True,0.0,0.045,0.2824,0.792,7.59
-15,2026-10-17 21:14:37,YcbGelatinBox,3,3316,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0744,False,False,False,True,True,0.0,0.0352,0.3126,0.812,0.46
-15,2026-10-17 21:14:37,YcbGelatinBox,3,3316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0743,False,False,True,True,True,0.0,0.04,0.2824,0.7,1.38
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.65
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.04
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0718,False,False,True,True,True,0.0,0.0434,0.312,0.0,45.03
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0685,False,False,True,True,True,0.0,0.0434,0.312,0.1,59.17
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0727,False,False,True,True,True,0.0,0.0434,0.312,0.069,63.78
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0751,False,False,True,True,True,0.0,0.0352,0.3123,0.142,86.15
-15,2026-10-17 21:14:38,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0727,False,False,True,True,True,0.0,0.0434,0.312,0.001,391.44
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Pure Geometric (PCA),True,True,False,True,0.0445,False,False,True,True,True,0.0,0.04,0.2826,0.36,0.27
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Pure Geometric (OBB),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.08,0.2826,0.4,0.26
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0442,False,False,True,True,True,0.0,0.045,0.2826,0.895,7.36
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0877,False,False,True,True,True,0.0,0.0313,0.3135,0.226,0.46
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0442,False,False,True,True,True,0.0,0.04,0.2826,0.7,1.5
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,-0.0011,False,False,True,True,False,61.71,0.0211,0.313,0.0,95.07
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,-0.0011,False,False,True,True,True,0.0,0.0211,0.313,0.0,92.91
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + PCA),False,False,False,True,-0.0268,False,False,True,True,True,0.0,0.0211,0.313,0.057,138.73
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0632,False,False,True,True,True,0.0,0.0211,0.313,0.1,154.39
-16,2026-10-17 21:14:39,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,-0.0011,False,False,True,True,True,0.0,0.0211,0.313,0.053,156.03
-16,2026-10-17 21:14:40,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.0313,0.3132,0.031,211.48
-16,2026-10-17 21:14:40,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,-0.0011,False,False,True,True,True,0.0,0.0211,0.313,0.0,534.67
-17,2026-10-17 21:14:40,YcbGelatinBox,5,5316,Pure Geometric (PCA),False,False,False,False,0.0,False,False,True,True,True,0.0,0.04,0.2823,0.151,0.26
-17,2026-10-17 21:14:40,YcbGelatinBox,5,5316,Pure Geometric (OBB),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.08,0.2823,0.4,0.25
-17,2026-10-17 21:14:40,YcbGelatinBox,5,5316,Pure Geometric (SurfaceNormals),False,False,False,False,-0.0,False,True,True,True,True,0.0,0.045,0.2823,0.884,7.06
-17,2026-10-17 21:14:40,YcbGelatinBox,5,5316,Pure Geometric (CrossSectionSlice),False,False,False,True,-0.0,False,False,False,True,True,0.0,0.0328,0.3123,0.195,0.56
-17,2026-10-17 21:14:40,YcbGelatinBox,5,5316,Pure Geometric (PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.04,0.2823,0.7,1.46
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.03
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,82.95
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.86
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.56
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,113.09
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,117.79
-17,2026-10-17 21:14:41,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,104.12
-18,2026-10-17 21:14:41,YcbGelatinBox,6,6316,Pure Geometric (PCA),True,True,False,True,0.0757,False,False,True,True,True,0.0,0.04,0.2819,0.075,0.34
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Pure Geometric (OBB),True,True,False,True,0.0747,False,False,True,True,True,0.0,0.08,0.2819,0.056,0.32
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0755,True,True,True,True,True,0.0,0.045,0.2819,0.947,9.36
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Pure Geometric (CrossSectionSlice),True,True,False,True,0.075,False,False,True,True,True,0.0,0.034,0.3128,0.827,0.47
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0755,False,False,True,True,True,0.0,0.04,0.2819,0.7,1.4
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,82.06
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,84.24
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,109.07
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,109.67
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,116.24
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,106.19
-18,2026-10-17 21:14:42,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.64
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Pure Geometric (PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.04,0.2521,0.012,0.35
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Pure Geometric (OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.08,0.2521,0.018,0.34
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Pure Geometric (SurfaceNormals),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.045,0.2521,0.734,13.53
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.0162,0.2653,0.048,0.47
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2521,0.7,1.33
-19,2026-10-17 21:14:43,YcbBanana,1,1453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.92
-19,2026-10-17 21:14:43,YcbBanana,1,1453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.36
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2302,0.0,65.69
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2521,0.1,142.92
-19,2026-10-17 21:14:43,YcbBanana,1,1453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2302,0.0,166.96
-19,2026-10-17 21:14:44,YcbBanana,1,1453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.0162,0.2478,0.013,299.86
-19,2026-10-17 21:14:45,YcbBanana,1,1453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2302,0.0,1172.46
-20,2026-10-17 21:14:45,YcbBanana,2,2453,Pure Geometric (PCA),True,True,False,True,0.0721,False,False,True,True,True,0.0,0.04,0.2523,0.185,0.36
-20,2026-10-17 21:14:45,YcbBanana,2,2453,Pure Geometric (OBB),True,True,False,True,0.072,False,False,True,True,True,0.0,0.08,0.2523,0.4,0.31
-20,2026-10-17 21:14:45,YcbBanana,2,2453,Pure Geometric (SurfaceNormals),True,True,False,True,0.071,False,False,True,True,True,0.0,0.045,0.2523,0.824,13.57
-20,2026-10-17 21:14:45,YcbBanana,2,2453,Pure Geometric (CrossSectionSlice),False,False,False,False,0.0,False,False,True,True,True,0.0,0.021,0.2658,0.4,0.46
-20,2026-10-17 21:14:45,YcbBanana,2,2453,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.071,False,False,True,True,True,0.0,0.04,0.2523,0.7,1.41
-20,2026-10-17 21:14:45,YcbBanana,2,2453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,-0.0001,False,False,True,True,False,67.72,0.015,0.2292,0.007,83.76
-20,2026-10-17 21:14:46,YcbBanana,2,2453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2292,0.001,83.05
-20,2026-10-17 21:14:46,YcbBanana,2,2453,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2423,0.0,153.6
-20,2026-10-17 21:14:46,YcbBanana,2,2453,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2523,0.1,216.19
-20,2026-10-17 21:14:46,YcbBanana,2,2453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2314,0.004,238.58
-20,2026-10-17 21:14:47,YcbBanana,2,2453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.021,0.2486,0.096,409.21
-20,2026-10-17 21:14:49,YcbBanana,2,2453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2314,0.007,1908.98
-21,2026-10-17 21:14:49,YcbBanana,3,3453,Pure Geometric (PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2504,0.031,0.34
-21,2026-10-17 21:14:49,YcbBanana,3,3453,Pure Geometric (OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.2504,0.4,0.32
-21,2026-10-17 21:14:49,YcbBanana,3,3453,Pure Geometric (SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.045,0.2504,0.7,11.99
-21,2026-10-17 21:14:49,YcbBanana,3,3453,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.0243,0.2642,0.179,0.43
-21,2026-10-17 21:14:49,YcbBanana,3,3453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2504,0.7,1.25
-21,2026-10-17 21:14:49,YcbBanana,3,3453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,82.75
-21,2026-10-17 21:14:49,YcbBanana,3,3453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,80.34
-21,2026-10-17 21:14:49,YcbBanana,3,3453,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2301,0.001,242.79
-21,2026-10-17 21:14:50,YcbBanana,3,3453,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2504,0.1,698.87
-21,2026-10-17 21:14:51,YcbBanana,3,3453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2301,0.0,737.54
-21,2026-10-17 21:14:52,YcbBanana,3,3453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0243,0.2471,0.063,1313.52
-21,2026-10-17 21:14:59,YcbBanana,3,3453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2301,0.009,6574.79
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Pure Geometric (PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2524,0.007,0.35
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Pure Geometric (OBB),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.08,0.2524,0.0,0.33
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Pure Geometric (SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.045,0.2524,0.7,11.78
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0722,False,False,True,True,True,0.0,0.0235,0.265,0.081,0.43
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2524,0.7,1.34
-22,2026-10-17 21:14:59,YcbBanana,4,4453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.52
-22,2026-10-17 21:14:59,YcbBanana,4,4453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,80.38
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Hybrid (AnyGrasp + PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0495,0.2604,0.0,38.2
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Hybrid (AnyGrasp + OBB),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0495,0.2604,0.1,43.9
-22,2026-10-17 21:14:59,YcbBanana,4,4453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0495,0.2604,0.003,52.48
-22,2026-10-17 21:15:00,YcbBanana,4,4453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0235,0.2627,0.029,57.9
-22,2026-10-17 21:15:00,YcbBanana,4,4453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0495,0.2604,0.0,188.29
-23,2026-10-17 21:15:00,YcbBanana,5,5453,Pure Geometric (PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2537,0.024,0.34
-23,2026-10-17 21:15:00,YcbBanana,5,5453,Pure Geometric (OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.08,0.2537,0.4,0.34
-23,2026-10-17 21:15:00,YcbBanana,5,5453,Pure Geometric (SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.045,0.2537,0.732,12.24
-23,2026-10-17 21:15:00,YcbBanana,5,5453,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0244,0.2661,0.013,0.41
-23,2026-10-17 21:15:00,YcbBanana,5,5453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2537,0.7,1.32
-23,2026-10-17 21:15:00,YcbBanana,5,5453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.12
-23,2026-10-17 21:15:00,YcbBanana,5,5453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,82.59
-23,2026-10-17 21:15:00,YcbBanana,5,5453,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,107.46
-23,2026-10-17 21:15:01,YcbBanana,5,5453,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,104.74
-23,2026-10-17 21:15:01,YcbBanana,5,5453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,113.29
-23,2026-10-17 21:15:01,YcbBanana,5,5453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,110.84
-23,2026-10-17 21:15:01,YcbBanana,5,5453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,112.21
-24,2026-10-17 21:15:01,YcbBanana,6,6453,Pure Geometric (PCA),True,True,False,True,0.0642,False,False,True,True,True,0.0,0.04,0.2516,0.088,0.35
-24,2026-10-17 21:15:01,YcbBanana,6,6453,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.2516,0.4,0.34
-24,2026-10-17 21:15:01,YcbBanana,6,6453,Pure Geometric (SurfaceNormals),True,True,False,True,0.0714,False,False,True,True,True,0.0,0.045,0.2516,0.789,11.33
-24,2026-10-17 21:15:01,YcbBanana,6,6453,Pure Geometric (CrossSectionSlice),False,False,False,False,0.0006,False,False,True,True,True,0.0,0.0211,0.2665,0.465,0.45
-24,2026-10-17 21:15:01,YcbBanana,6,6453,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0714,False,False,True,True,True,0.0,0.04,0.2516,0.7,1.37
-24,2026-10-17 21:15:01,YcbBanana,6,6453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,-0.0001,False,False,True,True,False,51.25,0.015,0.2276,0.004,86.38
-24,2026-10-17 21:15:01,YcbBanana,6,6453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2276,0.001,86.82
-24,2026-10-17 21:15:02,YcbBanana,6,6453,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2276,0.002,111.94
-24,2026-10-17 21:15:02,YcbBanana,6,6453,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2516,0.1,112.7
-24,2026-10-17 21:15:02,YcbBanana,6,6453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2276,0.002,120.51
-24,2026-10-17 21:15:02,YcbBanana,6,6453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.0211,0.2471,0.152,109.94
-24,2026-10-17 21:15:02,YcbBanana,6,6453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.015,0.2276,0.004,114.05
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Pure Geometric (PCA),True,True,False,True,0.0584,False,False,True,True,True,0.0,0.04,0.2626,0.129,0.31
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Pure Geometric (OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.08,0.2626,0.4,0.34
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Pure Geometric (SurfaceNormals),True,True,False,True,0.061,False,False,True,True,True,0.0,0.045,0.2626,0.783,9.09
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0747,False,False,True,True,True,0.0,0.0404,0.2651,0.65,0.48
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.061,False,False,True,True,True,0.0,0.04,0.2626,0.7,1.36
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0001,False,False,True,True,False,60.44,0.0275,0.2814,0.0,84.09
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0275,0.2814,0.0,88.78
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0275,0.2814,0.008,124.87
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0275,0.2814,0.1,131.72
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0275,0.2814,0.124,134.38
-25,2026-10-17 21:15:03,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0404,0.2733,0.115,151.39
-25,2026-10-17 21:15:04,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0275,0.2814,0.0,339.55
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,Pure Geometric (PCA),True,True,False,True,0.0764,False,False,True,True,True,0.0,0.04,0.2621,0.128,0.34
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,Pure Geometric (OBB),True,True,False,True,0.0706,False,False,True,True,True,0.0,0.08,0.2621,0.054,0.31
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,Pure Geometric (SurfaceNormals),True,True,False,True,0.076,False,False,True,True,True,0.0,0.045,0.2621,0.741,9.76
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0633,False,False,True,True,True,0.0,0.0204,0.2588,0.098,0.48
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.076,False,False,True,True,True,0.0,0.04,0.2621,0.7,1.37
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.69
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.41
-26,2026-10-17 21:15:04,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,True,True,True,0.0,0.015,0.2319,0.004,88.85
-26,2026-10-17 21:15:05,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.015,0.2621,0.1,201.23
-26,2026-10-17 21:15:05,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,True,True,True,0.0,0.015,0.2319,0.014,213.67
-26,2026-10-17 21:15:05,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0204,0.2454,0.08,319.7
-26,2026-10-17 21:15:07,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,True,True,True,0.0,0.015,0.2319,0.018,1861.58
-27,2026-10-17 21:15:07,YcbFoamBrick,3,3590,Pure Geometric (PCA),True,True,False,True,0.0717,False,False,True,True,True,0.0,0.04,0.2652,0.088,0.34
-27,2026-10-17 21:15:07,YcbFoamBrick,3,3590,Pure Geometric (OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.08,0.2652,0.4,0.32
-27,2026-10-17 21:15:07,YcbFoamBrick,3,3590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0712,False,False,True,True,True,0.0,0.045,0.2652,0.765,9.9
-27,2026-10-17 21:15:07,YcbFoamBrick,3,3590,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0364,0.2651,0.464,0.45
-27,2026-10-17 21:15:07,YcbFoamBrick,3,3590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0712,False,False,True,True,True,0.0,0.04,0.2652,0.7,1.56
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.57
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,83.56
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,108.47
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,105.23
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,111.36
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,104.96
-27,2026-10-17 21:15:08,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,104.51
-28,2026-10-17 21:15:08,YcbFoamBrick,4,4590,Pure Geometric (PCA),True,True,False,True,0.0744,False,False,True,True,True,0.0,0.04,0.2628,0.046,0.34
-28,2026-10-17 21:15:08,YcbFoamBrick,4,4590,Pure Geometric (OBB),True,True,False,True,0.0659,False,False,True,True,True,0.0,0.08,0.2628,0.4,0.33
-28,2026-10-17 21:15:08,YcbFoamBrick,4,4590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0733,False,False,True,True,True,0.0,0.045,0.2628,0.804,10.97
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.0541,0.2656,0.477,0.37
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0733,False,False,True,True,True,0.0,0.04,0.2628,0.7,1.42
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,84.82
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,84.06
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,109.19
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,106.52
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,114.04
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,106.52
-28,2026-10-17 21:15:09,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,106.56
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Pure Geometric (PCA),True,True,False,True,0.0659,False,False,True,True,True,0.0,0.04,0.2631,0.233,0.33
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Pure Geometric (OBB),True,True,False,True,0.0685,False,False,True,True,True,0.0,0.08,0.2631,0.4,0.3
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0656,False,False,True,True,True,0.0,0.045,0.2631,0.83,9.28
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0658,False,False,True,True,True,0.0,0.0611,0.2657,0.019,0.33
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0656,False,False,True,True,True,0.0,0.04,0.2631,0.7,1.35
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,AnyGrasp (Raw 6-DOF Baseline),False,False,True,False,0.0001,False,False,False,True,False,38.71,0.015,0.2252,0.006,85.87
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,85.38
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + PCA),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0601,0.2755,0.012,157.54
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0601,0.2755,0.1,219.5
-29,2026-10-17 21:15:10,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0601,0.2755,0.123,228.37
-29,2026-10-17 21:15:11,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0611,0.2706,0.001,317.06
-29,2026-10-17 21:15:13,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0601,0.2755,0.002,2146.11
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,Pure Geometric (PCA),True,True,False,True,0.0726,False,False,True,True,True,0.0,0.04,0.2647,0.153,0.26
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,Pure Geometric (OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.08,0.2647,0.075,0.27
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0718,False,False,True,True,True,0.0,0.045,0.2647,0.787,6.62
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0754,False,False,True,True,True,0.0,0.0421,0.2664,0.003,0.62
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0718,False,False,True,True,True,0.0,0.04,0.2647,0.7,1.84
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,85.79
-30,2026-10-17 21:15:13,YcbFoamBrick,6,6590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,0.0,84.37
-30,2026-10-17 21:15:14,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0609,0.2705,0.001,74.24
-30,2026-10-17 21:15:14,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0609,0.2705,0.1,92.49
-30,2026-10-17 21:15:14,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0609,0.2705,0.097,104.22
-30,2026-10-17 21:15:14,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0421,0.2684,0.003,153.15
-30,2026-10-17 21:15:15,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0609,0.2705,0.003,807.48
+trial_id,timestamp,object,trial,seed,method,physical_success,success,table_collision,has_dual_contact,lift_height_m,force_closure_mu04,force_closure_mu08,ik_feasible,aperture_valid,orientable_4dof,yaw_mismatch_deg,target_width,target_z,grasp_dist_to_centroid_m,confidence_score,latency_ms
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,Pure Geometric (PCA),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.04,0.2948,0.0345,0.231,0.32
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.2948,0.0639,0.136,0.25
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0706,False,False,True,True,True,0.0,0.045,0.2948,0.0345,0.928,9.96
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0462,0.2734,0.01,0.56,0.4
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0696,False,True,True,True,True,0.0,0.0698,0.2948,0.032,0.85,2.04
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,True,True,False,45.35,0.0421,0.3011,0.044,0.003,328.51
+1,2026-10-17 21:20:51,YcbTomatoSoupCan,1,1042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.0421,0.3011,0.044,0.002,134.83
+1,2026-10-17 21:20:52,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0678,0.3011,0.0398,0.035,426.57
+1,2026-10-17 21:20:52,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0678,0.3011,0.0398,0.1,613.18
+1,2026-10-17 21:20:53,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0678,0.3011,0.044,0.104,673.05
+1,2026-10-17 21:20:54,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0462,0.2873,0.0287,0.107,1268.05
+1,2026-10-17 21:21:01,YcbTomatoSoupCan,1,1042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0705,True,True,True,True,True,0.0,0.0758,0.3011,0.0395,0.084,6283.57
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,Pure Geometric (PCA),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.04,0.2978,0.0352,0.154,0.34
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,Pure Geometric (OBB),True,True,False,True,0.0715,False,False,True,True,True,0.0,0.08,0.2978,0.0498,0.4,0.31
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.045,0.2978,0.0352,0.918,8.89
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0434,False,False,True,True,True,0.0,0.0472,0.2487,0.0185,0.175,0.42
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.071,0.2978,0.0347,0.85,1.48
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,True,True,True,20.25,0.0319,0.2893,0.0386,0.007,27.63
+2,2026-10-17 21:21:01,YcbTomatoSoupCan,2,2042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0319,0.2893,0.0386,0.006,156.89
+2,2026-10-17 21:21:02,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0392,0.2878,0.0302,0.037,506.68
+2,2026-10-17 21:21:03,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0392,0.2978,0.0393,0.1,710.42
+2,2026-10-17 21:21:03,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0083,False,False,True,True,True,0.0,0.0392,0.2381,0.0363,0.049,763.71
+2,2026-10-17 21:21:05,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0472,0.2434,0.0285,0.036,1316.9
+2,2026-10-17 21:21:12,YcbTomatoSoupCan,2,2042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.0721,0.2978,0.0352,0.095,7477.89
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,Pure Geometric (PCA),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.04,0.2983,0.0377,0.064,0.34
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,Pure Geometric (OBB),False,False,False,False,-0.0137,False,False,True,True,True,0.0,0.08,0.2983,0.0556,0.4,0.33
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.045,0.2983,0.0377,0.787,10.67
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0714,False,False,True,True,True,0.0,0.0319,0.2979,0.0439,0.756,0.42
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0695,True,True,True,True,True,0.0,0.0733,0.2983,0.0352,0.85,1.43
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0,False,False,True,True,False,77.15,0.0788,0.3204,0.0683,0.032,27.56
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0788,0.3204,0.0683,0.002,72.07
+3,2026-10-17 21:21:13,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + PCA),False,False,False,True,-0.0,False,True,True,True,True,0.0,0.0713,0.2883,0.0295,0.001,462.08
+3,2026-10-17 21:21:14,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0704,False,False,True,True,True,0.0,0.0713,0.2983,0.0346,0.1,662.78
+3,2026-10-17 21:21:15,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0067,False,False,True,True,True,0.0,0.0713,0.2558,0.0262,0.037,694.51
+3,2026-10-17 21:21:16,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0319,0.2769,0.0192,0.13,1247.61
+3,2026-10-17 21:21:23,YcbTomatoSoupCan,3,3042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0701,True,True,True,True,True,0.0,0.0732,0.2983,0.0358,0.091,6817.67
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,Pure Geometric (PCA),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.04,0.302,0.0389,0.002,0.33
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.302,0.0501,0.008,0.34
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.045,0.302,0.0389,0.811,13.75
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.005,False,False,True,True,True,0.0,0.0403,0.2616,0.0044,0.586,0.4
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.0728,0.302,0.0391,0.85,1.46
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0,False,False,True,True,False,56.6,0.0736,0.3243,0.064,0.107,28.03
+4,2026-10-17 21:21:23,YcbTomatoSoupCan,4,4042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0736,0.3243,0.064,0.032,66.66
+4,2026-10-17 21:21:24,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0692,0.3243,0.0629,0.0,304.76
+4,2026-10-17 21:21:24,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0692,0.3243,0.062,0.1,425.6
+4,2026-10-17 21:21:25,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0692,0.3243,0.064,0.001,467.73
+4,2026-10-17 21:21:25,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.0403,0.2929,0.0323,0.184,748.03
+4,2026-10-17 21:21:30,YcbTomatoSoupCan,4,4042,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0692,0.3243,0.064,0.103,4518.67
+5,2026-10-17 21:21:30,YcbTomatoSoupCan,5,5042,Pure Geometric (PCA),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.04,0.2983,0.0347,0.8,0.39
+5,2026-10-17 21:21:30,YcbTomatoSoupCan,5,5042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.2983,0.0418,0.4,0.35
+5,2026-10-17 21:21:30,YcbTomatoSoupCan,5,5042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.045,0.2983,0.0347,0.936,9.26
+5,2026-10-17 21:21:30,YcbTomatoSoupCan,5,5042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0587,0.2983,0.0374,0.849,0.51
+5,2026-10-17 21:21:30,YcbTomatoSoupCan,5,5042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.0704,0.2983,0.0353,0.85,1.63
+5,2026-10-17 21:21:30,YcbTomatoSoupCan,5,5042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,True,True,False,62.23,0.0751,0.301,0.0445,0.015,28.52
+5,2026-10-17 21:21:31,YcbTomatoSoupCan,5,5042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0751,0.301,0.0445,0.003,88.1
+5,2026-10-17 21:21:31,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0715,0.301,0.0412,0.003,358.67
+5,2026-10-17 21:21:31,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0715,0.301,0.0437,0.1,515.27
+5,2026-10-17 21:21:32,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0715,0.301,0.0445,0.141,543.63
+5,2026-10-17 21:21:33,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0587,0.2996,0.0417,0.167,857.97
+5,2026-10-17 21:21:38,YcbTomatoSoupCan,5,5042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0705,False,False,True,True,True,0.0,0.0664,0.301,0.0375,0.098,5261.17
+6,2026-10-17 21:21:38,YcbTomatoSoupCan,6,6042,Pure Geometric (PCA),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.04,0.297,0.0347,0.218,0.28
+6,2026-10-17 21:21:38,YcbTomatoSoupCan,6,6042,Pure Geometric (OBB),False,False,False,False,0.0,False,False,False,True,True,0.0,0.08,0.297,0.0689,0.4,0.28
+6,2026-10-17 21:21:38,YcbTomatoSoupCan,6,6042,Pure Geometric (SurfaceNormals),True,True,False,True,0.0701,False,True,True,True,True,0.0,0.045,0.297,0.0347,0.93,10.3
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.044,0.2485,0.0229,0.293,0.45
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0695,True,True,True,True,True,0.0,0.0718,0.297,0.0341,0.85,1.85
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0,False,False,True,True,False,59.38,0.0785,0.3236,0.0613,0.052,27.59
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0785,0.3236,0.0613,0.014,53.17
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0716,False,False,True,True,True,0.0,0.0619,0.287,0.0374,0.0,188.36
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0682,False,False,True,True,True,0.0,0.0436,0.297,0.0499,0.1,248.38
+6,2026-10-17 21:21:39,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0516,False,False,True,True,True,0.0,0.0619,0.2566,0.0382,0.059,291.64
+6,2026-10-17 21:21:40,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0474,False,False,True,True,True,0.0,0.044,0.2526,0.0284,0.057,511.13
+6,2026-10-17 21:21:43,YcbTomatoSoupCan,6,6042,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0696,False,True,True,True,True,0.0,0.0678,0.297,0.0341,0.091,2566.15
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,Pure Geometric (PCA),True,True,False,True,0.0542,False,False,False,True,True,0.0,0.04,0.3472,0.0544,0.383,0.27
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,Pure Geometric (OBB),False,False,False,False,0.0,False,False,False,True,True,0.0,0.08,0.3472,0.1119,0.4,0.29
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0542,False,False,False,True,True,0.0,0.045,0.3472,0.0544,0.867,12.59
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.075,False,False,False,True,True,0.0,0.0313,0.4049,0.112,0.258,0.65
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0542,False,False,False,True,True,0.0,0.04,0.3472,0.0544,0.7,2.08
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,-0.0411,False,False,False,True,False,73.68,0.0135,0.3511,0.0729,0.001,28.62
+7,2026-10-17 21:21:43,YcbMustardBottle,1,1179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.2245,False,False,True,True,True,0.0,0.0327,0.2667,0.0555,0.0,144.67
+7,2026-10-17 21:21:44,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0129,False,False,True,True,True,0.0,0.0716,0.3372,0.0547,0.004,511.57
+7,2026-10-17 21:21:45,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,728.56
+7,2026-10-17 21:21:46,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.2614,False,False,True,True,True,0.0,0.0298,0.2918,0.0403,0.001,821.73
+7,2026-10-17 21:21:47,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0113,False,False,True,True,True,0.0,0.0313,0.3355,0.0521,0.075,1518.26
+7,2026-10-17 21:21:55,YcbMustardBottle,1,1179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.2614,False,False,True,True,True,0.0,0.0298,0.2918,0.0403,0.003,8235.37
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,Pure Geometric (PCA),True,True,False,True,0.0568,False,False,True,True,True,0.0,0.04,0.3499,0.057,0.002,0.34
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,Pure Geometric (OBB),True,True,False,True,0.0498,False,False,True,True,True,0.0,0.08,0.3499,0.0585,0.4,0.29
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0568,False,False,True,True,True,0.0,0.045,0.3499,0.057,0.895,18.53
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.0307,0.4071,0.1142,0.631,0.45
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0568,False,False,True,True,True,0.0,0.04,0.3499,0.057,0.7,1.61
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0755,False,False,False,True,False,81.0,0.0073,0.4145,0.1218,0.002,27.53
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,-0.0005,False,False,True,True,True,0.0,0.0588,0.2887,0.0232,0.001,139.17
+8,2026-10-17 21:21:56,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0463,False,False,True,True,True,0.0,0.0405,0.3399,0.05,0.001,517.48
+8,2026-10-17 21:21:57,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + OBB),False,False,False,True,0.025,False,False,True,True,True,0.0,0.0035,0.3499,0.0612,0.1,724.8
+8,2026-10-17 21:21:58,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,-0.0005,False,False,True,True,True,0.0,0.0405,0.2887,0.0232,0.09,874.87
+8,2026-10-17 21:22:00,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0575,False,False,True,True,True,0.0,0.0307,0.3615,0.0743,0.107,1658.68
+8,2026-10-17 21:22:09,YcbMustardBottle,2,2179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,-0.0005,False,False,True,True,True,0.0,0.0405,0.2887,0.0232,0.004,8722.28
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,Pure Geometric (PCA),True,True,False,True,0.0521,False,False,False,True,True,0.0,0.04,0.3452,0.0524,0.8,0.33
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.3452,0.0768,0.4,0.29
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0519,False,False,False,True,True,0.0,0.045,0.3452,0.0524,0.95,16.26
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.029,0.4059,0.1131,0.08,0.47
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0521,False,False,False,True,True,0.0,0.04,0.3452,0.0524,0.7,1.54
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0753,False,False,False,True,False,29.47,0.0145,0.4167,0.1246,0.002,27.21
+9,2026-10-17 21:22:09,YcbMustardBottle,3,3179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0032,False,False,True,True,True,0.0,0.0255,0.3127,0.0379,0.001,142.26
+9,2026-10-17 21:22:10,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.0097,0.3639,0.0765,0.0,509.39
+9,2026-10-17 21:22:10,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0097,0.3639,0.0829,0.1,718.26
+9,2026-10-17 21:22:11,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0743,False,False,True,True,True,0.0,0.0097,0.3639,0.0804,0.109,827.64
+9,2026-10-17 21:22:13,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.029,0.3707,0.085,0.011,1661.71
+9,2026-10-17 21:22:21,YcbMustardBottle,3,3179,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.071,False,False,True,True,True,0.0,0.0097,0.3639,0.0804,0.001,8303.49
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,Pure Geometric (PCA),True,True,False,True,0.0498,False,False,False,True,True,0.0,0.04,0.3433,0.0505,0.192,0.31
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,Pure Geometric (OBB),True,True,False,True,0.0498,False,False,False,True,True,0.0,0.08,0.3433,0.0513,0.4,0.37
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0499,False,False,False,True,True,0.0,0.045,0.3433,0.0505,0.898,11.84
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0754,False,False,False,True,True,0.0,0.028,0.4064,0.1136,0.037,0.69
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0499,False,False,False,True,True,0.0,0.04,0.3433,0.0505,0.7,1.74
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0742,False,False,False,True,False,28.46,0.0067,0.4136,0.1212,0.002,38.64
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0364,False,False,True,True,True,0.0,0.0654,0.2964,0.0407,0.0,144.52
+10,2026-10-17 21:22:22,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,511.51
+10,2026-10-17 21:22:23,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,712.05
+10,2026-10-17 21:22:24,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,795.82
+10,2026-10-17 21:22:25,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,1471.89
+10,2026-10-17 21:22:33,YcbMustardBottle,4,4179,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,7759.25
+11,2026-10-17 21:22:33,YcbMustardBottle,5,5179,Pure Geometric (PCA),True,True,False,True,0.0429,False,False,True,True,True,0.0,0.04,0.3361,0.0434,0.314,0.32
+11,2026-10-17 21:22:33,YcbMustardBottle,5,5179,Pure Geometric (OBB),False,False,False,True,0.0305,False,False,True,True,True,0.0,0.08,0.3361,0.0447,0.4,0.31
+11,2026-10-17 21:22:34,YcbMustardBottle,5,5179,Pure Geometric (SurfaceNormals),True,True,False,True,0.043,False,False,True,True,True,0.0,0.045,0.3361,0.0434,0.949,18.1
+11,2026-10-17 21:22:34,YcbMustardBottle,5,5179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.0281,0.4074,0.1145,0.214,0.47
+11,2026-10-17 21:22:34,YcbMustardBottle,5,5179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.043,False,False,True,True,True,0.0,0.04,0.3361,0.0434,0.7,1.61
+11,2026-10-17 21:22:34,YcbMustardBottle,5,5179,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0685,False,False,False,True,True,3.77,0.0118,0.3744,0.0842,0.002,27.7
+11,2026-10-17 21:22:34,YcbMustardBottle,5,5179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0094,False,False,True,True,True,0.0,0.0376,0.2609,0.0379,0.005,142.52
+11,2026-10-17 21:22:34,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0466,False,False,True,True,True,0.0,0.0039,0.3511,0.0623,0.052,532.02
+11,2026-10-17 21:22:35,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + OBB),True,True,False,True,0.058,False,False,True,True,True,0.0,0.0039,0.3511,0.06,0.1,742.99
+11,2026-10-17 21:22:36,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0473,False,False,True,True,True,0.0,0.0039,0.3511,0.0655,0.228,894.27
+11,2026-10-17 21:22:38,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0281,0.374,0.0871,0.038,1676.05
+11,2026-10-17 21:22:47,YcbMustardBottle,5,5179,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0473,False,False,True,True,True,0.0,0.0039,0.3511,0.0655,0.001,8771.88
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,Pure Geometric (PCA),True,True,False,True,0.0496,False,True,False,True,True,0.0,0.04,0.3439,0.0511,0.075,0.27
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.3439,0.0785,0.4,0.27
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,Pure Geometric (SurfaceNormals),True,True,False,True,0.0496,False,False,False,True,True,0.0,0.045,0.3439,0.0511,0.899,16.2
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0752,False,False,False,True,True,0.0,0.031,0.4068,0.1139,0.113,0.62
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0497,False,True,False,True,True,0.0,0.04,0.3439,0.0511,0.7,1.83
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,-0.0411,False,False,False,True,False,48.91,0.0365,0.2756,0.0471,0.001,29.61
+12,2026-10-17 21:22:47,YcbMustardBottle,6,6179,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.012,False,False,True,True,True,0.0,0.0203,0.2625,0.0406,0.004,140.4
+12,2026-10-17 21:22:48,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,True,False,True,0.0,0.0007,0.2307,0.1125,0.009,460.02
+12,2026-10-17 21:22:48,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0693,False,False,True,False,True,0.0,0.0011,0.3439,0.0677,0.1,660.07
+12,2026-10-17 21:22:49,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0468,False,False,True,False,True,0.0,0.0011,0.3205,0.0443,0.013,749.76
+12,2026-10-17 21:22:51,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,True,True,True,0.0,0.031,0.3187,0.0705,0.027,1470.35
+12,2026-10-17 21:22:58,YcbMustardBottle,6,6179,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0466,False,False,True,False,True,0.0,0.0011,0.3205,0.0443,0.017,7313.04
+13,2026-10-17 21:22:58,YcbGelatinBox,1,1316,Pure Geometric (PCA),True,True,False,True,0.0708,False,False,True,True,True,0.0,0.04,0.279,0.0182,0.001,0.26
+13,2026-10-17 21:22:58,YcbGelatinBox,1,1316,Pure Geometric (OBB),True,True,False,True,0.071,False,False,True,True,True,0.0,0.08,0.279,0.0199,0.001,0.26
+13,2026-10-17 21:22:58,YcbGelatinBox,1,1316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0709,False,False,True,True,True,0.0,0.045,0.279,0.0182,0.875,10.07
+13,2026-10-17 21:22:58,YcbGelatinBox,1,1316,Pure Geometric (CrossSectionSlice),False,False,False,True,-0.0257,False,False,True,True,True,0.0,0.0313,0.3122,0.0493,0.452,0.63
+13,2026-10-17 21:22:58,YcbGelatinBox,1,1316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0713,False,False,True,True,True,0.0,0.04,0.279,0.0182,0.7,2.42
+13,2026-10-17 21:22:58,YcbGelatinBox,1,1316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,0.0,False,False,True,False,False,87.47,0.0004,0.2276,0.3438,0.024,42.67
+13,2026-10-17 21:22:59,YcbGelatinBox,1,1316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,False,True,0.0,0.0004,0.2276,0.3438,0.0,155.71
+13,2026-10-17 21:22:59,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.0092,0.2787,0.0215,0.002,486.45
+13,2026-10-17 21:23:00,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + OBB),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0092,0.279,0.0215,0.1,683.58
+13,2026-10-17 21:23:01,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0208,False,False,True,True,True,0.0,0.0092,0.2787,0.0253,0.217,700.47
+13,2026-10-17 21:23:02,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0313,0.2954,0.0351,0.075,1639.75
+13,2026-10-17 21:23:09,YcbGelatinBox,1,1316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0208,False,False,True,True,True,0.0,0.0092,0.2787,0.0253,0.002,6879.38
+14,2026-10-17 21:23:09,YcbGelatinBox,2,2316,Pure Geometric (PCA),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.04,0.2795,0.0188,0.155,0.27
+14,2026-10-17 21:23:09,YcbGelatinBox,2,2316,Pure Geometric (OBB),False,False,False,True,-0.0,False,False,False,True,True,0.0,0.08,0.2795,0.051,0.057,0.29
+14,2026-10-17 21:23:09,YcbGelatinBox,2,2316,Pure Geometric (SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.045,0.2795,0.0188,0.934,6.29
+14,2026-10-17 21:23:09,YcbGelatinBox,2,2316,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0051,False,False,True,True,True,0.0,0.0346,0.2464,0.0239,0.042,0.42
+14,2026-10-17 21:23:09,YcbGelatinBox,2,2316,Pure Geometric (PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.04,0.2795,0.0188,0.7,1.72
+14,2026-10-17 21:23:10,YcbGelatinBox,2,2316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0,False,False,True,True,True,22.64,0.0162,0.2889,0.0372,0.005,50.94
+14,2026-10-17 21:23:10,YcbGelatinBox,2,2316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0162,0.2889,0.0372,0.004,148.95
+14,2026-10-17 21:23:10,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0357,0.2695,0.026,0.001,489.51
+14,2026-10-17 21:23:11,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + OBB),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0357,0.2795,0.0369,0.1,713.71
+14,2026-10-17 21:23:12,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0123,False,False,True,True,True,0.0,0.0357,0.2553,0.0316,0.001,688.41
+14,2026-10-17 21:23:13,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0054,False,False,True,True,True,0.0,0.0346,0.2508,0.0228,0.014,1302.02
+14,2026-10-17 21:23:20,YcbGelatinBox,2,2316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0357,0.2553,0.0316,0.004,6945.87
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,Pure Geometric (PCA),True,True,False,True,0.074,False,False,True,True,True,0.0,0.04,0.2824,0.0212,0.02,0.33
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,Pure Geometric (OBB),True,True,False,True,0.0723,False,False,True,True,True,0.0,0.08,0.2824,0.0431,0.4,0.36
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0743,False,False,True,True,True,0.0,0.045,0.2824,0.0212,0.792,7.82
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0744,False,False,False,True,True,0.0,0.0352,0.3126,0.0494,0.812,0.54
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0743,False,False,True,True,True,0.0,0.04,0.2824,0.0212,0.7,1.4
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0752,False,False,True,True,False,28.53,0.0184,0.2852,0.0238,0.008,28.67
+15,2026-10-17 21:23:20,YcbGelatinBox,3,3316,AnyGrasp (4-DOF Adapted Baseline),True,True,False,True,0.0752,False,False,True,True,True,0.0,0.0184,0.2852,0.0238,0.006,162.88
+15,2026-10-17 21:23:21,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0761,False,False,True,True,True,0.0,0.018,0.3131,0.0536,0.001,470.62
+15,2026-10-17 21:23:22,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0739,False,False,True,True,True,0.0,0.0338,0.2824,0.0196,0.1,666.96
+15,2026-10-17 21:23:22,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0609,False,False,True,True,True,0.0,0.0628,0.2522,0.0251,0.036,662.09
+15,2026-10-17 21:23:24,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0745,False,False,True,True,True,0.0,0.0352,0.3129,0.0536,0.143,1271.74
+15,2026-10-17 21:23:30,YcbGelatinBox,3,3316,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0609,False,False,True,True,True,0.0,0.0628,0.2522,0.0251,0.004,6803.16
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,Pure Geometric (PCA),True,True,False,True,0.0445,False,False,True,True,True,0.0,0.04,0.2826,0.0182,0.36,0.26
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,Pure Geometric (OBB),True,True,False,True,0.0701,False,False,True,True,True,0.0,0.08,0.2826,0.0352,0.4,0.24
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0442,False,False,True,True,True,0.0,0.045,0.2826,0.0182,0.895,6.8
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0877,False,False,True,True,True,0.0,0.0313,0.3135,0.0493,0.226,0.47
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0442,False,False,True,True,True,0.0,0.04,0.2826,0.0182,0.7,2.4
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,-0.0011,False,False,True,True,False,86.08,0.0227,0.3191,0.0586,0.0,34.58
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0011,False,False,True,True,True,0.0,0.0227,0.3191,0.0586,0.0,156.13
+16,2026-10-17 21:23:31,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + PCA),False,False,False,False,-0.0269,False,False,True,True,True,0.0,0.0303,0.2826,0.0306,0.0,435.93
+16,2026-10-17 21:23:32,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0262,False,False,True,True,True,0.0,0.0303,0.2826,0.0295,0.1,613.36
+16,2026-10-17 21:23:33,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,-0.0269,False,True,True,True,True,0.0,0.0303,0.2826,0.0375,0.012,627.66
+16,2026-10-17 21:23:34,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0261,False,False,True,True,True,0.0,0.0313,0.2981,0.0409,0.033,1419.93
+16,2026-10-17 21:23:40,YcbGelatinBox,4,4316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,-0.0262,False,True,True,True,True,0.0,0.0303,0.2826,0.0375,0.006,6234.57
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,Pure Geometric (PCA),False,False,False,False,0.0,False,False,True,True,True,0.0,0.04,0.2823,0.0226,0.151,0.32
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,Pure Geometric (OBB),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.08,0.2823,0.0781,0.4,0.3
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,Pure Geometric (SurfaceNormals),False,False,False,False,-0.0,False,True,True,True,True,0.0,0.045,0.2823,0.0226,0.884,8.96
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,Pure Geometric (CrossSectionSlice),False,False,False,True,-0.0,False,False,False,True,True,0.0,0.0328,0.3123,0.0491,0.195,0.55
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,Pure Geometric (PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.04,0.2823,0.0226,0.7,2.14
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,-0.0,False,False,True,True,False,80.76,0.0166,0.2615,0.0207,0.0,26.51
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0,False,False,True,True,True,0.0,0.0166,0.2615,0.0207,0.0,156.02
+17,2026-10-17 21:23:41,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0383,False,False,True,True,True,0.0,0.0275,0.278,0.0162,0.008,494.82
+17,2026-10-17 21:23:42,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0672,False,False,True,True,True,0.0,0.0275,0.2823,0.0323,0.1,687.17
+17,2026-10-17 21:23:43,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0275,0.278,0.0193,0.056,689.88
+17,2026-10-17 21:23:44,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0258,False,False,True,True,True,0.0,0.0328,0.2952,0.0332,0.032,1433.88
+17,2026-10-17 21:23:51,YcbGelatinBox,5,5316,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0275,0.278,0.0193,0.001,6864.51
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,Pure Geometric (PCA),True,True,False,True,0.0757,False,False,True,True,True,0.0,0.04,0.2819,0.0213,0.075,0.32
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,Pure Geometric (OBB),True,True,False,True,0.0747,False,False,True,True,True,0.0,0.08,0.2819,0.0262,0.056,0.34
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,Pure Geometric (SurfaceNormals),True,True,False,True,0.0755,True,True,True,True,True,0.0,0.045,0.2819,0.0213,0.947,8.8
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,Pure Geometric (CrossSectionSlice),True,True,False,True,0.075,False,False,True,True,True,0.0,0.034,0.3128,0.0498,0.827,0.5
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0755,False,False,True,True,True,0.0,0.04,0.2819,0.0213,0.7,1.36
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,AnyGrasp (Raw 6-DOF Baseline),True,True,False,True,0.0734,False,False,False,True,True,20.62,0.004,0.2857,0.0434,0.0,27.5
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,131.14
+18,2026-10-17 21:23:52,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0767,False,False,True,True,True,0.0,0.0117,0.2908,0.038,0.004,475.01
+18,2026-10-17 21:23:53,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0747,False,False,True,True,True,0.0,0.0117,0.2908,0.0346,0.1,679.18
+18,2026-10-17 21:23:54,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0781,False,False,True,True,True,0.0,0.0117,0.2908,0.0422,0.271,675.59
+18,2026-10-17 21:23:55,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0773,False,False,True,True,True,0.0,0.034,0.3018,0.0454,0.151,1420.77
+18,2026-10-17 21:24:02,YcbGelatinBox,6,6316,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.0781,False,False,True,True,True,0.0,0.0117,0.2908,0.0422,0.007,6887.41
+19,2026-10-17 21:24:02,YcbBanana,1,1453,Pure Geometric (PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.04,0.2521,0.0168,0.012,0.32
+19,2026-10-17 21:24:02,YcbBanana,1,1453,Pure Geometric (OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.08,0.2521,0.0447,0.018,0.3
+19,2026-10-17 21:24:02,YcbBanana,1,1453,Pure Geometric (SurfaceNormals),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.045,0.2521,0.0168,0.734,12.37
+19,2026-10-17 21:24:02,YcbBanana,1,1453,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.0162,0.2653,0.0274,0.048,0.57
+19,2026-10-17 21:24:03,YcbBanana,1,1453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2521,0.0168,0.7,1.3
+19,2026-10-17 21:24:03,YcbBanana,1,1453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,False,-0.0001,False,False,True,True,False,41.5,0.01,0.2539,0.028,0.0,26.54
+19,2026-10-17 21:24:03,YcbBanana,1,1453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.01,0.2539,0.028,0.0,151.02
+19,2026-10-17 21:24:03,YcbBanana,1,1453,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0574,False,False,True,True,True,0.0,0.0167,0.2476,0.0302,0.002,391.13
+19,2026-10-17 21:24:04,YcbBanana,1,1453,Hybrid (AnyGrasp + OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.0167,0.2521,0.0356,0.1,567.27
+19,2026-10-17 21:24:04,YcbBanana,1,1453,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0783,False,False,True,True,True,0.0,0.0167,0.2476,0.0361,0.011,624.14
+19,2026-10-17 21:24:06,YcbBanana,1,1453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0162,0.2564,0.0322,0.007,1201.39
+19,2026-10-17 21:24:11,YcbBanana,1,1453,Hybrid (AnyGrasp + PrimitiveRANSAC),True,True,False,True,0.082,False,False,True,True,True,0.0,0.0167,0.2476,0.0361,0.001,5508.97
+20,2026-10-17 21:24:11,YcbBanana,2,2453,Pure Geometric (PCA),True,True,False,True,0.0721,False,False,True,True,True,0.0,0.04,0.2523,0.0176,0.185,0.32
+20,2026-10-17 21:24:11,YcbBanana,2,2453,Pure Geometric (OBB),True,True,False,True,0.072,False,False,True,True,True,0.0,0.08,0.2523,0.0229,0.4,0.3
+20,2026-10-17 21:24:11,YcbBanana,2,2453,Pure Geometric (SurfaceNormals),True,True,False,True,0.071,False,False,True,True,True,0.0,0.045,0.2523,0.0176,0.824,13.01
+20,2026-10-17 21:24:11,YcbBanana,2,2453,Pure Geometric (CrossSectionSlice),False,False,False,False,0.0,False,False,True,True,True,0.0,0.021,0.2658,0.0277,0.4,0.42
+20,2026-10-17 21:24:12,YcbBanana,2,2453,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.071,False,False,True,True,True,0.0,0.04,0.2523,0.0176,0.7,1.32
+20,2026-10-17 21:24:12,YcbBanana,2,2453,AnyGrasp (Raw 6-DOF Baseline),False,False,True,False,-0.0001,False,False,True,True,False,54.51,0.005,0.2182,0.2736,0.003,30.71
+20,2026-10-17 21:24:12,YcbBanana,2,2453,AnyGrasp (4-DOF Adapted Baseline),False,False,True,False,-0.0001,False,False,True,True,True,0.0,0.005,0.2182,0.2736,0.001,151.46
+20,2026-10-17 21:24:12,YcbBanana,2,2453,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.021,0.2584,0.0246,0.0,504.96
+20,2026-10-17 21:24:13,YcbBanana,2,2453,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.021,0.2584,0.0254,0.1,710.7
+20,2026-10-17 21:24:14,YcbBanana,2,2453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.021,0.2584,0.0288,0.021,784.0
+20,2026-10-17 21:24:15,YcbBanana,2,2453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.021,0.2621,0.0283,0.069,1526.1
+20,2026-10-17 21:24:22,YcbBanana,2,2453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.021,0.2584,0.0288,0.002,7062.74
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Pure Geometric (PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2504,0.0158,0.031,0.29
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Pure Geometric (OBB),False,False,False,True,0.0,False,False,True,True,True,0.0,0.08,0.2504,0.0121,0.4,0.31
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Pure Geometric (SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.045,0.2504,0.0158,0.7,9.92
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.0243,0.2642,0.0256,0.179,0.66
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2504,0.0158,0.7,2.08
+21,2026-10-17 21:24:23,YcbBanana,3,3453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,-0.0001,False,False,True,True,False,86.92,0.0077,0.2602,0.0289,0.001,37.08
+21,2026-10-17 21:24:23,YcbBanana,3,3453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0077,0.2602,0.0289,0.0,165.73
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,48.06
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Hybrid (AnyGrasp + OBB),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,48.81
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,55.3
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,48.34
+21,2026-10-17 21:24:23,YcbBanana,3,3453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,47.82
+22,2026-10-17 21:24:24,YcbBanana,4,4453,Pure Geometric (PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2524,0.022,0.007,0.33
+22,2026-10-17 21:24:24,YcbBanana,4,4453,Pure Geometric (OBB),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.08,0.2524,0.0302,0.0,0.33
+22,2026-10-17 21:24:24,YcbBanana,4,4453,Pure Geometric (SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.045,0.2524,0.022,0.7,11.02
+22,2026-10-17 21:24:24,YcbBanana,4,4453,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0722,False,False,True,True,True,0.0,0.0235,0.265,0.0263,0.081,0.45
+22,2026-10-17 21:24:24,YcbBanana,4,4453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2524,0.022,0.7,1.33
+22,2026-10-17 21:24:24,YcbBanana,4,4453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,-0.0001,False,False,True,True,False,82.22,0.0062,0.2524,0.0305,0.013,28.24
+22,2026-10-17 21:24:24,YcbBanana,4,4453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0002,False,False,True,True,True,0.0,0.0062,0.2524,0.0305,0.0,158.7
+22,2026-10-17 21:24:24,YcbBanana,4,4453,Hybrid (AnyGrasp + PCA),False,False,False,False,0.0,False,False,True,True,True,0.0,0.0088,0.2513,0.062,0.006,502.45
+22,2026-10-17 21:24:25,YcbBanana,4,4453,Hybrid (AnyGrasp + OBB),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0088,0.2524,0.0411,0.1,703.6
+22,2026-10-17 21:24:26,YcbBanana,4,4453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0006,False,False,True,True,True,0.0,0.0088,0.2513,0.0766,0.004,740.37
+22,2026-10-17 21:24:27,YcbBanana,4,4453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0235,0.2582,0.0546,0.031,1310.66
+22,2026-10-17 21:24:34,YcbBanana,4,4453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0006,False,False,True,True,True,0.0,0.0088,0.2513,0.0766,0.002,6672.06
+23,2026-10-17 21:24:34,YcbBanana,5,5453,Pure Geometric (PCA),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2537,0.0174,0.024,0.31
+23,2026-10-17 21:24:34,YcbBanana,5,5453,Pure Geometric (OBB),False,False,False,False,-0.0001,False,False,True,True,True,0.0,0.08,0.2537,0.0465,0.4,0.29
+23,2026-10-17 21:24:34,YcbBanana,5,5453,Pure Geometric (SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.045,0.2537,0.0174,0.732,11.33
+23,2026-10-17 21:24:34,YcbBanana,5,5453,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0244,0.2661,0.0268,0.013,0.38
+23,2026-10-17 21:24:34,YcbBanana,5,5453,Pure Geometric (PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.04,0.2537,0.0174,0.7,1.36
+23,2026-10-17 21:24:34,YcbBanana,5,5453,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,-0.0001,False,False,True,True,True,0.09,0.0034,0.262,0.0281,0.003,38.15
+23,2026-10-17 21:24:35,YcbBanana,5,5453,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0034,0.262,0.0281,0.003,155.31
+23,2026-10-17 21:24:35,YcbBanana,5,5453,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.009,0.2437,0.0685,0.013,497.3
+23,2026-10-17 21:24:36,YcbBanana,5,5453,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0006,False,False,True,True,True,0.0,0.009,0.2537,0.0571,0.1,699.08
+23,2026-10-17 21:24:37,YcbBanana,5,5453,Hybrid (AnyGrasp + SurfaceNormals),True,True,False,True,0.0762,False,False,True,True,True,0.0,0.0184,0.2574,0.0247,0.052,740.53
+23,2026-10-17 21:24:38,YcbBanana,5,5453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0244,0.2549,0.0637,0.01,1317.74
+23,2026-10-17 21:24:45,YcbBanana,5,5453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0184,0.2574,0.0247,0.003,6795.97
+24,2026-10-17 21:24:45,YcbBanana,6,6453,Pure Geometric (PCA),True,True,False,True,0.0642,False,False,True,True,True,0.0,0.04,0.2516,0.0136,0.088,0.34
+24,2026-10-17 21:24:45,YcbBanana,6,6453,Pure Geometric (OBB),False,False,False,False,0.0,False,False,True,True,True,0.0,0.08,0.2516,0.0521,0.4,0.34
+24,2026-10-17 21:24:45,YcbBanana,6,6453,Pure Geometric (SurfaceNormals),True,True,False,True,0.0714,False,False,True,True,True,0.0,0.045,0.2516,0.0136,0.789,11.61
+24,2026-10-17 21:24:45,YcbBanana,6,6453,Pure Geometric (CrossSectionSlice),False,False,False,False,0.0006,False,False,True,True,True,0.0,0.0211,0.2665,0.0284,0.465,0.42
+24,2026-10-17 21:24:45,YcbBanana,6,6453,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0714,False,False,True,True,True,0.0,0.04,0.2516,0.0136,0.7,1.3
+24,2026-10-17 21:24:45,YcbBanana,6,6453,AnyGrasp (Raw 6-DOF Baseline),False,False,True,False,-0.0001,False,False,True,False,False,74.25,0.0002,0.2245,0.3229,0.085,29.21
+24,2026-10-17 21:24:45,YcbBanana,6,6453,AnyGrasp (4-DOF Adapted Baseline),False,False,True,False,-0.0001,False,False,True,False,True,0.0,0.0002,0.2245,0.3229,0.006,152.01
+24,2026-10-17 21:24:46,YcbBanana,6,6453,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0037,0.262,0.0264,0.005,493.32
+24,2026-10-17 21:24:47,YcbBanana,6,6453,Hybrid (AnyGrasp + OBB),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0037,0.262,0.0317,0.1,706.71
+24,2026-10-17 21:24:47,YcbBanana,6,6453,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0037,0.262,0.0309,0.132,763.02
+24,2026-10-17 21:24:49,YcbBanana,6,6453,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,-0.0001,False,False,True,True,True,0.0,0.0211,0.2642,0.0291,0.086,1351.4
+24,2026-10-17 21:24:56,YcbBanana,6,6453,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0037,0.262,0.0309,0.005,6794.51
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,Pure Geometric (PCA),True,True,False,True,0.0584,False,False,True,True,True,0.0,0.04,0.2626,0.0233,0.129,0.27
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,Pure Geometric (OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.08,0.2626,0.0773,0.4,0.24
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,Pure Geometric (SurfaceNormals),True,True,False,True,0.061,False,False,True,True,True,0.0,0.045,0.2626,0.0233,0.783,6.78
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0747,False,False,True,True,True,0.0,0.0404,0.2651,0.0235,0.65,0.67
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.061,False,False,True,True,True,0.0,0.04,0.2626,0.0233,0.7,1.47
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0001,False,False,True,True,True,22.19,0.0099,0.2787,0.0454,0.001,26.76
+25,2026-10-17 21:24:56,YcbFoamBrick,1,1590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0099,0.2787,0.0454,0.001,155.7
+25,2026-10-17 21:24:57,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0363,0.2731,0.0353,0.033,487.94
+25,2026-10-17 21:24:58,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0363,0.2731,0.0345,0.1,683.37
+25,2026-10-17 21:24:58,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0363,0.2731,0.0412,0.018,699.13
+25,2026-10-17 21:25:00,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0404,0.2691,0.0315,0.124,1293.1
+25,2026-10-17 21:25:07,YcbFoamBrick,1,1590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0363,0.2731,0.0412,0.001,7002.37
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,Pure Geometric (PCA),True,True,False,True,0.0764,False,False,True,True,True,0.0,0.04,0.2621,0.0247,0.128,0.32
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,Pure Geometric (OBB),True,True,False,True,0.0706,False,False,True,True,True,0.0,0.08,0.2621,0.0301,0.054,0.31
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,Pure Geometric (SurfaceNormals),True,True,False,True,0.076,False,False,True,True,True,0.0,0.045,0.2621,0.0247,0.741,9.55
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0633,False,False,True,True,True,0.0,0.0204,0.2588,0.0269,0.098,0.46
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.076,False,False,True,True,True,0.0,0.04,0.2621,0.0247,0.7,1.38
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0001,False,False,True,True,False,30.2,0.0107,0.2748,0.0547,0.002,28.66
+26,2026-10-17 21:25:07,YcbFoamBrick,2,2590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0107,0.2748,0.0547,0.002,157.18
+26,2026-10-17 21:25:08,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0047,0.2788,0.0437,0.009,382.31
+26,2026-10-17 21:25:08,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0047,0.2788,0.0394,0.1,539.29
+26,2026-10-17 21:25:09,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0047,0.2788,0.0466,0.034,549.89
+26,2026-10-17 21:25:10,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0204,0.2688,0.0364,0.022,868.53
+26,2026-10-17 21:25:15,YcbFoamBrick,2,2590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0047,0.2788,0.0466,0.002,5352.39
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,Pure Geometric (PCA),True,True,False,True,0.0717,False,False,True,True,True,0.0,0.04,0.2652,0.0268,0.088,0.33
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,Pure Geometric (OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.08,0.2652,0.0823,0.4,0.32
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0712,False,False,True,True,True,0.0,0.045,0.2652,0.0268,0.765,9.64
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,Pure Geometric (CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0364,0.2651,0.0253,0.464,0.49
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0712,False,False,True,True,True,0.0,0.04,0.2652,0.0268,0.7,1.44
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0001,False,False,True,True,True,23.09,0.0044,0.2734,0.0552,0.014,38.9
+27,2026-10-17 21:25:15,YcbFoamBrick,3,3590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0044,0.2734,0.0552,0.011,158.16
+27,2026-10-17 21:25:16,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0148,0.2768,0.0427,0.001,490.22
+27,2026-10-17 21:25:17,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0148,0.2768,0.0365,0.1,699.34
+27,2026-10-17 21:25:17,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,704.97
+27,2026-10-17 21:25:19,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0364,0.271,0.0365,0.097,1157.44
+27,2026-10-17 21:25:26,YcbFoamBrick,3,3590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,False,0.0,False,False,False,False,False,90.0,0.04,0.0,999.0,0.0,7164.54
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,Pure Geometric (PCA),True,True,False,True,0.0744,False,False,True,True,True,0.0,0.04,0.2628,0.021,0.046,0.35
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,Pure Geometric (OBB),True,True,False,True,0.0659,False,False,True,True,True,0.0,0.08,0.2628,0.0298,0.4,0.25
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0733,False,False,True,True,True,0.0,0.045,0.2628,0.021,0.804,7.88
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0702,False,False,True,True,True,0.0,0.0541,0.2656,0.0237,0.477,0.55
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0733,False,False,True,True,True,0.0,0.04,0.2628,0.021,0.7,1.65
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0001,False,False,True,True,False,27.99,0.0023,0.2612,0.0434,0.002,26.74
+28,2026-10-17 21:25:26,YcbFoamBrick,4,4590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0023,0.2612,0.0434,0.001,155.67
+28,2026-10-17 21:25:27,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + PCA),True,True,False,True,0.0703,False,False,True,True,True,0.0,0.0176,0.2528,0.0382,0.008,494.49
+28,2026-10-17 21:25:27,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + OBB),True,True,False,True,0.0601,False,False,True,True,True,0.0,0.0176,0.2628,0.0414,0.1,687.43
+28,2026-10-17 21:25:28,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0176,0.2366,0.0476,0.003,726.3
+28,2026-10-17 21:25:29,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + CrossSectionSlice),True,True,False,True,0.0672,False,False,True,True,True,0.0,0.0541,0.2511,0.0363,0.088,1010.05
+28,2026-10-17 21:25:36,YcbFoamBrick,4,4590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0176,0.2366,0.0476,0.001,7053.09
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,Pure Geometric (PCA),True,True,False,True,0.0659,False,False,True,True,True,0.0,0.04,0.2631,0.0211,0.233,0.28
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,Pure Geometric (OBB),True,True,False,True,0.0685,False,False,True,True,True,0.0,0.08,0.2631,0.0322,0.4,0.25
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0656,False,False,True,True,True,0.0,0.045,0.2631,0.0211,0.83,6.78
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0658,False,False,True,True,True,0.0,0.0611,0.2657,0.0245,0.019,0.3
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0656,False,False,True,True,True,0.0,0.04,0.2631,0.0211,0.7,1.43
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,AnyGrasp (Raw 6-DOF Baseline),False,False,True,False,0.0001,False,False,False,True,True,9.97,0.002,0.2187,0.3349,0.004,30.66
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,AnyGrasp (4-DOF Adapted Baseline),False,False,True,False,-0.0,False,False,True,True,True,0.0,0.0056,0.2187,0.2499,0.0,151.7
+29,2026-10-17 21:25:37,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0466,0.2768,0.0423,0.0,431.94
+29,2026-10-17 21:25:38,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0466,0.2768,0.0384,0.1,632.88
+29,2026-10-17 21:25:39,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0466,0.2768,0.0472,0.078,612.57
+29,2026-10-17 21:25:39,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0611,0.2713,0.0366,0.002,873.21
+29,2026-10-17 21:25:46,YcbFoamBrick,5,5590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0466,0.2768,0.0472,0.003,6178.89
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,Pure Geometric (PCA),True,True,False,True,0.0726,False,False,True,True,True,0.0,0.04,0.2647,0.0233,0.153,0.26
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,Pure Geometric (OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.08,0.2647,0.0432,0.075,0.25
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,Pure Geometric (SurfaceNormals),True,True,False,True,0.0718,False,False,True,True,True,0.0,0.045,0.2647,0.0233,0.787,9.49
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,Pure Geometric (CrossSectionSlice),True,True,False,True,0.0754,False,False,True,True,True,0.0,0.0421,0.2664,0.0263,0.003,0.34
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,Pure Geometric (PrimitiveRANSAC),True,True,False,True,0.0718,False,False,True,True,True,0.0,0.04,0.2647,0.0233,0.7,1.45
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,AnyGrasp (Raw 6-DOF Baseline),False,False,False,True,0.0251,False,False,True,True,True,22.85,0.0021,0.265,0.0371,0.002,32.23
+30,2026-10-17 21:25:46,YcbFoamBrick,6,6590,AnyGrasp (4-DOF Adapted Baseline),False,False,False,True,0.0251,False,False,True,True,True,0.0,0.0021,0.265,0.0371,0.002,157.7
+30,2026-10-17 21:25:47,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + PCA),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0312,0.2734,0.0348,0.022,489.3
+30,2026-10-17 21:25:47,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + OBB),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0312,0.2734,0.0377,0.1,682.48
+30,2026-10-17 21:25:48,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + SurfaceNormals),False,False,False,True,-0.0,False,False,True,True,True,0.0,0.0312,0.2734,0.0392,0.053,684.29
+30,2026-10-17 21:25:49,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + CrossSectionSlice),False,False,False,True,0.0001,False,False,True,True,True,0.0,0.0421,0.2699,0.0299,0.003,1162.98
+30,2026-10-17 21:25:56,YcbFoamBrick,6,6590,Hybrid (AnyGrasp + PrimitiveRANSAC),False,False,False,True,0.0,False,False,True,True,True,0.0,0.0312,0.2734,0.0392,0.004,7021.06

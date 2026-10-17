@@ -119,14 +119,14 @@ class GraspEvaluator:
 
         optional_params = {
             "dense_grasp": False,
-            "collision_detection": True,
-            "approach_steering": [0, 0, -1],  # Top-down constraint for arm
-            "approach_thresh": 0.25,
+            "collision_detection": False,  # Accurate collision is evaluated via PyBullet physical environment
+            "approach_steering": [0, 0, -1],  # Overhead approach bias
+            "approach_thresh": 0.35,
         }
 
         try:
             gg = detector.get_grasp(pts_down, optional_params)
-        except Exception as e:
+        except Exception:
             gg = None
 
         latency_ms = (time.perf_counter() - t0) * 1000.0
@@ -140,7 +140,12 @@ class GraspEvaluator:
                 width = float(g.width)
                 depth = float(g.depth)
 
-                yaw_raw = math.atan2(rot[1, 0], rot[0, 0]) + math.pi / 2.0
+                # Filter obvious subterranean grasps
+                if trans[2] < (self.table_z - 0.01):
+                    continue
+
+                # AnyGrasp convention: column 1 (rot[:, 1]) is the closing vector between fingers
+                yaw_raw = math.atan2(rot[1, 1], rot[0, 1])
                 yaw = (yaw_raw + math.pi) % (2 * math.pi) - math.pi
                 grasps.append({
                     "translation": trans,
@@ -220,6 +225,11 @@ class GraspEvaluator:
         ai_grasps, _ = self.run_anygrasp_pipeline(obj_points, detector)
         if not ai_grasps and len(obj_points) != len(points):
             ai_grasps, _ = self.run_anygrasp_pipeline(points, detector)
+
+        # Retain only proposals in the vicinity of the object cluster
+        if ai_grasps and len(obj_points) >= 10:
+            c = np.mean(obj_points, axis=0)
+            ai_grasps = [g for g in ai_grasps if np.linalg.norm(g["translation"][:2] - c[:2]) < 0.10]
 
         refiner = self.refiners.get(method.lower(), self.refiners["pca"])
         try:

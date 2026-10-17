@@ -304,6 +304,7 @@ def run_benchmark(
                         "yaw_mismatch_deg": round(float(rollout.get("yaw_mismatch_deg", 0.0)), 2),
                         "target_width": round(float(best["width"]) if grasps else 0.04, 4),
                         "target_z": round(float(best["translation"][2]) if grasps else 0.0, 4),
+                        "grasp_dist_to_centroid_m": round(float(np.linalg.norm(best["translation"] - settled_base_pos)) if grasps else 999.0, 4),
                         "confidence_score": round(float(analytical["confidence_score"]), 3),
                         "latency_ms": round(float(latency_ms), 2),
                     }
